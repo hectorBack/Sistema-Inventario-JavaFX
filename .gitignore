@@ -1,0 +1,24 @@
+# Compilados de Java
+*.class
+*.bluej
+*.pkg
+
+# Carpetas de construcción
+target/
+build/
+bin/
+dist/
+
+# Configuraciones de IDEs (NetBeans, IntelliJ, Eclipse)
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+.mtj.tmp/
+.idea/
+*.iml
+*.ipr
+*.iws
+.settings/
+.classpath
+.project
