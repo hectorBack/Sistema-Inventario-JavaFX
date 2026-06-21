@@ -12,10 +12,15 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 
 public class MainLayoutController implements Initializable {
-    
-    @FXML private BorderPane mainContainer;
-    @FXML private Button btnInventario;
-    @FXML private Button btnCategorias;
+
+    @FXML
+    private BorderPane mainContainer;
+    @FXML
+    private Button btnInventario;
+    @FXML
+    private Button btnCategorias;
+    @FXML
+    private Button btnMovimientos;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -26,13 +31,22 @@ public class MainLayoutController implements Initializable {
     @FXML
     void mostrarInventario(ActionEvent event) {
         cargarVista("view/Inventario");
-        intercambiarEstiloBotones(btnInventario, btnCategorias);
+        // Activamos Inventario, apagamos Categorías y Movimientos
+        actualizarEstiloMenu(btnInventario, btnCategorias, btnMovimientos);
     }
 
     @FXML
     void mostrarCategorias(ActionEvent event) {
         cargarVista("view/Categoria");
-        intercambiarEstiloBotones(btnCategorias, btnInventario);
+        // Activamos Categorías, apagamos Inventario y Movimientos
+        actualizarEstiloMenu(btnCategorias, btnInventario, btnMovimientos);
+    }
+
+    @FXML
+    void mostrarMovimientos(ActionEvent event) {
+        cargarVista("view/Movimiento");
+        // Activamos Movimientos, apagamos Inventario y Categorías
+        actualizarEstiloMenu(btnMovimientos, btnInventario, btnCategorias);
     }
 
     private void cargarVista(String fxmlPath) {
@@ -48,14 +62,16 @@ public class MainLayoutController implements Initializable {
         }
     }
 
-    private void intercambiarEstiloBotones(Button seleccionado, Button deseleccionado) {
-        // Estilo activo (Slate 700 / Texto Blanco)
+    private void actualizarEstiloMenu(Button seleccionado, Button... deseleccionados) {
+        // 1. Estilo activo (Slate 700 / Texto Blanco)
         seleccionado.setStyle("-fx-background-color: #334155; -fx-background-radius: 6; -fx-cursor: hand;");
         seleccionado.setTextFill(javafx.scene.paint.Color.WHITE);
-        
-        // Estilo inactivo (Transparente / Texto grisáceo)
-        deseleccionado.setStyle("-fx-background-color: transparent; -fx-background-radius: 6; -fx-cursor: hand;");
-        deseleccionado.setTextFill(javafx.scene.paint.Color.web("#94a3b8"));
+
+        // 2. Apagar todos los botones que se pasen en los parámetros restantes
+        for (Button botonInactivo : deseleccionados) {
+            botonInactivo.setStyle("-fx-background-color: transparent; -fx-background-radius: 6; -fx-cursor: hand;");
+            botonInactivo.setTextFill(javafx.scene.paint.Color.web("#94a3b8"));
+        }
     }
 
 }

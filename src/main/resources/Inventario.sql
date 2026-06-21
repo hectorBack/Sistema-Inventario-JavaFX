@@ -24,3 +24,12 @@ CREATE TABLE categorias (
     nombre VARCHAR(100) NOT NULL,
     estado VARCHAR(20) DEFAULT 'Activo'
 );
+
+CREATE TABLE movimientos_inventario (
+    id SERIAL PRIMARY KEY,
+    producto_id INT REFERENCES productos(id) ON DELETE CASCADE,
+    tipo_movimiento VARCHAR(20) NOT NULL, -- 'ENTRADA' o 'SALIDA'
+    cantidad INT NOT NULL,
+    motivo VARCHAR(255),
+    fecha_movimiento TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
