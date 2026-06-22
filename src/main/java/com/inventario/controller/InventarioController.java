@@ -1,14 +1,17 @@
-
 package com.inventario.controller;
 
 import com.inventario.model.Categoria;
 import com.inventario.model.Producto;
+import com.inventario.model.Proveedor;
 import com.inventario.repository.CategoriaRepository;
 import com.inventario.repository.Impl.CategoriaRepositoryImpl;
 import com.inventario.repository.Impl.ProductoRepositoryImpl;
+import com.inventario.repository.Impl.ProveedorRepositoryImpl;
 import com.inventario.repository.ProductoRepository;
+import com.inventario.repository.ProveedorRepository;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,46 +21,59 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-
 public class InventarioController implements Initializable {
 
-    @FXML private TextField txtNombre;
-    @FXML private TextField txtPrecio;
-    @FXML private TextField txtStock;
-    @FXML private ComboBox<String> cmbEstado;
-    @FXML private ComboBox<Categoria> cmbCategoria;
-    
+    @FXML
+    private TextField txtNombre;
+    @FXML
+    private TextField txtPrecio;
+    @FXML
+    private TextField txtStock;
+    @FXML
+    private ComboBox<String> cmbEstado;
+    @FXML
+    private ComboBox<Categoria> cmbCategoria;
+    @FXML
+    private ComboBox<Proveedor> cmbProveedor;
+
     // Configuración de la Tabla y sus columnas
-    @FXML private TableView<Producto> tblProductos;
+    @FXML
+    private TableView<Producto> tblProductos;
     private TableColumn<Producto, Integer> colId;
     private TableColumn<Producto, String> colNombre;
     private TableColumn<Producto, Double> colPrecio;
     private TableColumn<Producto, Integer> colStock;
     private TableColumn<Producto, String> colEstado;
     private TableColumn<Producto, String> colCategoria;
-    
+
+    private TableColumn<Producto, String> colProveedor;
+
     // Dependencias
     private final ProductoRepository repository = new ProductoRepositoryImpl();
     private final CategoriaRepository catRepository = new CategoriaRepositoryImpl();
-    
+    private final ProveedorRepository provRepository = new ProveedorRepositoryImpl();
+
     private final ObservableList<Producto> listaProductos = FXCollections.observableArrayList();
     private final ObservableList<Categoria> listaCategorias = FXCollections.observableArrayList();
-    
+    private final ObservableList<Proveedor> listaProveedores = FXCollections.observableArrayList();
+
     // Variable para saber qué producto está seleccionado al actualizar/eliminar
     private Producto productoSeleccionado;
-    
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // 1. Inicializar el ComboBox con las opciones de Estado
         cmbEstado.setItems(FXCollections.observableArrayList("Activo", "Inactivo"));
         cmbEstado.setValue("Activo");
-        
+
         cargarComboCategorias();
+        cargarComboProveedores();
 
         // 2. Configurar las columnas del TableView de forma dinámica
         configurarColumnas();
@@ -74,15 +90,42 @@ public class InventarioController implements Initializable {
                 txtStock.setText(String.valueOf(productoSeleccionado.getStock()));
                 cmbEstado.setValue(productoSeleccionado.getEstado());
                 cmbCategoria.setValue(productoSeleccionado.getCategoria());
+                cmbProveedor.setValue(productoSeleccionado.getProveedor());
             }
         });
     }
-    
+
     private void cargarComboCategorias() {
         listaCategorias.clear();
         // Filtrar opcionalmente para mostrar sólo las categorías con estado 'Activo'
-        listaCategorias.addAll(catRepository.listarTodas()); 
+        listaCategorias.addAll(catRepository.listarTodas());
         cmbCategoria.setItems(listaCategorias);
+    }
+
+    private void cargarComboProveedores() {
+        listaProveedores.clear();
+        // Filtrar opcionalmente para cargar solo proveedores "ACTIVO"
+        java.util.List<Proveedor> activos = provRepository.listarTodos().stream()
+                .filter(p -> "ACTIVO".equalsIgnoreCase(p.getEstado()))
+                .collect(Collectors.toList());
+        listaProveedores.addAll(activos);
+        cmbProveedor.setItems(listaProveedores);
+
+        // Formateador para renderizar el combo mostrando el nombre plano de la empresa
+        cmbProveedor.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(Proveedor item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getNombre());
+            }
+        });
+        cmbProveedor.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Proveedor item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getNombre());
+            }
+        });
     }
 
     private void configurarColumnas() {
@@ -101,7 +144,7 @@ public class InventarioController implements Initializable {
 
         colEstado = new TableColumn<>("Estado");
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
-        
+
         colCategoria = new TableColumn<>("Categoría");
         colCategoria.setCellValueFactory(cellData -> {
             if (cellData.getValue().getCategoria() != null) {
@@ -110,16 +153,24 @@ public class InventarioController implements Initializable {
             return new SimpleStringProperty("Sin Categoría");
         });
 
+        colProveedor = new TableColumn<>("Proveedor");
+        colProveedor.setCellValueFactory(cellData -> {
+            if (cellData.getValue().getProveedor() != null) {
+                return cellData.getValue().getProveedor().nombreProperty();
+            }
+            return new SimpleStringProperty("Sin Proveedor");
+        });
+
         // Añadimos las columnas configuradas al TableView limpiando las que Scene Builder trae por defecto
-        tblProductos.getColumns().setAll(colId, colNombre, colCategoria, colPrecio, colStock, colEstado);
+        tblProductos.getColumns().setAll(colId, colNombre, colCategoria, colProveedor, colPrecio, colStock, colEstado);
     }
 
     private void listarProductos() {
         listaProductos.clear();
         listaProductos.addAll(repository.listarTodos());
         tblProductos.setItems(listaProductos);
-    } 
-    
+    }
+
     @FXML
     void onAgregar(ActionEvent event) {
         if (validarCampos()) {
@@ -128,7 +179,8 @@ public class InventarioController implements Initializable {
                     Double.parseDouble(txtPrecio.getText()),
                     Integer.parseInt(txtStock.getText()),
                     cmbEstado.getValue(),
-                    cmbCategoria.getValue() 
+                    cmbCategoria.getValue(),
+                    cmbProveedor.getValue()
             );
 
             if (repository.guardar(nuevoProducto)) {
@@ -154,6 +206,7 @@ public class InventarioController implements Initializable {
             productoSeleccionado.setStock(Integer.parseInt(txtStock.getText()));
             productoSeleccionado.setEstado(cmbEstado.getValue());
             productoSeleccionado.setCategoria(cmbCategoria.getValue());
+            productoSeleccionado.setProveedor(cmbProveedor.getValue());
 
             if (repository.actualizar(productoSeleccionado)) {
                 mostrarAlerta("Éxito", "Producto actualizado correctamente", Alert.AlertType.INFORMATION);
@@ -187,19 +240,25 @@ public class InventarioController implements Initializable {
         txtStock.clear();
         cmbEstado.setValue("Activo");
         cmbCategoria.setValue(null);
+        cmbProveedor.setValue(null);
         productoSeleccionado = null;
         tblProductos.getSelectionModel().clearSelection();
     }
 
-   private boolean validarCampos() {
+    private boolean validarCampos() {
         if (txtNombre.getText().isEmpty() || txtPrecio.getText().isEmpty() || txtStock.getText().isEmpty()) {
             mostrarAlerta("Campos vacíos", "Por favor rellena todos los campos obligatorios", Alert.AlertType.WARNING);
             return false;
         }
-        
+
         // NUEVO: Validar que se haya seleccionado una categoría
         if (cmbCategoria.getValue() == null) {
             mostrarAlerta("Categoría requerida", "Por favor selecciona una categoría para el producto", Alert.AlertType.WARNING);
+            return false;
+        }
+
+        if (cmbProveedor.getValue() == null) {
+            mostrarAlerta("Proveedor requerido", "Por favor selecciona un proveedor para el producto", Alert.AlertType.WARNING);
             return false;
         }
 
@@ -220,5 +279,5 @@ public class InventarioController implements Initializable {
         alert.setContentText(mensaje);
         alert.showAndWait();
     }
-    
+
 }

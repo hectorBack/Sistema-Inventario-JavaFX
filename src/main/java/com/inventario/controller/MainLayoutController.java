@@ -21,6 +21,8 @@ public class MainLayoutController implements Initializable {
     private Button btnCategorias;
     @FXML
     private Button btnMovimientos;
+    @FXML
+    private Button btnProveedores;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -32,21 +34,28 @@ public class MainLayoutController implements Initializable {
     void mostrarInventario(ActionEvent event) {
         cargarVista("view/Inventario");
         // Activamos Inventario, apagamos Categorías y Movimientos
-        actualizarEstiloMenu(btnInventario, btnCategorias, btnMovimientos);
+        actualizarEstiloMenu(btnInventario, btnCategorias, btnMovimientos, btnProveedores);
     }
 
     @FXML
     void mostrarCategorias(ActionEvent event) {
         cargarVista("view/Categoria");
         // Activamos Categorías, apagamos Inventario y Movimientos
-        actualizarEstiloMenu(btnCategorias, btnInventario, btnMovimientos);
+        actualizarEstiloMenu(btnCategorias, btnInventario, btnMovimientos, btnProveedores);
     }
 
     @FXML
     void mostrarMovimientos(ActionEvent event) {
         cargarVista("view/Movimiento");
         // Activamos Movimientos, apagamos Inventario y Categorías
-        actualizarEstiloMenu(btnMovimientos, btnInventario, btnCategorias);
+        actualizarEstiloMenu(btnMovimientos, btnInventario, btnCategorias, btnProveedores);
+    }
+
+    @FXML
+    void mostrarProveedores(ActionEvent event) {
+        cargarVista("view/Proveedor");
+        // Encendemos Proveedores, apagamos los otros tres
+        actualizarEstiloMenu(btnProveedores, btnInventario, btnCategorias, btnMovimientos);
     }
 
     private void cargarVista(String fxmlPath) {

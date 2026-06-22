@@ -33,3 +33,17 @@ CREATE TABLE movimientos_inventario (
     motivo VARCHAR(255),
     fecha_movimiento TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE public.proveedores (
+    id serial NOT NULL,
+    nombre character varying(100) NOT NULL,
+    contacto character varying(100), -- Nombre de la persona de contacto
+    telefono character varying(20),
+    email character varying(100),
+    estado character varying(20) NOT NULL DEFAULT 'ACTIVO', -- 'ACTIVO' o 'INACTIVO'
+    PRIMARY KEY (id)
+);
+
+-- OPCIONAL: Para relacionarlo con tus productos existentes
+ALTER TABLE public.productos 
+ADD COLUMN proveedor_id integer REFERENCES public.proveedores(id) ON DELETE SET NULL;

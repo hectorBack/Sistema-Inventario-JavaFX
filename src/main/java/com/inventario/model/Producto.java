@@ -18,26 +18,29 @@ public class Producto {
     private final StringProperty estado;
 
     private final ObjectProperty<Categoria> categoria;
+    private final ObjectProperty<Proveedor> proveedor;
 
     // Constructor completo (Para cuando traes datos de la BD)
     // Constructor completo actualizado (con Categoría)
-    public Producto(int id, String nombre, double precio, int stock, String estado, Categoria categoria) {
+    public Producto(int id, String nombre, double precio, int stock, String estado, Categoria categoria, Proveedor proveedor) {
         this.id = new SimpleIntegerProperty(id);
         this.nombre = new SimpleStringProperty(nombre);
         this.precio = new SimpleDoubleProperty(precio);
         this.stock = new SimpleIntegerProperty(stock);
         this.estado = new SimpleStringProperty(estado);
         this.categoria = new SimpleObjectProperty<>(categoria);
+        this.proveedor = new SimpleObjectProperty<>(proveedor); // Inicialización
     }
 
     // Constructor sin ID actualizado
-    public Producto(String nombre, double precio, int stock, String estado, Categoria categoria) {
+    public Producto(String nombre, double precio, int stock, String estado, Categoria categoria, Proveedor proveedor) {
         this.id = new SimpleIntegerProperty(0);
         this.nombre = new SimpleStringProperty(nombre);
         this.precio = new SimpleDoubleProperty(precio);
         this.stock = new SimpleIntegerProperty(stock);
         this.estado = new SimpleStringProperty(estado);
         this.categoria = new SimpleObjectProperty<>(categoria);
+        this.proveedor = new SimpleObjectProperty<>(proveedor); // Inicialización
     }
 
     // --- GETTERS Y SETTERS ESTÁNDAR ---
@@ -81,6 +84,23 @@ public class Producto {
         estado.set(value);
     }
 
+    public Categoria getCategoria() {
+        return categoria.get();
+    }
+
+    public void setCategoria(Categoria value) {
+        categoria.set(value);
+    }
+
+    // NUEVOS: Getters y Setters para Proveedor
+    public Proveedor getProveedor() {
+        return proveedor.get();
+    }
+
+    public void setProveedor(Proveedor value) {
+        proveedor.set(value);
+    }
+
     // --- PROPIEDADES (Obligatorias para el TableView de JavaFX) ---
     public IntegerProperty idProperty() {
         return id;
@@ -102,16 +122,13 @@ public class Producto {
         return estado;
     }
 
-    public Categoria getCategoria() {
-        return categoria.get();
-    }
-
-    public void setCategoria(Categoria value) {
-        categoria.set(value);
-    }
-
     public ObjectProperty<Categoria> categoriaProperty() {
         return categoria;
+    }
+
+    // NUEVO: Propiedad para enlace reactivo del Proveedor
+    public ObjectProperty<Proveedor> proveedorProperty() {
+        return proveedor;
     }
 
 }
