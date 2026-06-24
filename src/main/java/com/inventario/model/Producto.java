@@ -43,6 +43,16 @@ public class Producto {
         this.proveedor = new SimpleObjectProperty<>(proveedor); // Inicialización
     }
 
+    public Producto() {
+        this.id = new SimpleIntegerProperty(0);
+        this.nombre = new SimpleStringProperty("");
+        this.precio = new SimpleDoubleProperty(0.0);
+        this.stock = new SimpleIntegerProperty(0);
+        this.estado = new SimpleStringProperty("ACTIVO");
+        this.categoria = new SimpleObjectProperty<>(null);
+        this.proveedor = new SimpleObjectProperty<>(null);
+    }
+
     // --- GETTERS Y SETTERS ESTÁNDAR ---
     public int getId() {
         return id.get();

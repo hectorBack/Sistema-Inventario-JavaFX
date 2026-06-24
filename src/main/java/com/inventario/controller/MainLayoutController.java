@@ -26,6 +26,9 @@ public class MainLayoutController implements Initializable {
     @FXML
     private Button btnClientes;
 
+    @FXML
+    private Button btnVentas;
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // Al arrancar, cargamos por defecto el inventario en el centro
@@ -36,35 +39,41 @@ public class MainLayoutController implements Initializable {
     void mostrarInventario(ActionEvent event) {
         cargarVista("view/Inventario");
         // Activamos Inventario, apagamos Categorías y Movimientos
-        actualizarEstiloMenu(btnInventario, btnCategorias, btnMovimientos, btnProveedores, btnClientes);
+        actualizarEstiloMenu(btnInventario, btnCategorias, btnMovimientos, btnProveedores, btnClientes, btnVentas);
     }
 
     @FXML
     void mostrarCategorias(ActionEvent event) {
         cargarVista("view/Categoria");
         // Activamos Categorías, apagamos Inventario y Movimientos
-        actualizarEstiloMenu(btnCategorias, btnInventario, btnMovimientos, btnProveedores, btnClientes);
+        actualizarEstiloMenu(btnCategorias, btnInventario, btnMovimientos, btnProveedores, btnClientes, btnVentas);
     }
 
     @FXML
     void mostrarMovimientos(ActionEvent event) {
         cargarVista("view/Movimiento");
         // Activamos Movimientos, apagamos Inventario y Categorías
-        actualizarEstiloMenu(btnMovimientos, btnInventario, btnCategorias, btnProveedores, btnClientes);
+        actualizarEstiloMenu(btnMovimientos, btnInventario, btnCategorias, btnProveedores, btnClientes, btnVentas);
     }
 
     @FXML
     void mostrarProveedores(ActionEvent event) {
         cargarVista("view/Proveedor");
         // Encendemos Proveedores, apagamos los otros tres
-        actualizarEstiloMenu(btnProveedores, btnInventario, btnCategorias, btnMovimientos, btnClientes);
+        actualizarEstiloMenu(btnProveedores, btnInventario, btnCategorias, btnMovimientos, btnClientes, btnVentas);
     }
 
     @FXML
     void mostrarClientes(ActionEvent event) {
         cargarVista("view/Clientes");
         // Encendemos Clientes y pasamos el resto de botones para que se apaguen automáticamente
-        actualizarEstiloMenu(btnClientes, btnInventario, btnCategorias, btnMovimientos, btnProveedores);
+        actualizarEstiloMenu(btnClientes, btnInventario, btnCategorias, btnMovimientos, btnProveedores, btnVentas);
+    }
+
+    @FXML
+    void mostrarVentas(ActionEvent event) {
+        cargarVista("view/Ventas");
+        actualizarEstiloMenu(btnVentas, btnInventario, btnCategorias, btnMovimientos, btnProveedores, btnClientes);
     }
 
     private void cargarVista(String fxmlPath) {

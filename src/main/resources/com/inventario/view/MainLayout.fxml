@@ -50,6 +50,12 @@
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
+                
+                <Button fx:id="btnVentas" alignment="BASELINE_LEFT" mnemonicParsing="false" onAction="#mostrarVentas" prefHeight="45.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-background-radius: 6; -fx-cursor: hand;" text=" 🛒  Caja / Ventas" textFill="#94a3b8">
+                    <font>
+                        <Font name="System Bold" size="14.0" />
+                    </font>
+                </Button>
             </children>
         </VBox>
     </left>

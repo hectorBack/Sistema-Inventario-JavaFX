@@ -61,3 +61,37 @@ CREATE TABLE public.clientes (
 
 ALTER TABLE IF EXISTS public.clientes
     OWNER to postgres;
+
+
+-- 1. Tabla Cabecera de la Venta
+CREATE TABLE public.ventas (
+    id serial NOT NULL,
+    cliente_id integer NOT NULL,
+    fecha timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    total numeric(10,2) NOT NULL,
+    estado character varying(20) NOT NULL DEFAULT 'COMPLETADA', -- 'COMPLETADA' o 'ANULADA'
+    PRIMARY KEY (id),
+    CONSTRAINT fk_ventas_cliente FOREIGN KEY (cliente_id)
+        REFERENCES public.clientes (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);
+
+-- 2. Tabla Detalle de la Venta (Los renglones del carrito)
+CREATE TABLE public.detalle_ventas (
+    id serial NOT NULL,
+    venta_id integer NOT NULL,
+    producto_id integer NOT NULL,
+    cantidad integer NOT NULL,
+    precio_unitario numeric(10,2) NOT NULL,
+    subtotal numeric(10,2) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_detalle_venta FOREIGN KEY (venta_id)
+        REFERENCES public.ventas (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE, -- Si se borra la venta, se borra su detalle
+    CONSTRAINT fk_detalle_producto FOREIGN KEY (producto_id)
+        REFERENCES public.productos (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);
