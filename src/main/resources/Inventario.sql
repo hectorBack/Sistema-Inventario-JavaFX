@@ -47,3 +47,17 @@ CREATE TABLE public.proveedores (
 -- OPCIONAL: Para relacionarlo con tus productos existentes
 ALTER TABLE public.productos 
 ADD COLUMN proveedor_id integer REFERENCES public.proveedores(id) ON DELETE SET NULL;
+
+CREATE TABLE public.clientes (
+    id serial NOT NULL,
+    nombre character varying(100) NOT NULL,
+    rfc character varying(20), -- O identificación fiscal según tu país
+    telefono character varying(20),
+    email character varying(100),
+    direccion character varying(200),
+    estado character varying(20) NOT NULL DEFAULT 'ACTIVO', -- 'ACTIVO' o 'INACTIVO'
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE IF EXISTS public.clientes
+    OWNER to postgres;

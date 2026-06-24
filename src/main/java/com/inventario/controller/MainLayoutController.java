@@ -23,6 +23,8 @@ public class MainLayoutController implements Initializable {
     private Button btnMovimientos;
     @FXML
     private Button btnProveedores;
+    @FXML
+    private Button btnClientes;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -34,28 +36,35 @@ public class MainLayoutController implements Initializable {
     void mostrarInventario(ActionEvent event) {
         cargarVista("view/Inventario");
         // Activamos Inventario, apagamos Categorías y Movimientos
-        actualizarEstiloMenu(btnInventario, btnCategorias, btnMovimientos, btnProveedores);
+        actualizarEstiloMenu(btnInventario, btnCategorias, btnMovimientos, btnProveedores, btnClientes);
     }
 
     @FXML
     void mostrarCategorias(ActionEvent event) {
         cargarVista("view/Categoria");
         // Activamos Categorías, apagamos Inventario y Movimientos
-        actualizarEstiloMenu(btnCategorias, btnInventario, btnMovimientos, btnProveedores);
+        actualizarEstiloMenu(btnCategorias, btnInventario, btnMovimientos, btnProveedores, btnClientes);
     }
 
     @FXML
     void mostrarMovimientos(ActionEvent event) {
         cargarVista("view/Movimiento");
         // Activamos Movimientos, apagamos Inventario y Categorías
-        actualizarEstiloMenu(btnMovimientos, btnInventario, btnCategorias, btnProveedores);
+        actualizarEstiloMenu(btnMovimientos, btnInventario, btnCategorias, btnProveedores, btnClientes);
     }
 
     @FXML
     void mostrarProveedores(ActionEvent event) {
         cargarVista("view/Proveedor");
         // Encendemos Proveedores, apagamos los otros tres
-        actualizarEstiloMenu(btnProveedores, btnInventario, btnCategorias, btnMovimientos);
+        actualizarEstiloMenu(btnProveedores, btnInventario, btnCategorias, btnMovimientos, btnClientes);
+    }
+
+    @FXML
+    void mostrarClientes(ActionEvent event) {
+        cargarVista("view/Clientes");
+        // Encendemos Clientes y pasamos el resto de botones para que se apaguen automáticamente
+        actualizarEstiloMenu(btnClientes, btnInventario, btnCategorias, btnMovimientos, btnProveedores);
     }
 
     private void cargarVista(String fxmlPath) {
