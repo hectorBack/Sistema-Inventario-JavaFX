@@ -1,4 +1,3 @@
-
 package com.inventario.repository.Impl;
 
 import com.inventario.config.ConexionDB;
@@ -11,7 +10,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class CategoriaRepositoryImpl implements CategoriaRepository {
 
     @Override
@@ -19,9 +17,7 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
         List<Categoria> categorias = new ArrayList<>();
         String sql = "SELECT id, nombre, estado FROM categorias ORDER BY id DESC";
 
-        try (Connection conn = ConexionDB.getConexion();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+        try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 Categoria categoria = new Categoria(
@@ -41,10 +37,9 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
     public boolean guardar(Categoria categoria) {
         String sql = "INSERT INTO categorias (nombre, estado) VALUES (?, ?)";
 
-        try (Connection conn = ConexionDB.getConexion();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, categoria.getNombre());
+            stmt.setString(1, categoria.getNombre().trim());
             stmt.setString(2, categoria.getEstado());
 
             return stmt.executeUpdate() > 0;
@@ -58,10 +53,9 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
     public boolean actualizar(Categoria categoria) {
         String sql = "UPDATE categorias SET nombre = ?, estado = ? WHERE id = ?";
 
-        try (Connection conn = ConexionDB.getConexion();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, categoria.getNombre());
+            stmt.setString(1, categoria.getNombre().trim());
             stmt.setString(2, categoria.getEstado());
             stmt.setInt(3, categoria.getId());
 
@@ -76,8 +70,7 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
     public boolean eliminar(int id) {
         String sql = "DELETE FROM categorias WHERE id = ?";
 
-        try (Connection conn = ConexionDB.getConexion();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
             return stmt.executeUpdate() > 0;
@@ -86,5 +79,99 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
             return false;
         }
     }
-    
+
+    @Override
+    public List<Categoria> listarActivas() {
+        List<Categoria> categorias = new ArrayList<>();
+        String sql = "SELECT id, nombre, estado FROM categorias WHERE estado = 'ACTIVO' ORDER BY nombre ASC";
+
+        try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                categorias.add(mapearCategoria(rs));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al listar categorías activas: " + e.getMessage());
+        }
+        return categorias;
+    }
+
+    @Override
+    public Categoria buscarPorId(int id) {
+        String sql = "SELECT id, nombre, estado FROM categorias WHERE id = ?";
+        try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapearCategoria(rs);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al buscar categoría por ID: " + e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public boolean desactivar(int id) {
+        String sql = "UPDATE categorias SET estado = 'INACTIVO' WHERE id = ?";
+
+        try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error al desactivar categoría: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean existeNombre(String nombre, int idExcluir) {
+        String sql = "SELECT COUNT(*) FROM categorias WHERE LOWER(nombre) = LOWER(?) AND id != ?";
+
+        try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, nombre.trim());
+            stmt.setInt(2, idExcluir);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al validar nombre duplicado: " + e.getMessage());
+        }
+        return false;
+    }
+
+    @Override
+    public boolean tieneProductosAsociados(int categoriaId) {
+        String sql = "SELECT COUNT(*) FROM productos WHERE categoria_id = ?";
+
+        try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, categoriaId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al verificar relaciones con productos: " + e.getMessage());
+        }
+        return false;
+    }
+
+    private Categoria mapearCategoria(ResultSet rs) throws SQLException {
+        return new Categoria(
+                rs.getInt("id"),
+                rs.getString("nombre"),
+                rs.getString("estado")
+        );
+    }
+
 }

@@ -20,19 +20,24 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 public class CategoriaController implements Initializable {
 
-    @FXML private TextField txtNombre;
-    @FXML private ComboBox<String> cmbEstado;
-    
-    @FXML private TableView<Categoria> tblCategorias;
+    @FXML
+    private TextField txtNombre;
+    @FXML
+    private ComboBox<String> cmbEstado;
+    @FXML
+    private TextField txtBuscar;
+
+    @FXML
+    private TableView<Categoria> tblCategorias;
     private TableColumn<Categoria, Integer> colId;
     private TableColumn<Categoria, String> colNombre;
     private TableColumn<Categoria, String> colEstado;
 
     private final CategoriaRepository repository = new CategoriaRepositoryImpl();
     private final ObservableList<Categoria> listaCategorias = FXCollections.observableArrayList();
-    
+
     private Categoria categoriaSeleccionada;
-    
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         cmbEstado.setItems(FXCollections.observableArrayList("Activo", "Inactivo"));
@@ -40,6 +45,13 @@ public class CategoriaController implements Initializable {
 
         configurarColumnas();
         listarCategorias();
+
+        // Búsqueda dinámica en tiempo real
+        if (txtBuscar != null) {
+            txtBuscar.textProperty().addListener((obs, oldVal, newVal) -> {
+                filtrarCategorias(newVal);
+            });
+        }
 
         tblCategorias.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
@@ -49,7 +61,7 @@ public class CategoriaController implements Initializable {
             }
         });
     }
-    
+
     private void configurarColumnas() {
         colId = new TableColumn<>("ID");
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -69,15 +81,38 @@ public class CategoriaController implements Initializable {
         tblCategorias.setItems(listaCategorias);
     }
 
+    private void filtrarCategorias(String criterio) {
+        if (criterio == null || criterio.trim().isEmpty()) {
+            listarCategorias();
+            return;
+        }
+        String filtro = criterio.trim().toLowerCase();
+        ObservableList<Categoria> filtradas = FXCollections.observableArrayList();
+        for (Categoria cat : repository.listarTodas()) {
+            if (cat.getNombre().toLowerCase().contains(filtro)) {
+                filtradas.add(cat);
+            }
+        }
+        tblCategorias.setItems(filtradas);
+    }
+
     @FXML
     void onAgregar(ActionEvent event) {
-        if (txtNombre.getText().trim().isEmpty()) {
+        String nombre = txtNombre.getText().trim();
+
+        if (nombre.isEmpty()) {
             mostrarAlerta("Campos vacíos", "El nombre de la categoría es obligatorio", Alert.AlertType.WARNING);
             return;
         }
 
+        // Validar que no exista un registro previo con el mismo nombre
+        if (repository.existeNombre(nombre, 0)) {
+            mostrarAlerta("Registro duplicado", "Ya existe una categoría registrada como '" + nombre + "'.", Alert.AlertType.WARNING);
+            return;
+        }
+
         Categoria nuevaCategoria = new Categoria(
-                txtNombre.getText().trim(),
+                nombre,
                 cmbEstado.getValue()
         );
 
@@ -97,12 +132,20 @@ public class CategoriaController implements Initializable {
             return;
         }
 
-        if (txtNombre.getText().trim().isEmpty()) {
+        String nombre = txtNombre.getText().trim();
+
+        if (nombre.isEmpty()) {
             mostrarAlerta("Campos vacíos", "El nombre de la categoría no puede quedar vacío", Alert.AlertType.WARNING);
             return;
         }
 
-        categoriaSeleccionada.setNombre(txtNombre.getText().trim());
+        // Validar que el nombre modificado no colisione con otra categoría existente
+        if (repository.existeNombre(nombre, categoriaSeleccionada.getId())) {
+            mostrarAlerta("Registro duplicado", "Ya existe otra categoría registrada como '" + nombre + "'.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        categoriaSeleccionada.setNombre(nombre);
         categoriaSeleccionada.setEstado(cmbEstado.getValue());
 
         if (repository.actualizar(categoriaSeleccionada)) {
@@ -121,19 +164,49 @@ public class CategoriaController implements Initializable {
             return;
         }
 
-        // Alerta de confirmación debido al impacto sobre la restricción de llave foránea
-        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION, "¿Estás seguro de eliminar esta categoría? Los productos asociados se quedarán sin categoría.", ButtonType.YES, ButtonType.NO);
+        int id = categoriaSeleccionada.getId();
+
+        // 1. Manejo de Integridad Referencial: Si tiene productos vinculados
+        if (repository.tieneProductosAsociados(id)) {
+            Alert confirmacionBaja = new Alert(
+                    Alert.AlertType.CONFIRMATION,
+                    "La categoría '" + categoriaSeleccionada.getNombre() + "' tiene productos vinculados.\n\n"
+                    + "Por seguridad no puede eliminarse físicamente. ¿Deseas cambiar su estado a 'INACTIVO'?",
+                    ButtonType.YES, ButtonType.NO
+            );
+            confirmacionBaja.setTitle("Categoría en uso");
+            confirmacionBaja.setHeaderText(null);
+            confirmacionBaja.showAndWait();
+
+            if (confirmacionBaja.getResult() == ButtonType.YES) {
+                if (repository.desactivar(id)) {
+                    mostrarAlerta("Estado actualizado", "La categoría ha sido marcada como INACTIVA.", Alert.AlertType.INFORMATION);
+                    limpiarFormulario();
+                    listarCategorias();
+                } else {
+                    mostrarAlerta("Error", "No se pudo desactivar la categoría.", Alert.AlertType.ERROR);
+                }
+            }
+            return;
+        }
+
+        // 2. Eliminación física si no existen relaciones en la BD
+        Alert confirmacion = new Alert(
+                Alert.AlertType.CONFIRMATION,
+                "¿Estás seguro de eliminar físicamente esta categoría?",
+                ButtonType.YES, ButtonType.NO
+        );
         confirmacion.setTitle("Confirmar Eliminación");
         confirmacion.setHeaderText(null);
         confirmacion.showAndWait();
 
         if (confirmacion.getResult() == ButtonType.YES) {
-            if (repository.eliminar(categoriaSeleccionada.getId())) {
+            if (repository.eliminar(id)) {
                 mostrarAlerta("Éxito", "Categoría eliminada correctamente", Alert.AlertType.INFORMATION);
                 limpiarFormulario();
                 listarCategorias();
             } else {
-                mostrarAlerta("Error", "No se pudo eliminar la categoría", Alert.AlertType.ERROR);
+                mostrarAlerta("Error", "No se pudo eliminar la categoría de la base de datos", Alert.AlertType.ERROR);
             }
         }
     }
