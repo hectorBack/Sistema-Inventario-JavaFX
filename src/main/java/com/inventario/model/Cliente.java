@@ -37,6 +37,17 @@ public class Cliente {
         this.estado = new SimpleStringProperty(estado);
     }
 
+    // Constructor para registros nuevos (sin ID)
+    public Cliente(String nombre, String rfc, String telefono, String email, String direccion, String estado) {
+        this.id = new SimpleIntegerProperty(0);
+        this.nombre = new SimpleStringProperty(nombre);
+        this.rfc = new SimpleStringProperty(rfc);
+        this.telefono = new SimpleStringProperty(telefono);
+        this.email = new SimpleStringProperty(email);
+        this.direccion = new SimpleStringProperty(direccion);
+        this.estado = new SimpleStringProperty(estado);
+    }
+
     // --- GETTERS Y SETTERS ESTÁNDAR ---
     public int getId() {
         return id.get();
@@ -121,6 +132,11 @@ public class Cliente {
 
     public StringProperty estadoProperty() {
         return estado;
+    }
+
+    @Override
+    public String toString() {
+        return getNombre() + (getRfc().isEmpty() ? "" : " (" + getRfc() + ")");
     }
 
 }

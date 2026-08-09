@@ -4,16 +4,16 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox prefHeight="600.0" prefWidth="860.0" spacing="25.0" style="-fx-background-color: #f8fafc; -fx-padding: 25;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.VentasController">
+<HBox prefHeight="600.0" prefWidth="900.0" spacing="25.0" style="-fx-background-color: #f8fafc; -fx-padding: 25;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.VentasController">
     <children>
       
+        <!-- PANEL IZQUIERDO: SELECCIÓN Y FORMULARIO DE INGRESO -->
         <VBox minWidth="300.0" prefWidth="300.0" spacing="15.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-padding: 20;">
             <children>
                 <Label text="Nueva Transacción" textFill="#0f172a">
@@ -25,6 +25,7 @@
                     </VBox.margin>
                 </Label>
             
+                <!-- SELECCIÓN DE CLIENTE -->
                 <VBox spacing="5.0" style="-fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0; -fx-padding: 0 0 15 0;">
                     <children>
                         <Label text="Seleccionar Cliente" textFill="#64748b">
@@ -36,6 +37,7 @@
                     </children>
                 </VBox>
             
+                <!-- DETALLE Y ADICIÓN DE PRODUCTOS -->
                 <VBox spacing="12.0">
                     <children>
                         <Label text="Detalle del Artículo" textFill="#0f172a">
@@ -93,6 +95,7 @@
             </children>
         </VBox>
       
+        <!-- PANEL DERECHO: CARRITO Y RESUMEN DE COMPRA -->
         <VBox spacing="15.0" HBox.hgrow="ALWAYS">
             <children>
             

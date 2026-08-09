@@ -32,6 +32,8 @@ public class ClientesController implements Initializable {
     private TextField txtDireccion;
     @FXML
     private ComboBox<String> cmbEstado;
+    @FXML
+    private TextField txtBuscar;
 
     // Configuración de la Tabla y Columnas
     @FXML
@@ -62,7 +64,12 @@ public class ClientesController implements Initializable {
         // 3. Cargar datos de la BD
         listarClientes();
 
-        // 4. Listener para rellenar el formulario al seleccionar una fila
+        // 4. Búsqueda en tiempo real
+        if (txtBuscar != null) {
+            txtBuscar.textProperty().addListener((obs, oldVal, newVal) -> filtrarClientes(newVal));
+        }
+
+        // 5. Listener para rellenar el formulario al seleccionar una fila
         tblClientes.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 clienteSeleccionado = newSelection;
@@ -77,29 +84,28 @@ public class ClientesController implements Initializable {
     }
 
     private void configurarColumnas() {
-        colId = new TableColumn<>("ID");
+        TableColumn<Cliente, Integer> colId = new TableColumn<>("ID");
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colId.setPrefWidth(50);
 
-        colNombre = new TableColumn<>("Nombre / Razón Social");
+        TableColumn<Cliente, String> colNombre = new TableColumn<>("Nombre / Razón Social");
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
 
-        colRfc = new TableColumn<>("RFC");
+        TableColumn<Cliente, String> colRfc = new TableColumn<>("RFC");
         colRfc.setCellValueFactory(new PropertyValueFactory<>("rfc"));
 
-        colTelefono = new TableColumn<>("Teléfono");
+        TableColumn<Cliente, String> colTelefono = new TableColumn<>("Teléfono");
         colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
 
-        colEmail = new TableColumn<>("Email");
+        TableColumn<Cliente, String> colEmail = new TableColumn<>("Email");
         colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
 
-        colDireccion = new TableColumn<>("Dirección");
+        TableColumn<Cliente, String> colDireccion = new TableColumn<>("Dirección");
         colDireccion.setCellValueFactory(new PropertyValueFactory<>("direccion"));
 
-        colEstado = new TableColumn<>("Estado");
+        TableColumn<Cliente, String> colEstado = new TableColumn<>("Estado");
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
 
-        // Vinculamos todas las columnas limpiando residuos previos
         tblClientes.getColumns().setAll(colId, colNombre, colRfc, colTelefono, colEmail, colDireccion, colEstado);
     }
 
@@ -109,26 +115,37 @@ public class ClientesController implements Initializable {
         tblClientes.setItems(listaClientes);
     }
 
+    private void filtrarClientes(String criterio) {
+        if (criterio == null || criterio.trim().isEmpty()) {
+            listarClientes();
+            return;
+        }
+        listaClientes.clear();
+        listaClientes.addAll(repository.buscarConFiltro(criterio));
+        tblClientes.setItems(listaClientes);
+    }
+
     @FXML
     void onAgregar(ActionEvent event) {
-        if (validarCampos()) {
-            Cliente nuevoCliente = new Cliente(
-                    0, // El ID lo autogenera serial en PostgreSQL
-                    txtNombre.getText().trim(),
-                    txtRfc.getText().trim(),
-                    txtTelefono.getText().trim(),
-                    txtEmail.getText().trim(),
-                    txtDireccion.getText().trim(),
-                    cmbEstado.getValue()
-            );
+        if (!validarCampos(0)) {
+            return;
+        }
 
-            if (repository.guardar(nuevoCliente)) {
-                mostrarAlerta("Éxito", "Cliente registrado correctamente.", Alert.AlertType.INFORMATION);
-                limpiarFormulario();
-                listarClientes();
-            } else {
-                mostrarAlerta("Error", "No se pudo registrar al cliente.", Alert.AlertType.ERROR);
-            }
+        Cliente nuevoCliente = new Cliente(
+                txtNombre.getText().trim(),
+                txtRfc.getText().trim(),
+                txtTelefono.getText().trim(),
+                txtEmail.getText().trim(),
+                txtDireccion.getText().trim(),
+                cmbEstado.getValue()
+        );
+
+        if (repository.guardar(nuevoCliente)) {
+            mostrarAlerta("Éxito", "Cliente registrado correctamente.", Alert.AlertType.INFORMATION);
+            limpiarFormulario();
+            listarClientes();
+        } else {
+            mostrarAlerta("Error", "No se pudo registrar al cliente.", Alert.AlertType.ERROR);
         }
     }
 
@@ -139,21 +156,25 @@ public class ClientesController implements Initializable {
             return;
         }
 
-        if (validarCampos()) {
-            clienteSeleccionado.setNombre(txtNombre.getText().trim());
-            clienteSeleccionado.setRfc(txtRfc.getText().trim());
-            clienteSeleccionado.setTelefono(txtTelefono.getText().trim());
-            clienteSeleccionado.setEmail(txtEmail.getText().trim());
-            clienteSeleccionado.setDireccion(txtDireccion.getText().trim());
-            clienteSeleccionado.setEstado(cmbEstado.getValue());
+        int id = clienteSeleccionado.getId();
 
-            if (repository.actualizar(clienteSeleccionado)) {
-                mostrarAlerta("Éxito", "Datos del cliente actualizados con éxito.", Alert.AlertType.INFORMATION);
-                limpiarFormulario();
-                listarClientes();
-            } else {
-                mostrarAlerta("Error", "No se pudo actualizar la información del cliente.", Alert.AlertType.ERROR);
-            }
+        if (!validarCampos(id)) {
+            return;
+        }
+
+        clienteSeleccionado.setNombre(txtNombre.getText().trim());
+        clienteSeleccionado.setRfc(txtRfc.getText().trim());
+        clienteSeleccionado.setTelefono(txtTelefono.getText().trim());
+        clienteSeleccionado.setEmail(txtEmail.getText().trim());
+        clienteSeleccionado.setDireccion(txtDireccion.getText().trim());
+        clienteSeleccionado.setEstado(cmbEstado.getValue());
+
+        if (repository.actualizar(clienteSeleccionado)) {
+            mostrarAlerta("Éxito", "Datos del cliente actualizados con éxito.", Alert.AlertType.INFORMATION);
+            limpiarFormulario();
+            listarClientes();
+        } else {
+            mostrarAlerta("Error", "No se pudo actualizar la información del cliente.", Alert.AlertType.ERROR);
         }
     }
 
@@ -164,18 +185,50 @@ public class ClientesController implements Initializable {
             return;
         }
 
-        // Alerta de confirmación opcional para evitar accidentes
-        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION, "¿Estás seguro de que deseas eliminar este cliente?", ButtonType.YES, ButtonType.NO);
-        confirmacion.setTitle("Confirmar eliminación");
+        int id = clienteSeleccionado.getId();
+
+        // 1. Control de llaves foráneas: Verificar si el cliente tiene ventas asociadas
+        if (repository.tieneVentasAsociadas(id)) {
+            Alert confirmacionInactivo = new Alert(
+                    Alert.AlertType.CONFIRMATION,
+                    "El cliente '" + clienteSeleccionado.getNombre() + "' tiene transacciones/ventas vinculadas.\n\n"
+                    + "No se puede eliminar físicamente. ¿Deseas cambiar su estado a 'INACTIVO'?",
+                    ButtonType.YES, ButtonType.NO
+            );
+            confirmacionInactivo.setTitle("Cliente con Historial Comercial");
+            confirmacionInactivo.setHeaderText(null);
+
+            confirmacionInactivo.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.YES) {
+                    if (repository.desactivar(id)) {
+                        mostrarAlerta("Estado Actualizado", "El cliente ha sido marcado como INACTIVO.", Alert.AlertType.INFORMATION);
+                        limpiarFormulario();
+                        listarClientes();
+                    } else {
+                        mostrarAlerta("Error", "No se pudo desactivar al cliente.", Alert.AlertType.ERROR);
+                    }
+                }
+            });
+            return;
+        }
+
+        // 2. Eliminación física si no tiene historial
+        Alert confirmacion = new Alert(
+                Alert.AlertType.CONFIRMATION,
+                "¿Estás seguro de eliminar físicamente al cliente '" + clienteSeleccionado.getNombre() + "'?",
+                ButtonType.YES, ButtonType.NO
+        );
+        confirmacion.setTitle("Confirmar Eliminación");
         confirmacion.setHeaderText(null);
+
         confirmacion.showAndWait().ifPresent(response -> {
             if (response == ButtonType.YES) {
-                if (repository.eliminar(clienteSeleccionado.getId())) {
-                    mostrarAlerta("Éxito", "Cliente eliminado de forma definitiva.", Alert.AlertType.INFORMATION);
+                if (repository.eliminar(id)) {
+                    mostrarAlerta("Éxito", "Cliente eliminado correctamente.", Alert.AlertType.INFORMATION);
                     limpiarFormulario();
                     listarClientes();
                 } else {
-                    mostrarAlerta("Error", "No se puede eliminar el cliente (puede estar asociado a registros de transacciones).", Alert.AlertType.ERROR);
+                    mostrarAlerta("Error", "No se pudo eliminar al cliente.", Alert.AlertType.ERROR);
                 }
             }
         });
@@ -192,11 +245,28 @@ public class ClientesController implements Initializable {
         tblClientes.getSelectionModel().clearSelection();
     }
 
-    private boolean validarCampos() {
-        if (txtNombre.getText().isBlank()) {
+    private boolean validarCampos(int idExcluir) {
+        String nombre = txtNombre.getText().trim();
+        String rfc = txtRfc.getText().trim();
+        String email = txtEmail.getText().trim();
+
+        if (nombre.isBlank()) {
             mostrarAlerta("Campo requerido", "El nombre o razón social es obligatorio.", Alert.AlertType.WARNING);
             return false;
         }
+
+        // Validación de RFC duplicado
+        if (!rfc.isBlank() && repository.existeRfc(rfc, idExcluir)) {
+            mostrarAlerta("RFC Duplicado", "El RFC '" + rfc + "' ya pertenece a otro cliente registrado.", Alert.AlertType.WARNING);
+            return false;
+        }
+
+        // Validación de Email duplicado
+        if (!email.isBlank() && repository.existeEmail(email, idExcluir)) {
+            mostrarAlerta("Correo Duplicado", "El correo electrónico '" + email + "' ya está asociado a otro cliente.", Alert.AlertType.WARNING);
+            return false;
+        }
+
         return true;
     }
 

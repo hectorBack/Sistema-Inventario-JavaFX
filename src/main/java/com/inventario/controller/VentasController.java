@@ -76,15 +76,11 @@ public class VentasController implements Initializable {
     }
 
     private void cargarCombosIniciales() {
-        // Cargar Clientes Activos
-        ObservableList<Cliente> clientes = FXCollections.observableArrayList(
-                clienteRepository.listarTodos().stream()
-                        .filter(c -> "ACTIVO".equalsIgnoreCase(c.getEstado()))
-                        .collect(java.util.stream.Collectors.toList())
-        );
+        // Cargar Clientes Activos usando el repositorio
+        ObservableList<Cliente> clientes = FXCollections.observableArrayList(clienteRepository.listarActivos());
         cmbCliente.setItems(clientes);
 
-        // Formateador para que el ComboBox muestre el Nombre en lugar de la dirección de memoria
+        // Formateador para mostrar el Nombre del cliente
         cmbCliente.setCellFactory(lv -> new ListCell<>() {
             @Override
             protected void updateItem(Cliente item, boolean empty) {
@@ -113,18 +109,18 @@ public class VentasController implements Initializable {
     }
 
     private void configurarColumnasCarrito() {
-        colProducto = new TableColumn<>("Producto");
+        TableColumn<DetalleVenta, String> colProducto = new TableColumn<>("Producto");
         colProducto.setCellValueFactory(new PropertyValueFactory<>("nombreProducto"));
 
-        colCantidad = new TableColumn<>("Cantidad");
+        TableColumn<DetalleVenta, Integer> colCantidad = new TableColumn<>("Cantidad");
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
         colCantidad.setStyle("-fx-alignment: CENTER;");
 
-        colPrecioUnitario = new TableColumn<>("Precio Unit.");
+        TableColumn<DetalleVenta, Double> colPrecioUnitario = new TableColumn<>("Precio Unit.");
         colPrecioUnitario.setCellValueFactory(new PropertyValueFactory<>("precioUnitario"));
         colPrecioUnitario.setStyle("-fx-alignment: CENTER-RIGHT;");
 
-        colSubtotal = new TableColumn<>("Subtotal");
+        TableColumn<DetalleVenta, Double> colSubtotal = new TableColumn<>("Subtotal");
         colSubtotal.setCellValueFactory(new PropertyValueFactory<>("subtotal"));
         colSubtotal.setStyle("-fx-alignment: CENTER-RIGHT;");
 
@@ -159,7 +155,7 @@ public class VentasController implements Initializable {
             return;
         }
 
-        // Buscar si el producto ya está en el carrito para consolidarlo en una sola fila
+        // Buscar si el producto ya está en el carrito para consolidarlo
         DetalleVenta itemExistente = null;
         for (DetalleVenta item : carritoItems) {
             if (item.getProducto().getId() == prodSeleccionado.getId()) {
@@ -175,10 +171,10 @@ public class VentasController implements Initializable {
                 return;
             }
             itemExistente.setCantidad(itemExistente.getCantidad() + cantidad);
-            tblCarrito.refresh(); // Refrescar celdas visuales de la tabla
+            tblCarrito.refresh();
         } else {
-            // Agregar nuevo renglón de detalle
-            DetalleVenta nuevoDetalle = new DetalleVenta(0, 0, prodSeleccionado, cantidad, prodSeleccionado.getPrecio());
+            // Agregar nuevo renglón utilizando el constructor limpio de DetalleVenta
+            DetalleVenta nuevoDetalle = new DetalleVenta(prodSeleccionado, cantidad, prodSeleccionado.getPrecio());
             carritoItems.add(nuevoDetalle);
         }
 
@@ -210,16 +206,16 @@ public class VentasController implements Initializable {
             return;
         }
 
-        // Construir entidad de cabecera principal
-        Venta nuevaVenta = new Venta(0, cliente, LocalDateTime.now(), totalAcumulado, "COMPLETADA");
+        // Construir la venta usando el constructor ajustado (sin pasar un id mock manual)
+        Venta nuevaVenta = new Venta(cliente, totalAcumulado, "COMPLETADA");
 
-        // Ejecutar proceso atómico transaccional en base de datos
+        // Ejecutar el proceso atómico con validación SQL de stock
         if (ventaRepository.registrarVenta(nuevaVenta, carritoItems)) {
             mostrarAlerta("Venta Procesada", "La venta se ha registrado exitosamente e inventarios actualizados.", Alert.AlertType.INFORMATION);
             limpiarPantallaCompleta();
-            cargarCombosIniciales(); // Recargar existencias visuales actualizadas de productos
+            cargarCombosIniciales(); // Recargar existencias en los combos
         } else {
-            mostrarAlerta("Error Crítico", "Ocurrió un problema en la transacción SQL. Venta cancelada de forma segura.", Alert.AlertType.ERROR);
+            mostrarAlerta("Error Crítico", "Ocurrió un problema en la transacción SQL (posible cambio de stock concurrente). Venta cancelada de forma segura.", Alert.AlertType.ERROR);
         }
     }
 

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.inventario.model;
 
 import javafx.beans.property.DoubleProperty;
@@ -13,10 +9,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-/**
- *
- * @author azulc
- */
 public class DetalleVenta {
 
     private final IntegerProperty id;
@@ -35,6 +27,17 @@ public class DetalleVenta {
         this.cantidad = new SimpleIntegerProperty(0);
         this.precioUnitario = new SimpleDoubleProperty(0.0);
         this.subtotal = new SimpleDoubleProperty(0.0);
+    }
+
+    // Constructor para items en carrito (sin ID ni ventaId)
+    public DetalleVenta(Producto producto, int cantidad, double precioUnitario) {
+        this.id = new SimpleIntegerProperty(0);
+        this.ventaId = new SimpleIntegerProperty(0);
+        this.producto = new SimpleObjectProperty<>(producto);
+        this.nombreProducto = new SimpleStringProperty(producto != null ? producto.getNombre() : "");
+        this.cantidad = new SimpleIntegerProperty(cantidad);
+        this.precioUnitario = new SimpleDoubleProperty(precioUnitario);
+        this.subtotal = new SimpleDoubleProperty(cantidad * precioUnitario);
     }
 
     public DetalleVenta(int id, int ventaId, Producto producto, int cantidad, double precioUnitario) {

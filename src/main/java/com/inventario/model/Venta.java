@@ -26,6 +26,15 @@ public class Venta {
         this.estado = new SimpleStringProperty("COMPLETADA");
     }
 
+    // Constructor para nueva venta (sin ID)
+    public Venta(Cliente cliente, double total, String estado) {
+        this.id = new SimpleIntegerProperty(0);
+        this.cliente = new SimpleObjectProperty<>(cliente);
+        this.fecha = new SimpleObjectProperty<>(LocalDateTime.now());
+        this.total = new SimpleDoubleProperty(total);
+        this.estado = new SimpleStringProperty(estado);
+    }
+
     public Venta(int id, Cliente cliente, LocalDateTime fecha, double total, String estado) {
         this.id = new SimpleIntegerProperty(id);
         this.cliente = new SimpleObjectProperty<>(cliente);

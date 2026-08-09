@@ -3,12 +3,15 @@ package com.inventario.repository.Impl;
 import com.inventario.config.ConexionDB;
 import com.inventario.model.Cliente;
 import com.inventario.model.DetalleVenta;
+import com.inventario.model.Producto;
 import com.inventario.model.Venta;
 import com.inventario.repository.VentaRepository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +21,8 @@ public class VentaRepositoryImpl implements VentaRepository {
     public boolean registrarVenta(Venta venta, List<DetalleVenta> detalles) {
         String sqlVenta = "INSERT INTO ventas (cliente_id, total, estado) VALUES (?, ?, ?) RETURNING id";
         String sqlDetalle = "INSERT INTO detalle_ventas (venta_id, producto_id, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?)";
-        String sqlActualizarStock = "UPDATE productos SET stock = stock - ? WHERE id = ?";
+        // Validación estricta de stock disponible en la misma consulta
+        String sqlActualizarStock = "UPDATE productos SET stock = stock - ? WHERE id = ? AND stock >= ?";
 
         Connection conn = null;
         PreparedStatement stmtVenta = null;
@@ -27,10 +31,9 @@ public class VentaRepositoryImpl implements VentaRepository {
 
         try {
             conn = ConexionDB.getConexion();
-            // INICIAR TRANSACCIÓN: Desactivamos el guardado automático
-            conn.setAutoCommit(false);
+            conn.setAutoCommit(false); // INICIO DE TRANSACCIÓN
 
-            // 1. Insertar Cabecera de la Venta y recuperar el ID generado
+            // 1. Insertar Cabecera de la Venta
             stmtVenta = conn.prepareStatement(sqlVenta);
             stmtVenta.setInt(1, venta.getCliente().getId());
             stmtVenta.setDouble(2, venta.getTotal());
@@ -41,16 +44,14 @@ public class VentaRepositoryImpl implements VentaRepository {
             if (rsVenta.next()) {
                 idVentaGenerado = rsVenta.getInt(1);
             } else {
-                throw new SQLException("No se pudo obtener el ID de la venta.");
+                throw new SQLException("No se pudo generar el identificador de la venta.");
             }
 
-            // Preparamos los statements para el lote de detalles y actualización de stock
             stmtDetalle = conn.prepareStatement(sqlDetalle);
             stmtStock = conn.prepareStatement(sqlActualizarStock);
 
-            // 2. Recorrer el carrito de compras e insertar fila por fila
+            // 2. Procesar detalles e inspeccionar disponibilidad física
             for (DetalleVenta detalle : detalles) {
-                // Registrar el detalle
                 stmtDetalle.setInt(1, idVentaGenerado);
                 stmtDetalle.setInt(2, detalle.getProducto().getId());
                 stmtDetalle.setInt(3, detalle.getCantidad());
@@ -58,25 +59,24 @@ public class VentaRepositoryImpl implements VentaRepository {
                 stmtDetalle.setDouble(5, detalle.getSubtotal());
                 stmtDetalle.executeUpdate();
 
-                // 3. Descontar Stock de forma inmediata en la misma transacción
+                // 3. Descontar stock evaluando disponibilidad
                 stmtStock.setInt(1, detalle.getCantidad());
                 stmtStock.setInt(2, detalle.getProducto().getId());
+                stmtStock.setInt(3, detalle.getCantidad()); // Condición stock >= cantidad
 
                 int filasAfectadasStock = stmtStock.executeUpdate();
                 if (filasAfectadasStock == 0) {
-                    throw new SQLException("Error al actualizar el stock del producto ID: " + detalle.getProducto().getId());
+                    throw new SQLException("Stock insuficiente o no disponible para el producto: " + detalle.getProducto().getNombre());
                 }
             }
 
-            // SI TODO SALIÓ BIEN: Confirmamos y asentamos los cambios en la BD
-            conn.commit();
+            conn.commit(); // CONFIRMACIÓN DE TRANSACCIÓN
             return true;
 
         } catch (SQLException e) {
-            // SI ALGO FALLA: Cancelamos absolutamente todo el bloque completo
             if (conn != null) {
                 try {
-                    System.out.println("Cerrando transacción por error: " + e.getMessage());
+                    System.out.println("Rollback ejecutado en Venta: " + e.getMessage());
                     conn.rollback();
                 } catch (SQLException ex) {
                     System.out.println("Error en Rollback: " + ex.getMessage());
@@ -84,53 +84,21 @@ public class VentaRepositoryImpl implements VentaRepository {
             }
             return false;
         } finally {
-            // Cerramos todos los recursos limpios
-            try {
-                if (stmtVenta != null) {
-                    stmtVenta.close();
-                }
-                if (stmtDetalle != null) {
-                    stmtDetalle.close();
-                }
-                if (stmtStock != null) {
-                    stmtStock.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                System.out.println("Error al cerrar recursos: " + e.getMessage());
-            }
+            cerrarRecursos(stmtVenta, stmtDetalle, stmtStock, conn);
         }
     }
 
     @Override
     public List<Venta> listarTodas() {
         List<Venta> ventas = new ArrayList<>();
-        // Unimos con clientes para reconstruir el objeto completo mapeado
-        String sql = "SELECT v.*, c.nombre as cliente_nombre, c.rfc, c.telefono, c.email, c.direccion, c.estado as cliente_estado "
+        String sql = "SELECT v.id, v.fecha, v.total, v.estado, "
+                + "c.id as cliente_id, c.nombre as cliente_nombre, c.rfc, c.telefono, c.email, c.direccion, c.estado as cliente_estado "
                 + "FROM ventas v INNER JOIN clientes c ON v.cliente_id = c.id ORDER BY v.id DESC";
 
         try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                Cliente cliente = new Cliente(
-                        rs.getInt("cliente_id"),
-                        rs.getString("cliente_nombre"),
-                        rs.getString("rfc"),
-                        rs.getString("telefono"),
-                        rs.getString("email"),
-                        rs.getString("direccion"),
-                        rs.getString("cliente_estado")
-                );
-
-                ventas.add(new Venta(
-                        rs.getInt("id"),
-                        cliente,
-                        rs.getTimestamp("fecha").toLocalDateTime(),
-                        rs.getDouble("total"),
-                        rs.getString("estado")
-                ));
+                ventas.add(mapearVenta(rs));
             }
         } catch (SQLException e) {
             System.out.println("Error al listar ventas: " + e.getMessage());
@@ -141,9 +109,8 @@ public class VentaRepositoryImpl implements VentaRepository {
     @Override
     public List<DetalleVenta> listarDetallesPorVenta(int ventaId) {
         List<DetalleVenta> detalles = new ArrayList<>();
-        // En este método simple no es necesario traer el objeto Producto completo con Categorías, 
-        // basta con inicializar el ID y Nombre para renderizar el historial si se requiere.
-        String sql = "SELECT dv.*, p.nombre as producto_nombre "
+        String sql = "SELECT dv.id, dv.venta_id, dv.cantidad, dv.precio_unitario, dv.subtotal, "
+                + "p.id as producto_id, p.nombre as producto_nombre "
                 + "FROM detalle_ventas dv INNER JOIN productos p ON dv.producto_id = p.id "
                 + "WHERE dv.venta_id = ?";
 
@@ -152,8 +119,7 @@ public class VentaRepositoryImpl implements VentaRepository {
             stmt.setInt(1, ventaId);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    // Creamos un mock/objeto básico del producto para el detalle
-                    com.inventario.model.Producto p = new com.inventario.model.Producto();
+                    Producto p = new Producto();
                     p.setId(rs.getInt("producto_id"));
                     p.setNombre(rs.getString("producto_nombre"));
 
@@ -170,6 +136,123 @@ public class VentaRepositoryImpl implements VentaRepository {
             System.out.println("Error al obtener detalles de venta: " + e.getMessage());
         }
         return detalles;
+    }
+
+    @Override
+    public boolean cancelarVenta(int ventaId) {
+        String sqlEstadoVenta = "SELECT estado FROM ventas WHERE id = ?";
+        String sqlCancelarVenta = "UPDATE ventas SET estado = 'CANCELADA' WHERE id = ?";
+        String sqlReintegrarStock = "UPDATE productos SET stock = stock + ? WHERE id = ?";
+
+        Connection conn = null;
+        PreparedStatement stmtEstado = null;
+        PreparedStatement stmtCancelar = null;
+        PreparedStatement stmtReintegrar = null;
+
+        try {
+            conn = ConexionDB.getConexion();
+            conn.setAutoCommit(false); // TRANSACCIÓN DE ANULACIÓN
+
+            // Verificar si la venta no estaba ya cancelada
+            stmtEstado = conn.prepareStatement(sqlEstadoVenta);
+            stmtEstado.setInt(1, ventaId);
+            try (ResultSet rs = stmtEstado.executeQuery()) {
+                if (rs.next()) {
+                    if ("CANCELADA".equalsIgnoreCase(rs.getString("estado"))) {
+                        throw new SQLException("La venta ya se encuentra cancelada.");
+                    }
+                } else {
+                    throw new SQLException("No se encontró la venta especificada.");
+                }
+            }
+
+            // 1. Obtener los detalles para devolver stock a productos
+            List<DetalleVenta> detalles = listarDetallesPorVenta(ventaId);
+
+            stmtReintegrar = conn.prepareStatement(sqlReintegrarStock);
+            for (DetalleVenta detalle : detalles) {
+                stmtReintegrar.setInt(1, detalle.getCantidad());
+                stmtReintegrar.setInt(2, detalle.getProducto().getId());
+                stmtReintegrar.executeUpdate();
+            }
+
+            // 2. Marcar la venta como CANCELADA
+            stmtCancelar = conn.prepareStatement(sqlCancelarVenta);
+            stmtCancelar.setInt(1, ventaId);
+            stmtCancelar.executeUpdate();
+
+            conn.commit();
+            return true;
+
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    System.out.println("Error en rollback al cancelar venta: " + ex.getMessage());
+                }
+            }
+            System.out.println("Error al cancelar la venta ID " + ventaId + ": " + e.getMessage());
+            return false;
+        } finally {
+            cerrarRecursos(stmtEstado, stmtCancelar, stmtReintegrar, conn);
+        }
+    }
+
+    @Override
+    public List<Venta> buscarPorRangoFechas(LocalDate inicio, LocalDate fin) {
+        List<Venta> ventas = new ArrayList<>();
+        String sql = "SELECT v.id, v.fecha, v.total, v.estado, "
+                + "c.id as cliente_id, c.nombre as cliente_nombre, c.rfc, c.telefono, c.email, c.direccion, c.estado as cliente_estado "
+                + "FROM ventas v INNER JOIN clientes c ON v.cliente_id = c.id "
+                + "WHERE v.fecha >= ? AND v.fecha <= ? ORDER BY v.id DESC";
+
+        try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setTimestamp(1, Timestamp.valueOf(inicio.atStartOfDay()));
+            stmt.setTimestamp(2, Timestamp.valueOf(fin.atTime(23, 59, 59)));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    ventas.add(mapearVenta(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al filtrar ventas por fechas: " + e.getMessage());
+        }
+        return ventas;
+    }
+
+    private Venta mapearVenta(ResultSet rs) throws SQLException {
+        Cliente cliente = new Cliente(
+                rs.getInt("cliente_id"),
+                rs.getString("cliente_nombre"),
+                rs.getString("rfc"),
+                rs.getString("telefono"),
+                rs.getString("email"),
+                rs.getString("direccion"),
+                rs.getString("cliente_estado")
+        );
+
+        return new Venta(
+                rs.getInt("id"),
+                cliente,
+                rs.getTimestamp("fecha").toLocalDateTime(),
+                rs.getDouble("total"),
+                rs.getString("estado")
+        );
+    }
+
+    private void cerrarRecursos(AutoCloseable... recursos) {
+        for (AutoCloseable r : recursos) {
+            if (r != null) {
+                try {
+                    r.close();
+                } catch (Exception e) {
+                    // Cierre silencioso de conexión
+                }
+            }
+        }
     }
 
 }
