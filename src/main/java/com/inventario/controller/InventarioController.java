@@ -24,17 +24,28 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 public class InventarioController implements Initializable {
 
     @FXML
+    private TextField txtCodigoBarras; // NUEVO
+    @FXML
     private TextField txtNombre;
+    @FXML
+    private TextField txtBuscar;
+    @FXML
+    private TextArea txtDescripcion;
     @FXML
     private TextField txtPrecio;
     @FXML
+    private TextField txtPrecioCompra;
+    @FXML
     private TextField txtStock;
+    @FXML
+    private TextField txtStockMinimo;
     @FXML
     private ComboBox<String> cmbEstado;
     @FXML
@@ -46,9 +57,13 @@ public class InventarioController implements Initializable {
     @FXML
     private TableView<Producto> tblProductos;
     private TableColumn<Producto, Integer> colId;
+    private TableColumn<Producto, String> colCodigo;
     private TableColumn<Producto, String> colNombre;
+    private TableColumn<Producto, String> colDescripcion;
     private TableColumn<Producto, Double> colPrecio;
+    private TableColumn<Producto, Double> colPrecioCompra;
     private TableColumn<Producto, Integer> colStock;
+    private TableColumn<Producto, Integer> colStockMin;
     private TableColumn<Producto, String> colEstado;
     private TableColumn<Producto, String> colCategoria;
 
@@ -85,45 +100,81 @@ public class InventarioController implements Initializable {
         tblProductos.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 productoSeleccionado = newSelection;
+                txtCodigoBarras.setText(productoSeleccionado.getCodigoBarras() != null ? productoSeleccionado.getCodigoBarras() : "");
                 txtNombre.setText(productoSeleccionado.getNombre());
+                txtDescripcion.setText(productoSeleccionado.getDescripcion() != null ? productoSeleccionado.getDescripcion() : "");
                 txtPrecio.setText(String.valueOf(productoSeleccionado.getPrecio()));
+                txtPrecioCompra.setText(String.valueOf(productoSeleccionado.getPrecioCompra()));
                 txtStock.setText(String.valueOf(productoSeleccionado.getStock()));
+                txtStockMinimo.setText(String.valueOf(productoSeleccionado.getStockMinimo()));
                 cmbEstado.setValue(productoSeleccionado.getEstado());
                 cmbCategoria.setValue(productoSeleccionado.getCategoria());
                 cmbProveedor.setValue(productoSeleccionado.getProveedor());
             }
         });
+        txtBuscar.textProperty().addListener((observable, oldValue, newValue) -> {
+            buscarProductos(newValue);
+        });
+    }
+
+    private void buscarProductos(String criterio) {
+        if (criterio == null || criterio.trim().isEmpty()) {
+            listarProductos();
+            return;
+        }
+
+        String termino = criterio.trim();
+        listaProductos.clear();
+
+        // 1. Intentar buscar coincidencia exacta por código de barras primero
+        Producto pCodigo = repository.buscarPorCodigoBarras(termino);
+        if (pCodigo != null) {
+            listaProductos.add(pCodigo);
+        } else {
+            // 2. Si no coincide el código, buscar por nombre (coincidencia parcial)
+            listaProductos.addAll(repository.buscarPorNombre(termino));
+        }
+
+        tblProductos.setItems(listaProductos);
     }
 
     private void cargarComboCategorias() {
         listaCategorias.clear();
-        // Filtrar opcionalmente para mostrar sólo las categorías con estado 'Activo'
         listaCategorias.addAll(catRepository.listarTodas());
         cmbCategoria.setItems(listaCategorias);
+
+        // Convertidor para mostrar correctamente el nombre de la categoría en el ComboBox sin romper estilos CSS
+        cmbCategoria.setConverter(new javafx.util.StringConverter<Categoria>() {
+            @Override
+            public String toString(Categoria cat) {
+                return cat == null ? "" : cat.getNombre();
+            }
+
+            @Override
+            public Categoria fromString(String string) {
+                return null;
+            }
+        });
     }
 
     private void cargarComboProveedores() {
         listaProveedores.clear();
-        // Filtrar opcionalmente para cargar solo proveedores "ACTIVO"
         java.util.List<Proveedor> activos = provRepository.listarTodos().stream()
                 .filter(p -> "ACTIVO".equalsIgnoreCase(p.getEstado()))
                 .collect(Collectors.toList());
         listaProveedores.addAll(activos);
         cmbProveedor.setItems(listaProveedores);
 
-        // Formateador para renderizar el combo mostrando el nombre plano de la empresa
-        cmbProveedor.setCellFactory(param -> new ListCell<>() {
+        // Convertidor estándar usando StringConverter en lugar de ListCell anónima
+        cmbProveedor.setConverter(new javafx.util.StringConverter<Proveedor>() {
             @Override
-            protected void updateItem(Proveedor item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.getNombre());
+            public String toString(Proveedor prov) {
+                return prov == null ? "" : prov.getNombre();
             }
-        });
-        cmbProveedor.setButtonCell(new ListCell<>() {
+
             @Override
-            protected void updateItem(Proveedor item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.getNombre());
+            public Proveedor fromString(String string) {
+                return null;
             }
         });
     }
@@ -133,14 +184,26 @@ public class InventarioController implements Initializable {
         colId = new TableColumn<>("ID");
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
 
+        colCodigo = new TableColumn<>("Código");
+        colCodigo.setCellValueFactory(new PropertyValueFactory<>("codigoBarras"));
+
         colNombre = new TableColumn<>("Nombre");
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
 
-        colPrecio = new TableColumn<>("Precio");
+        colDescripcion = new TableColumn<>("Descripción");
+        colDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
+
+        colPrecio = new TableColumn<>("P. Venta");
         colPrecio.setCellValueFactory(new PropertyValueFactory<>("precio"));
+
+        colPrecioCompra = new TableColumn<>("P. Costo");
+        colPrecioCompra.setCellValueFactory(new PropertyValueFactory<>("precioCompra"));
 
         colStock = new TableColumn<>("Stock");
         colStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
+
+        colStockMin = new TableColumn<>("Mín.");
+        colStockMin.setCellValueFactory(new PropertyValueFactory<>("stockMinimo"));
 
         colEstado = new TableColumn<>("Estado");
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
@@ -162,7 +225,10 @@ public class InventarioController implements Initializable {
         });
 
         // Añadimos las columnas configuradas al TableView limpiando las que Scene Builder trae por defecto
-        tblProductos.getColumns().setAll(colId, colNombre, colCategoria, colProveedor, colPrecio, colStock, colEstado);
+        tblProductos.getColumns().setAll(
+                colId, colCodigo, colNombre, colDescripcion, colCategoria,
+                colProveedor, colPrecio, colPrecioCompra, colStock, colStockMin, colEstado
+        );
     }
 
     private void listarProductos() {
@@ -174,11 +240,25 @@ public class InventarioController implements Initializable {
     @FXML
     void onAgregar(ActionEvent event) {
         if (validarCampos()) {
+            String codigo = txtCodigoBarras.getText() != null ? txtCodigoBarras.getText().trim() : "";
+            String nombre = txtNombre.getText().trim();
+            String descripcion = txtDescripcion.getText() != null ? txtDescripcion.getText().trim() : "";// Reservado para observaciones
+            double precioVenta = Double.parseDouble(txtPrecio.getText().trim());
+            double precioCompra = txtPrecioCompra.getText().trim().isEmpty() ? 0.0 : Double.parseDouble(txtPrecioCompra.getText().trim());
+            int stock = Integer.parseInt(txtStock.getText().trim());
+            int stockMin = txtStockMinimo.getText().trim().isEmpty() ? 5 : Integer.parseInt(txtStockMinimo.getText().trim());
+            String estado = cmbEstado.getValue() != null ? cmbEstado.getValue() : "ACTIVO";
+
+            // CONSTRUCTOR CORREGIDO DE 10 PARÁMETROS
             Producto nuevoProducto = new Producto(
-                    txtNombre.getText(),
-                    Double.parseDouble(txtPrecio.getText()),
-                    Integer.parseInt(txtStock.getText()),
-                    cmbEstado.getValue(),
+                    codigo,
+                    nombre,
+                    descripcion,
+                    precioVenta,
+                    precioCompra,
+                    stock,
+                    stockMin,
+                    estado,
                     cmbCategoria.getValue(),
                     cmbProveedor.getValue()
             );
@@ -201,9 +281,13 @@ public class InventarioController implements Initializable {
         }
 
         if (validarCampos()) {
-            productoSeleccionado.setNombre(txtNombre.getText());
-            productoSeleccionado.setPrecio(Double.parseDouble(txtPrecio.getText()));
-            productoSeleccionado.setStock(Integer.parseInt(txtStock.getText()));
+            productoSeleccionado.setCodigoBarras(txtCodigoBarras.getText() != null ? txtCodigoBarras.getText().trim() : "");
+            productoSeleccionado.setNombre(txtNombre.getText().trim());
+            productoSeleccionado.setDescripcion(txtDescripcion.getText() != null ? txtDescripcion.getText().trim() : "");
+            productoSeleccionado.setPrecio(Double.parseDouble(txtPrecio.getText().trim()));
+            productoSeleccionado.setPrecioCompra(txtPrecioCompra.getText().trim().isEmpty() ? 0.0 : Double.parseDouble(txtPrecioCompra.getText().trim()));
+            productoSeleccionado.setStock(Integer.parseInt(txtStock.getText().trim()));
+            productoSeleccionado.setStockMinimo(txtStockMinimo.getText().trim().isEmpty() ? 5 : Integer.parseInt(txtStockMinimo.getText().trim()));
             productoSeleccionado.setEstado(cmbEstado.getValue());
             productoSeleccionado.setCategoria(cmbCategoria.getValue());
             productoSeleccionado.setProveedor(cmbProveedor.getValue());
@@ -235,10 +319,22 @@ public class InventarioController implements Initializable {
     }
 
     private void limpiarFormulario() {
+        if (txtCodigoBarras != null) {
+            txtCodigoBarras.clear();
+        }
         txtNombre.clear();
+        if (txtDescripcion != null) {
+            txtDescripcion.clear();
+        }
         txtPrecio.clear();
+        if (txtPrecioCompra != null) {
+            txtPrecioCompra.clear();
+        }
         txtStock.clear();
-        cmbEstado.setValue("Activo");
+        if (txtStockMinimo != null) {
+            txtStockMinimo.clear();
+        }
+        cmbEstado.setValue("ACTIVO");
         cmbCategoria.setValue(null);
         cmbProveedor.setValue(null);
         productoSeleccionado = null;
@@ -246,12 +342,11 @@ public class InventarioController implements Initializable {
     }
 
     private boolean validarCampos() {
-        if (txtNombre.getText().isEmpty() || txtPrecio.getText().isEmpty() || txtStock.getText().isEmpty()) {
-            mostrarAlerta("Campos vacíos", "Por favor rellena todos los campos obligatorios", Alert.AlertType.WARNING);
+        if (txtNombre.getText().trim().isEmpty() || txtPrecio.getText().trim().isEmpty() || txtStock.getText().trim().isEmpty()) {
+            mostrarAlerta("Campos vacíos", "Por favor rellena los campos obligatorios (Nombre, Precio Venta y Stock)", Alert.AlertType.WARNING);
             return false;
         }
 
-        // NUEVO: Validar que se haya seleccionado una categoría
         if (cmbCategoria.getValue() == null) {
             mostrarAlerta("Categoría requerida", "Por favor selecciona una categoría para el producto", Alert.AlertType.WARNING);
             return false;
@@ -263,10 +358,17 @@ public class InventarioController implements Initializable {
         }
 
         try {
-            Double.parseDouble(txtPrecio.getText());
-            Integer.parseInt(txtStock.getText());
+            Double.parseDouble(txtPrecio.getText().trim());
+            Integer.parseInt(txtStock.getText().trim());
+
+            if (txtPrecioCompra != null && !txtPrecioCompra.getText().trim().isEmpty()) {
+                Double.parseDouble(txtPrecioCompra.getText().trim());
+            }
+            if (txtStockMinimo != null && !txtStockMinimo.getText().trim().isEmpty()) {
+                Integer.parseInt(txtStockMinimo.getText().trim());
+            }
         } catch (NumberFormatException e) {
-            mostrarAlerta("Datos inválidos", "Precio y Stock deben ser numéricos", Alert.AlertType.ERROR);
+            mostrarAlerta("Datos inválidos", "Precio y Stock deben ser números válidos", Alert.AlertType.ERROR);
             return false;
         }
         return true;
