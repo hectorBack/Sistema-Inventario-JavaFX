@@ -34,6 +34,16 @@ public class Proveedor {
         this.estado = new SimpleStringProperty(estado);
     }
 
+    // Constructor para nuevos registros (sin ID)
+    public Proveedor(String nombre, String contacto, String telefono, String email, String estado) {
+        this.id = new SimpleIntegerProperty(0);
+        this.nombre = new SimpleStringProperty(nombre);
+        this.contacto = new SimpleStringProperty(contacto);
+        this.telefono = new SimpleStringProperty(telefono);
+        this.email = new SimpleStringProperty(email);
+        this.estado = new SimpleStringProperty(estado);
+    }
+
     // --- GETTERS Y SETTERS ESTÁNDAR ---
     public int getId() {
         return id.get();
@@ -106,5 +116,10 @@ public class Proveedor {
 
     public StringProperty estadoProperty() {
         return estado;
+    }
+
+    @Override
+    public String toString() {
+        return getNombre();
     }
 }

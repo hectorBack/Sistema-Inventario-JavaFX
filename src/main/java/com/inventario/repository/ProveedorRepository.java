@@ -7,10 +7,25 @@ public interface ProveedorRepository {
 
     List<Proveedor> listarTodos();
 
+    List<Proveedor> listarActivos();
+
+    Proveedor buscarPorId(int id);
+
     boolean guardar(Proveedor proveedor);
 
     boolean actualizar(Proveedor proveedor);
 
     boolean eliminar(int id); // O dar de baja cambiando el estado a INACTIVO
+
+    boolean desactivar(int id);
+
+    // Validaciones de negocio e integridad
+    boolean existeNombre(String nombre, int idExcluir);
+
+    boolean existeEmail(String email, int idExcluir);
+
+    boolean tieneProductosAsociados(int proveedorId);
+
+    List<Proveedor> buscarConFiltro(String criterio);
 
 }

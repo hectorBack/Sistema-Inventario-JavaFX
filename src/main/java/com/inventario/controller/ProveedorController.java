@@ -11,6 +11,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -31,6 +32,8 @@ public class ProveedorController implements Initializable {
     private ComboBox<String> cmbEstado;
     @FXML
     private TableView<Proveedor> tblProveedores;
+    @FXML
+    private TextField txtBuscar;
 
     private final ProveedorRepository repo = new ProveedorRepositoryImpl();
     private final ObservableList<Proveedor> listaProveedores = FXCollections.observableArrayList();
@@ -44,7 +47,12 @@ public class ProveedorController implements Initializable {
         configurarColumnas();
         listarProveedores();
 
-        // Listener para seleccionar filas de la tabla
+        // Búsqueda en tiempo real
+        if (txtBuscar != null) {
+            txtBuscar.textProperty().addListener((obs, oldVal, newVal) -> filtrarProveedores(newVal));
+        }
+
+        // Listener para selección en la tabla
         tblProveedores.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 proveedorSeleccionado = newSelection;
@@ -61,7 +69,7 @@ public class ProveedorController implements Initializable {
         TableColumn<Proveedor, Integer> colId = new TableColumn<>("ID");
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-        TableColumn<Proveedor, String> colNombre = new TableColumn<>("Nombre");
+        TableColumn<Proveedor, String> colNombre = new TableColumn<>("Nombre / Razon Social");
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
 
         TableColumn<Proveedor, String> colContacto = new TableColumn<>("Contacto");
@@ -70,10 +78,13 @@ public class ProveedorController implements Initializable {
         TableColumn<Proveedor, String> colTel = new TableColumn<>("Teléfono");
         colTel.setCellValueFactory(new PropertyValueFactory<>("telefono"));
 
+        TableColumn<Proveedor, String> colEmail = new TableColumn<>("Email");
+        colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+
         TableColumn<Proveedor, String> colEstado = new TableColumn<>("Estado");
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
 
-        tblProveedores.getColumns().setAll(colId, colNombre, colContacto, colTel, colEstado);
+        tblProveedores.getColumns().setAll(colId, colNombre, colContacto, colTel, colEmail, colEstado);
     }
 
     private void listarProveedores() {
@@ -82,46 +93,146 @@ public class ProveedorController implements Initializable {
         tblProveedores.setItems(listaProveedores);
     }
 
-    @FXML
-    void onAgregar(ActionEvent event) {
-        if (txtNombre.getText().trim().isEmpty()) {
-            mostrarAlerta("Error", "El nombre es obligatorio", Alert.AlertType.WARNING);
+    private void filtrarProveedores(String criterio) {
+        if (criterio == null || criterio.trim().isEmpty()) {
+            listarProveedores();
             return;
         }
-        Proveedor p = new Proveedor(0, txtNombre.getText().trim(), txtContacto.getText().trim(), txtTelefono.getText().trim(), txtEmail.getText().trim(), cmbEstado.getValue());
+        listaProveedores.clear();
+        listaProveedores.addAll(repo.buscarConFiltro(criterio));
+        tblProveedores.setItems(listaProveedores);
+    }
+
+    @FXML
+    void onAgregar(ActionEvent event) {
+        String nombre = txtNombre.getText().trim();
+        String contacto = txtContacto.getText().trim();
+        String telefono = txtTelefono.getText().trim();
+        String email = txtEmail.getText().trim();
+
+        if (nombre.isEmpty()) {
+            mostrarAlerta("Campos vacíos", "El nombre del proveedor o razón social es obligatorio.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        // Validación de Nombre duplicado
+        if (repo.existeNombre(nombre, 0)) {
+            mostrarAlerta("Registro duplicado", "Ya existe un proveedor registrado como '" + nombre + "'.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        // Validación de Email duplicado
+        if (!email.isEmpty() && repo.existeEmail(email, 0)) {
+            mostrarAlerta("Correo en uso", "El correo electrónico '" + email + "' ya está registrado con otro proveedor.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        Proveedor p = new Proveedor(nombre, contacto, telefono, email, cmbEstado.getValue());
+
         if (repo.guardar(p)) {
+            mostrarAlerta("Éxito", "Proveedor registrado correctamente.", Alert.AlertType.INFORMATION);
             listarProveedores();
             limpiarCampos();
+        } else {
+            mostrarAlerta("Error", "No se pudo registrar el proveedor en la base de datos.", Alert.AlertType.ERROR);
         }
     }
 
     @FXML
     void onActualizar(ActionEvent event) {
         if (proveedorSeleccionado == null) {
-            mostrarAlerta("Error", "Selecciona un proveedor de la tabla", Alert.AlertType.WARNING);
+            mostrarAlerta("Advertencia", "Selecciona un proveedor de la tabla para actualizar.", Alert.AlertType.WARNING);
             return;
         }
-        proveedorSeleccionado.setNombre(txtNombre.getText().trim());
+
+        String nombre = txtNombre.getText().trim();
+        String email = txtEmail.getText().trim();
+
+        if (nombre.isEmpty()) {
+            mostrarAlerta("Campos vacíos", "El nombre del proveedor no puede quedar vacío.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        int id = proveedorSeleccionado.getId();
+
+        // Validar que el nuevo nombre no entre en colisión con otro registro
+        if (repo.existeNombre(nombre, id)) {
+            mostrarAlerta("Registro duplicado", "Ya existe otro proveedor registrado como '" + nombre + "'.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        // Validar que el nuevo email no esté en uso
+        if (!email.isEmpty() && repo.existeEmail(email, id)) {
+            mostrarAlerta("Correo en uso", "El correo electrónico '" + email + "' pertenece a otro proveedor.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        proveedorSeleccionado.setNombre(nombre);
         proveedorSeleccionado.setContacto(txtContacto.getText().trim());
         proveedorSeleccionado.setTelefono(txtTelefono.getText().trim());
-        proveedorSeleccionado.setEmail(txtEmail.getText().trim());
+        proveedorSeleccionado.setEmail(email);
         proveedorSeleccionado.setEstado(cmbEstado.getValue());
 
         if (repo.actualizar(proveedorSeleccionado)) {
+            mostrarAlerta("Éxito", "Proveedor actualizado correctamente.", Alert.AlertType.INFORMATION);
             listarProveedores();
             limpiarCampos();
+        } else {
+            mostrarAlerta("Error", "No se pudo actualizar el proveedor.", Alert.AlertType.ERROR);
         }
     }
 
     @FXML
     void onEliminar(ActionEvent event) {
         if (proveedorSeleccionado == null) {
-            mostrarAlerta("Error", "Selecciona un proveedor de la tabla", Alert.AlertType.WARNING);
+            mostrarAlerta("Advertencia", "Selecciona un proveedor de la tabla para eliminar.", Alert.AlertType.WARNING);
             return;
         }
-        if (repo.eliminar(proveedorSeleccionado.getId())) {
-            listarProveedores();
-            limpiarCampos();
+
+        int id = proveedorSeleccionado.getId();
+
+        // 1. Control de llaves foráneas: Verificar si existen productos asociados a este proveedor
+        if (repo.tieneProductosAsociados(id)) {
+            Alert confirmacionInactivo = new Alert(
+                    Alert.AlertType.CONFIRMATION,
+                    "El proveedor '" + proveedorSeleccionado.getNombre() + "' tiene productos asociados en el inventario.\n\n"
+                    + "No se puede eliminar físicamente. ¿Deseas cambiar su estado a 'INACTIVO'?",
+                    ButtonType.YES, ButtonType.NO
+            );
+            confirmacionInactivo.setTitle("Proveedor con Dependencias");
+            confirmacionInactivo.setHeaderText(null);
+            confirmacionInactivo.showAndWait();
+
+            if (confirmacionInactivo.getResult() == ButtonType.YES) {
+                if (repo.desactivar(id)) {
+                    mostrarAlerta("Estado actualizado", "El proveedor ha sido marcado como INACTIVO.", Alert.AlertType.INFORMATION);
+                    listarProveedores();
+                    limpiarCampos();
+                } else {
+                    mostrarAlerta("Error", "No se pudo desactivar el proveedor.", Alert.AlertType.ERROR);
+                }
+            }
+            return;
+        }
+
+        // 2. Eliminación física si no tiene vinculaciones
+        Alert confirmacion = new Alert(
+                Alert.AlertType.CONFIRMATION,
+                "¿Estás seguro de eliminar físicamente al proveedor '" + proveedorSeleccionado.getNombre() + "'?",
+                ButtonType.YES, ButtonType.NO
+        );
+        confirmacion.setTitle("Confirmar Eliminación");
+        confirmacion.setHeaderText(null);
+        confirmacion.showAndWait();
+
+        if (confirmacion.getResult() == ButtonType.YES) {
+            if (repo.eliminar(id)) {
+                mostrarAlerta("Éxito", "Proveedor eliminado correctamente.", Alert.AlertType.INFORMATION);
+                listarProveedores();
+                limpiarCampos();
+            } else {
+                mostrarAlerta("Error", "No se pudo eliminar el proveedor.", Alert.AlertType.ERROR);
+            }
         }
     }
 
