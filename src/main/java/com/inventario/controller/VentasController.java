@@ -12,7 +12,9 @@ import com.inventario.repository.ProductoRepository;
 import com.inventario.repository.VentaRepository;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -26,9 +28,14 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.SourceDataLine;
 
 public class VentasController implements Initializable {
 
+    @FXML
+    private TextField txtCodigoBarras;
     @FXML
     private ComboBox<Cliente> cmbCliente;
     @FXML
@@ -65,7 +72,7 @@ public class VentasController implements Initializable {
         // 2. Configurar la estructura de columnas del carrito
         configurarColumnasCarrito();
 
-        // 3. Listener para rellenar automáticamente el precio al seleccionar un artículo
+        // 3. Listener para rellenar automáticamente el precio al seleccionar un artículo manualmente
         cmbProducto.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 txtPrecio.setText(String.format("%.2f", newVal.getPrecio()));
@@ -73,6 +80,64 @@ public class VentasController implements Initializable {
                 txtPrecio.setText("0.00");
             }
         });
+
+        // 4. Asegurar que el cursor siempre empiece en el campo del lector al entrar al módulo
+        if (txtCodigoBarras != null) {
+            Platform.runLater(() -> txtCodigoBarras.requestFocus());
+        }
+    }
+
+    /**
+     * Emite un tono sintético vía AudioSystem sin requerir archivos .wav
+     * externos.
+     */
+    private void emitirBeep(int hz, int msecs) {
+        new Thread(() -> {
+            try {
+                byte[] buf = new byte[1];
+                AudioFormat af = new AudioFormat(8000f, 8, 1, true, false);
+                SourceDataLine sdl = AudioSystem.getSourceDataLine(af);
+                sdl.open(af);
+                sdl.start();
+                for (int i = 0; i < msecs * 8; i++) {
+                    double angle = i / (8000f / hz) * 2.0 * Math.PI;
+                    buf[0] = (byte) (Math.sin(angle) * 100);
+                    sdl.write(buf, 0, 1);
+                }
+                sdl.drain();
+                sdl.stop();
+                sdl.close();
+            } catch (Exception ignored) {
+            }
+        }).start();
+    }
+
+    /**
+     * Evento ejecutado automáticamente cuando la pistola escanea un código y
+     * envía la tecla ENTER al final.
+     */
+    @FXML
+    void onEscanearCodigoBarras(ActionEvent event) {
+        String codigo = txtCodigoBarras.getText().trim();
+
+        if (codigo.isEmpty()) {
+            return;
+        }
+
+        // Buscar producto directo (retorna Producto o null si no existe)
+        Producto productoEncontrado = productoRepository.buscarPorCodigoBarras(codigo);
+
+        if (productoEncontrado != null) {
+            emitirBeep(900, 120); 
+            procesarAgregadoACarrito(productoEncontrado, 1);
+        } else {
+            emitirBeep(450, 180); 
+            mostrarAlerta("Producto no encontrado", "No se encontró ningún artículo registrado con el código: " + codigo, Alert.AlertType.WARNING);
+        }
+
+        // Limpiar el campo y mantener el foco listo para la siguiente lectura
+        txtCodigoBarras.clear();
+        txtCodigoBarras.requestFocus();
     }
 
     private void cargarCombosIniciales() {
@@ -80,8 +145,7 @@ public class VentasController implements Initializable {
         ObservableList<Cliente> clientes = FXCollections.observableArrayList(clienteRepository.listarActivos());
         cmbCliente.setItems(clientes);
 
-        // Formateador para mostrar el Nombre del cliente
-        cmbCliente.setCellFactory(lv -> new ListCell<>() {
+        cmbCliente.setCellFactory(lv -> new ListCell<Cliente>() {
             @Override
             protected void updateItem(Cliente item, boolean empty) {
                 super.updateItem(item, empty);
@@ -90,7 +154,7 @@ public class VentasController implements Initializable {
         });
         cmbCliente.setButtonCell(cmbCliente.getCellFactory().call(null));
 
-        // Cargar Productos Disponibles (Con stock mayor a 0)
+        // Cargar Productos Disponibles
         ObservableList<Producto> productos = FXCollections.observableArrayList(
                 productoRepository.listarTodos().stream()
                         .filter(p -> p.getStock() > 0)
@@ -98,7 +162,7 @@ public class VentasController implements Initializable {
         );
         cmbProducto.setItems(productos);
 
-        cmbProducto.setCellFactory(lv -> new ListCell<>() {
+        cmbProducto.setCellFactory(lv -> new ListCell<Producto>() {
             @Override
             protected void updateItem(Producto item, boolean empty) {
                 super.updateItem(item, empty);
@@ -149,36 +213,51 @@ public class VentasController implements Initializable {
             return;
         }
 
-        // Validar si hay stock suficiente en almacén
-        if (cantidad > prodSeleccionado.getStock()) {
-            mostrarAlerta("Stock Insuficiente", "Solo quedan " + prodSeleccionado.getStock() + " unidades de este artículo.", Alert.AlertType.WARNING);
+        procesarAgregadoACarrito(prodSeleccionado, cantidad);
+        txtCantidad.clear();
+    }
+
+    /**
+     * Lógica unificada para validar stock, buscar duplicados y
+     * agregar/incrementar renglones.
+     */
+    private void procesarAgregadoACarrito(Producto producto, int cantidadAñadir) {
+        if (producto.getStock() <= 0) {
+            mostrarAlerta("Sin Stock", "El producto " + producto.getNombre() + " está agotado en almacén.", Alert.AlertType.WARNING);
             return;
         }
 
-        // Buscar si el producto ya está en el carrito para consolidarlo
+        // Buscar si el producto ya existe en el carrito
         DetalleVenta itemExistente = null;
         for (DetalleVenta item : carritoItems) {
-            if (item.getProducto().getId() == prodSeleccionado.getId()) {
+            if (item.getProducto() != null && item.getProducto().getId() == producto.getId()) {
                 itemExistente = item;
                 break;
             }
         }
 
         if (itemExistente != null) {
-            // Validar stock combinado acumulativo
-            if ((itemExistente.getCantidad() + cantidad) > prodSeleccionado.getStock()) {
-                mostrarAlerta("Stock Insuficiente", "El acumulado en carrito supera el stock disponible (" + prodSeleccionado.getStock() + ").", Alert.AlertType.WARNING);
+            int nuevaCantidadTotal = itemExistente.getCantidad() + cantidadAñadir;
+
+            // Validar si el acumulado en carrito supera el stock
+            if (nuevaCantidadTotal > producto.getStock()) {
+                mostrarAlerta("Stock Insuficiente", "El acumulado en carrito (" + nuevaCantidadTotal + ") supera el stock disponible (" + producto.getStock() + ").", Alert.AlertType.WARNING);
                 return;
             }
-            itemExistente.setCantidad(itemExistente.getCantidad() + cantidad);
+
+            itemExistente.setCantidad(nuevaCantidadTotal);
             tblCarrito.refresh();
         } else {
-            // Agregar nuevo renglón utilizando el constructor limpio de DetalleVenta
-            DetalleVenta nuevoDetalle = new DetalleVenta(prodSeleccionado, cantidad, prodSeleccionado.getPrecio());
+            if (cantidadAñadir > producto.getStock()) {
+                mostrarAlerta("Stock Insuficiente", "Solo quedan " + producto.getStock() + " unidades de este artículo.", Alert.AlertType.WARNING);
+                return;
+            }
+
+            // Agregar nuevo registro usando tu constructor
+            DetalleVenta nuevoDetalle = new DetalleVenta(producto, cantidadAñadir, producto.getPrecio());
             carritoItems.add(nuevoDetalle);
         }
 
-        txtCantidad.clear();
         recalcularTotal();
     }
 
@@ -191,6 +270,10 @@ public class VentasController implements Initializable {
         }
         carritoItems.remove(itemSeleccionado);
         recalcularTotal();
+
+        if (txtCodigoBarras != null) {
+            txtCodigoBarras.requestFocus();
+        }
     }
 
     @FXML
@@ -206,14 +289,12 @@ public class VentasController implements Initializable {
             return;
         }
 
-        // Construir la venta usando el constructor ajustado (sin pasar un id mock manual)
         Venta nuevaVenta = new Venta(cliente, totalAcumulado, "COMPLETADA");
 
-        // Ejecutar el proceso atómico con validación SQL de stock
         if (ventaRepository.registrarVenta(nuevaVenta, carritoItems)) {
             mostrarAlerta("Venta Procesada", "La venta se ha registrado exitosamente e inventarios actualizados.", Alert.AlertType.INFORMATION);
             limpiarPantallaCompleta();
-            cargarCombosIniciales(); // Recargar existencias en los combos
+            cargarCombosIniciales();
         } else {
             mostrarAlerta("Error Crítico", "Ocurrió un problema en la transacción SQL (posible cambio de stock concurrente). Venta cancelada de forma segura.", Alert.AlertType.ERROR);
         }
@@ -231,6 +312,11 @@ public class VentasController implements Initializable {
         txtPrecio.setText("0.00");
         carritoItems.clear();
         recalcularTotal();
+
+        if (txtCodigoBarras != null) {
+            txtCodigoBarras.clear();
+            txtCodigoBarras.requestFocus();
+        }
     }
 
     private void mostrarAlerta(String titulo, String mensaje, Alert.AlertType tipo) {

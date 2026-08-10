@@ -27,6 +27,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.SourceDataLine;
 
 public class InventarioController implements Initializable {
 
@@ -115,6 +118,54 @@ public class InventarioController implements Initializable {
         txtBuscar.textProperty().addListener((observable, oldValue, newValue) -> {
             buscarProductos(newValue);
         });
+    }
+
+    /**
+     * Emite un tono sintético vía AudioSystem sin requerir archivos .wav
+     * externos.
+     */
+    private void emitirBeep(int hz, int msecs) {
+        new Thread(() -> {
+            try {
+                byte[] buf = new byte[1];
+                AudioFormat af = new AudioFormat(8000f, 8, 1, true, false);
+                SourceDataLine sdl = AudioSystem.getSourceDataLine(af);
+                sdl.open(af);
+                sdl.start();
+                for (int i = 0; i < msecs * 8; i++) {
+                    double angle = i / (8000f / hz) * 2.0 * Math.PI;
+                    buf[0] = (byte) (Math.sin(angle) * 100);
+                    sdl.write(buf, 0, 1);
+                }
+                sdl.drain();
+                sdl.stop();
+                sdl.close();
+            } catch (Exception ignored) {
+            }
+        }).start();
+    }
+
+    /**
+     * Evento disparado al escanear sobre el campo txtCodigoBarras con la
+     * pistola. Si el producto ya existe, carga sus datos para editarlo o
+     * consultar.
+     */
+    @FXML
+    void onEscanearCodigoFormulario(ActionEvent event) {
+        String codigo = txtCodigoBarras.getText().trim();
+        if (codigo.isEmpty()) {
+            return;
+        }
+
+        Producto encontrado = repository.buscarPorCodigoBarras(codigo);
+        if (encontrado != null) {
+            emitirBeep(900, 120); // Beep agudo para éxito
+            tblProductos.getSelectionModel().select(encontrado);
+            mostrarAlerta("Producto Encontrado", "El producto '" + encontrado.getNombre() + "' ya está registrado. Se cargaron sus datos para edición.", Alert.AlertType.INFORMATION);
+        } else {
+            emitirBeep(450, 180); // Beep más grave para código nuevo / no registrado
+            txtNombre.requestFocus();
+        }
     }
 
     private void buscarProductos(String criterio) {
@@ -241,6 +292,13 @@ public class InventarioController implements Initializable {
     void onAgregar(ActionEvent event) {
         if (validarCampos()) {
             String codigo = txtCodigoBarras.getText() != null ? txtCodigoBarras.getText().trim() : "";
+
+            // Validar que el código de barras no exista previamente en otro producto
+            if (!codigo.isEmpty() && repository.existeCodigoBarras(codigo, 0)) {
+                mostrarAlerta("Código Duplicado", "Ya existe un producto registrado con el código de barras: " + codigo, Alert.AlertType.WARNING);
+                return;
+            }
+
             String nombre = txtNombre.getText().trim();
             String descripcion = txtDescripcion.getText() != null ? txtDescripcion.getText().trim() : "";// Reservado para observaciones
             double precioVenta = Double.parseDouble(txtPrecio.getText().trim());
@@ -281,7 +339,15 @@ public class InventarioController implements Initializable {
         }
 
         if (validarCampos()) {
-            productoSeleccionado.setCodigoBarras(txtCodigoBarras.getText() != null ? txtCodigoBarras.getText().trim() : "");
+            String codigo = txtCodigoBarras.getText() != null ? txtCodigoBarras.getText().trim() : "";
+
+            // Validar que el nuevo código de barras no le pertenezca a OTRO producto distinto al actual
+            if (!codigo.isEmpty() && repository.existeCodigoBarras(codigo, productoSeleccionado.getId())) {
+                mostrarAlerta("Código Duplicado", "El código de barras '" + codigo + "' ya le pertenece a otro producto registrado.", Alert.AlertType.WARNING);
+                return;
+            }
+
+            productoSeleccionado.setCodigoBarras(codigo);
             productoSeleccionado.setNombre(txtNombre.getText().trim());
             productoSeleccionado.setDescripcion(txtDescripcion.getText() != null ? txtDescripcion.getText().trim() : "");
             productoSeleccionado.setPrecio(Double.parseDouble(txtPrecio.getText().trim()));

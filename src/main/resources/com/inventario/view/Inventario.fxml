@@ -33,7 +33,12 @@
                                 <Font name="System Bold" size="11.0" />
                             </font>
                         </Label>
-                        <TextField fx:id="txtCodigoBarras" prefHeight="30.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" />
+                        <!-- CÓDIGO DE BARRAS CON EVENTO ONACTION CONECTADO -->
+                        <TextField fx:id="txtCodigoBarras" 
+                                   onAction="#onEscanearCodigoFormulario" 
+                                   prefHeight="30.0" 
+                                   promptText="Escanea o escribe el código de barras..." 
+                                   style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" />
                     </children>
                 </VBox>
 

@@ -3,6 +3,7 @@ module com.inventario {
     requires javafx.fxml;
     requires java.sql;
     requires java.base;
+    requires java.desktop;
     
     opens com.inventario to javafx.fxml;
 
