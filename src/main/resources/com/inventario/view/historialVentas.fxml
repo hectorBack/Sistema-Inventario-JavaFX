@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<HBox prefHeight="600.0" prefWidth="900.0" spacing="25.0" style="-fx-background-color: #f8fafc; -fx-padding: 25;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.HistorialVentasController">
+    <children>
+        
+        <!-- PANEL LATERAL DE FILTROS Y RESUMEN DE TICKET -->
+        <VBox minWidth="280.0" prefWidth="280.0" spacing="12.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-padding: 20;">
+            <children>
+                <Label text="Filtros de Búsqueda" textFill="#0f172a">
+                    <font>
+                        <Font name="System Bold" size="18.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="5.0" />
+                    </VBox.margin>
+                </Label>
+            
+                <VBox spacing="5.0">
+                    <children>
+                        <Label text="Fecha Inicial" textFill="#64748b">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Label>
+                        <DatePicker fx:id="dpInicio" prefHeight="35.0" prefWidth="240.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" />
+                    </children>
+                </VBox>
+
+                <VBox spacing="5.0">
+                    <children>
+                        <Label text="Fecha Final" textFill="#64748b">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Label>
+                        <DatePicker fx:id="dpFin" prefHeight="35.0" prefWidth="240.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" />
+                    </children>
+                </VBox>
+            
+                <VBox spacing="5.0">
+                    <children>
+                        <Label text="Filtrar por Cliente" textFill="#64748b">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Label>
+                        <ComboBox fx:id="cmbFiltroCliente" prefHeight="35.0" prefWidth="240.0" promptText="Todos los clientes" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" />
+                    </children>
+                </VBox>
+
+                <HBox spacing="10.0">
+                    <children>
+                        <Button mnemonicParsing="false" onAction="#onBuscarVentas" prefHeight="35.0" style="-fx-background-color: #3b82f6; -fx-background-radius: 6; -fx-cursor: hand;" text="🔍 Filtrar" textFill="WHITE" HBox.hgrow="ALWAYS">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Button>
+                        <Button mnemonicParsing="false" onAction="#onLimpiarFiltros" prefHeight="35.0" style="-fx-background-color: #e2e8f0; -fx-background-radius: 6; -fx-cursor: hand;" text="Limpiar" textFill="#334155" HBox.hgrow="ALWAYS">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Button>
+                    </children>
+                    <VBox.margin>
+                        <Insets top="5.0" />
+                    </VBox.margin>
+                </HBox>
+
+                <!-- SECCIÓN DE DETALLE DE LA VENTA SELECCIONADA -->
+                <VBox spacing="8.0" style="-fx-border-color: #f1f5f9; -fx-border-width: 1 0 0 0; -fx-padding: 12 0 0 0;" VBox.vgrow="ALWAYS">
+                    <children>
+                        <Label fx:id="lblVentaSeleccionada" text="Selecciona una venta" textFill="#0f172a">
+                            <font>
+                                <Font name="System Bold" size="13.0" />
+                            </font>
+                        </Label>
+                        
+                        <TableView fx:id="tblDetalleVenta" prefHeight="160.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #e2e8f0;" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colProdNombre" prefWidth="110.0" text="Producto" />
+                                <TableColumn fx:id="colProdCantidad" prefWidth="45.0" text="Cant." />
+                                <TableColumn fx:id="colProdPrecio" prefWidth="60.0" text="P.Unit" />
+                                <TableColumn fx:id="colProdSubtotal" prefWidth="65.0" text="Subtotal" />
+                            </columns>
+                        </TableView>
+
+                        <Button mnemonicParsing="false" onAction="#onAnularVenta" maxWidth="1.7976931348623157E308" prefHeight="38.0" style="-fx-background-color: transparent; -fx-border-color: #ef4444; -fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand;" text="❌ Anular Venta" textFill="#ef4444">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Button>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+      
+        <!-- TABLA PRINCIPAL DE VENTAS Y TOTALES -->
+        <VBox spacing="15.0" HBox.hgrow="ALWAYS">
+            <children>
+            
+                <HBox alignment="CENTER_LEFT" prefHeight="40.0">
+                    <children>
+                        <Label text="Historial de Ventas" textFill="#0f172a">
+                            <font>
+                                <Font name="System Bold" size="22.0" />
+                            </font>
+                        </Label>
+                    </children>
+                </HBox>
+            
+                <TableView fx:id="tblVentas" prefHeight="410.0" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0;" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colId" prefWidth="50.0" text="ID" />
+                        <TableColumn fx:id="colCliente" prefWidth="180.0" text="Cliente" />
+                        <TableColumn fx:id="colFecha" prefWidth="140.0" text="Fecha / Hora" />
+                        <TableColumn fx:id="colTotal" prefWidth="100.0" text="Total" />
+                        <TableColumn fx:id="colEstado" prefWidth="100.0" text="Estado" />
+                    </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                    </columnResizePolicy>
+                </TableView>
+            
+                <HBox alignment="CENTER_RIGHT" prefHeight="50.0" spacing="15.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-padding: 10 20 10 20;">
+                    <children>
+                        <Label text="TOTAL COMPLETADO EN PERIODO:" textFill="#64748b">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Label>
+                        <Label fx:id="lblTotalHistorico" text="\$0.00" textFill="#10b981">
+                            <font>
+                                <Font name="System Bold" size="22.0" />
+                            </font>
+                        </Label>
+                    </children>
+                </HBox>
+            
+            </children>
+        </VBox>
+      
+    </children>
+</HBox>

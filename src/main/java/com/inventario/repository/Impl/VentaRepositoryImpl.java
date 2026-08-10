@@ -255,4 +255,48 @@ public class VentaRepositoryImpl implements VentaRepository {
         }
     }
 
+    @Override
+    public List buscarConFiltros(LocalDate inicio, LocalDate fin, Integer clienteId) {
+        List ventas = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+                "SELECT v.id, v.fecha, v.total, v.estado, "
+                + "c.id as cliente_id, c.nombre as cliente_nombre, c.rfc, c.telefono, c.email, c.direccion, c.estado as cliente_estado "
+                + "FROM ventas v INNER JOIN clientes c ON v.cliente_id = c.id WHERE 1=1 "
+        );
+
+        if (inicio != null) {
+            sql.append("AND v.fecha >= ? ");
+        }
+        if (fin != null) {
+            sql.append("AND v.fecha <= ? ");
+        }
+        if (clienteId != null && clienteId > 0) {
+            sql.append("AND c.id = ? ");
+        }
+        sql.append("ORDER BY v.id DESC");
+
+        try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+            if (inicio != null) {
+                stmt.setTimestamp(paramIndex++, Timestamp.valueOf(inicio.atStartOfDay()));
+            }
+            if (fin != null) {
+                stmt.setTimestamp(paramIndex++, Timestamp.valueOf(fin.atTime(23, 59, 59)));
+            }
+            if (clienteId != null && clienteId > 0) {
+                stmt.setInt(paramIndex++, clienteId);
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    ventas.add(mapearVenta(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al filtrar historial de ventas: " + e.getMessage());
+        }
+        return ventas;
+    }
+
 }

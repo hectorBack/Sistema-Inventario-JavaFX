@@ -28,6 +28,8 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private Button btnVentas;
+    @FXML
+    private Button btnHistorialVentas;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -74,6 +76,12 @@ public class MainLayoutController implements Initializable {
     void mostrarVentas(ActionEvent event) {
         cargarVista("view/Ventas");
         actualizarEstiloMenu(btnVentas, btnInventario, btnCategorias, btnMovimientos, btnProveedores, btnClientes);
+    }
+
+    @FXML
+    void mostrarHistorialVentas(ActionEvent event) {
+        cargarVista("view/HistorialVentas");
+        actualizarEstiloMenu(btnHistorialVentas, btnInventario, btnCategorias, btnMovimientos, btnProveedores, btnClientes, btnVentas);
     }
 
     private void cargarVista(String fxmlPath) {

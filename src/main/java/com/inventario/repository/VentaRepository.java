@@ -17,4 +17,6 @@ public interface VentaRepository {
     List<Venta> buscarPorRangoFechas(LocalDate inicio, LocalDate fin);
 
     List<DetalleVenta> listarDetallesPorVenta(int ventaId);
+
+    List buscarConFiltros(LocalDate inicio, LocalDate fin, Integer clienteId);
 }
