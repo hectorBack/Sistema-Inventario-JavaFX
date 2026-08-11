@@ -14,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -84,7 +85,6 @@ public class HistorialVentasController implements Initializable {
         configurarTablas();
         cargarClientes();
 
-        // Listener seguro con tipos explícitos
         tblVentas.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 mostrarDetalleVenta(newVal);
@@ -94,8 +94,8 @@ public class HistorialVentasController implements Initializable {
             }
         });
 
-        // Cargar últimos 30 días por defecto
-        dpInicio.setValue(LocalDate.now().minusDays(30));
+        // Cargar únicamente el día de hoy por defecto
+        dpInicio.setValue(LocalDate.now());
         dpFin.setValue(LocalDate.now());
         onBuscarVentas(null);
     }
@@ -178,15 +178,16 @@ public class HistorialVentasController implements Initializable {
         Cliente cliente = cmbFiltroCliente.getValue();
         Integer clienteId = cliente != null ? cliente.getId() : null;
 
-        List<Venta> resultados = ventaRepository.buscarPorRangoFechas(
-                inicio != null ? inicio : LocalDate.now().minusYears(1),
-                fin != null ? fin : LocalDate.now()
-        );
+        // Si los campos están vacíos, fallback a hoy
+        LocalDate fechaInicio = (inicio != null) ? inicio : LocalDate.now();
+        LocalDate fechaFin = (fin != null) ? fin : LocalDate.now();
+
+        List<Venta> resultados = ventaRepository.buscarPorRangoFechas(fechaInicio, fechaFin);
 
         if (clienteId != null) {
             resultados = resultados.stream()
                     .filter(v -> v.getCliente() != null && v.getCliente().getId() == clienteId)
-                    .collect(java.util.stream.Collectors.toList());
+                    .collect(Collectors.toList());
         }
 
         listaVentas.setAll(resultados);
@@ -195,7 +196,7 @@ public class HistorialVentasController implements Initializable {
 
     @FXML
     void onLimpiarFiltros(ActionEvent event) {
-        dpInicio.setValue(LocalDate.now().minusDays(30));
+        dpInicio.setValue(LocalDate.now());
         dpFin.setValue(LocalDate.now());
         cmbFiltroCliente.getSelectionModel().clearSelection();
         onBuscarVentas(null);

@@ -202,15 +202,21 @@ public class VentaRepositoryImpl implements VentaRepository {
     @Override
     public List<Venta> buscarPorRangoFechas(LocalDate inicio, LocalDate fin) {
         List<Venta> ventas = new ArrayList<>();
+
+        // Cambiamos INNER JOIN a LEFT JOIN para no perder ventas sin cliente asignado
+        // Y usamos la condición de rango exclusivo (< día siguiente a las 00:00:00)
         String sql = "SELECT v.id, v.fecha, v.total, v.estado, "
                 + "c.id as cliente_id, c.nombre as cliente_nombre, c.rfc, c.telefono, c.email, c.direccion, c.estado as cliente_estado "
-                + "FROM ventas v INNER JOIN clientes c ON v.cliente_id = c.id "
-                + "WHERE v.fecha >= ? AND v.fecha <= ? ORDER BY v.id DESC";
+                + "FROM ventas v LEFT JOIN clientes c ON v.cliente_id = c.id "
+                + "WHERE v.fecha >= ? AND v.fecha < ? ORDER BY v.id DESC";
 
         try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
+            // Inicio del día 00:00:00
             stmt.setTimestamp(1, Timestamp.valueOf(inicio.atStartOfDay()));
-            stmt.setTimestamp(2, Timestamp.valueOf(fin.atTime(23, 59, 59)));
+
+            // Sumamos 1 día al límite superior y evaluamos con '<' (cubre hasta 23:59:59.999999)
+            stmt.setTimestamp(2, Timestamp.valueOf(fin.plusDays(1).atStartOfDay()));
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -224,15 +230,26 @@ public class VentaRepositoryImpl implements VentaRepository {
     }
 
     private Venta mapearVenta(ResultSet rs) throws SQLException {
-        Cliente cliente = new Cliente(
-                rs.getInt("cliente_id"),
-                rs.getString("cliente_nombre"),
-                rs.getString("rfc"),
-                rs.getString("telefono"),
-                rs.getString("email"),
-                rs.getString("direccion"),
-                rs.getString("cliente_estado")
-        );
+        int clienteId = rs.getInt("cliente_id");
+        Cliente cliente = null;
+
+        // Solo instanciamos el objeto Cliente si realmente existía una relación en la BD
+        if (!rs.wasNull() && clienteId > 0) {
+            cliente = new Cliente(
+                    clienteId,
+                    rs.getString("cliente_nombre"),
+                    rs.getString("rfc"),
+                    rs.getString("telefono"),
+                    rs.getString("email"),
+                    rs.getString("direccion"),
+                    rs.getString("cliente_estado")
+            );
+        } else {
+            // Opcional: Instanciar un cliente genérico por defecto para evitar que la UI reciba null
+            cliente = new Cliente();
+            cliente.setId(0);
+            cliente.setNombre("Público en General");
+        }
 
         return new Venta(
                 rs.getInt("id"),
