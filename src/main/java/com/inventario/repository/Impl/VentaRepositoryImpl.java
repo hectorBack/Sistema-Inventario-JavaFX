@@ -127,7 +127,7 @@ public class VentaRepositoryImpl implements VentaRepository {
                             rs.getInt("id"),
                             rs.getInt("venta_id"),
                             p,
-                            rs.getInt("cantidad"),
+                            rs.getDouble("cantidad"),
                             rs.getDouble("precio_unitario")
                     ));
                 }

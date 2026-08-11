@@ -21,8 +21,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
@@ -32,6 +36,9 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.HBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 public class HistorialVentasController implements Initializable {
 
@@ -55,28 +62,15 @@ public class HistorialVentasController implements Initializable {
     private TableColumn<Venta, Double> colTotal;
     @FXML
     private TableColumn<Venta, String> colEstado;
+    @FXML
+    private TableColumn<Venta, Void> colAcciones;
 
-    // Tabla de Detalle (Ticket de la venta seleccionada)
-    @FXML
-    private TableView<DetalleVenta> tblDetalleVenta;
-    @FXML
-    private TableColumn<DetalleVenta, String> colProdNombre;
-    @FXML
-    private TableColumn<DetalleVenta, Integer> colProdCantidad;
-    @FXML
-    private TableColumn<DetalleVenta, Double> colProdPrecio;
-    @FXML
-    private TableColumn<DetalleVenta, Double> colProdSubtotal;
-
-    @FXML
-    private Label lblVentaSeleccionada;
     @FXML
     private Label lblTotalHistorico;
 
     private final VentaRepository ventaRepository = new VentaRepositoryImpl();
     private final ClienteRepository clienteRepository = new ClienteRepositoryImpl();
     private final ObservableList<Venta> listaVentas = FXCollections.observableArrayList();
-    private final ObservableList<DetalleVenta> listaDetalles = FXCollections.observableArrayList();
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
@@ -84,15 +78,6 @@ public class HistorialVentasController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         configurarTablas();
         cargarClientes();
-
-        tblVentas.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                mostrarDetalleVenta(newVal);
-            } else {
-                listaDetalles.clear();
-                lblVentaSeleccionada.setText("Selecciona una venta");
-            }
-        });
 
         // Cargar únicamente el día de hoy por defecto
         dpInicio.setValue(LocalDate.now());
@@ -103,10 +88,9 @@ public class HistorialVentasController implements Initializable {
     private void configurarTablas() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-        // Tipado explícito en los lambdas de cellData para evitar que sea tratado como Object
         colCliente.setCellValueFactory(cellData -> {
             Venta venta = cellData.getValue();
-            return new SimpleStringProperty(venta != null && venta.getCliente() != null ? venta.getCliente().getNombre() : "N/A");
+            return new SimpleStringProperty(venta != null && venta.getCliente() != null ? venta.getCliente().getNombre() : "Público en General");
         });
 
         colFecha.setCellValueFactory(cellData -> {
@@ -114,15 +98,17 @@ public class HistorialVentasController implements Initializable {
             return new SimpleStringProperty(venta != null && venta.getFecha() != null ? venta.getFecha().format(formatter) : "");
         });
 
-        colTotal.setCellValueFactory(cellData -> {
-            Venta venta = cellData.getValue();
-            return new SimpleObjectProperty<>(venta != null ? venta.getTotal() : 0.0);
-        });
+        colTotal.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue() != null ? cellData.getValue().getTotal() : 0.0));
         colTotal.setStyle("-fx-alignment: CENTER-RIGHT;");
+        colTotal.setCellFactory(tc -> new TableCell<Venta, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : String.format("$%.2f", item));
+            }
+        });
 
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
-
-        // Formateo visual con tipado estricto
         colEstado.setCellFactory(column -> new TableCell<Venta, String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -141,19 +127,62 @@ public class HistorialVentasController implements Initializable {
             }
         });
 
+        configurarColumnaAcciones();
         tblVentas.setItems(listaVentas);
+    }
 
-        // Tabla Detalle
-        colProdNombre.setCellValueFactory(new PropertyValueFactory<>("nombreProducto"));
-        colProdCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
-        colProdPrecio.setCellValueFactory(new PropertyValueFactory<>("precioUnitario"));
-        colProdSubtotal.setCellValueFactory(new PropertyValueFactory<>("subtotal"));
+    private void configurarColumnaAcciones() {
+        colAcciones.setCellFactory(param -> new TableCell<Venta, Void>() {
+            private final Button btnDetalle = new Button("👁 Detalle");
 
-        colProdCantidad.setStyle("-fx-alignment: CENTER;");
-        colProdPrecio.setStyle("-fx-alignment: CENTER-RIGHT;");
-        colProdSubtotal.setStyle("-fx-alignment: CENTER-RIGHT;");
+            {
+                btnDetalle.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 4; -fx-cursor: hand;");
+                btnDetalle.setOnAction(event -> {
+                    Venta ventaSel = getTableView().getItems().get(getIndex());
+                    abrirModalDetalles(ventaSel);
+                });
+            }
 
-        tblDetalleVenta.setItems(listaDetalles);
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    HBox box = new HBox(btnDetalle);
+                    box.setStyle("-fx-alignment: CENTER;");
+                    setGraphic(box);
+                }
+            }
+        });
+    }
+
+    private void abrirModalDetalles(Venta venta) {
+        try {
+            URL fxmlLocation = getClass().getResource("/com/inventario/view/DetalleVentaModal.fxml");
+            if (fxmlLocation == null) {
+                fxmlLocation = getClass().getResource("DetalleVentaModal.fxml");
+            }
+
+            FXMLLoader loader = new FXMLLoader(fxmlLocation);
+            Parent root = loader.load();
+
+            DetalleVentaModalController controller = loader.getController();
+            controller.initData(venta);
+
+            Stage modalStage = new Stage();
+            modalStage.setTitle("Detalles de Venta #" + venta.getId());
+            modalStage.initModality(Modality.APPLICATION_MODAL);
+            modalStage.setScene(new Scene(root));
+            modalStage.showAndWait();
+
+            if (controller.isEstadoCambiado()) {
+                onBuscarVentas(null);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarAlerta("Error", "No se pudo abrir la vista de detalles: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
     }
 
     private void cargarClientes() {
@@ -202,44 +231,7 @@ public class HistorialVentasController implements Initializable {
         onBuscarVentas(null);
     }
 
-    @FXML
-    void onAnularVenta(ActionEvent event) {
-        Venta ventaSeleccionada = tblVentas.getSelectionModel().getSelectedItem();
-
-        if (ventaSeleccionada == null) {
-            mostrarAlerta("Selección vacía", "Debes seleccionar una venta del historial para poder anularla.", Alert.AlertType.WARNING);
-            return;
-        }
-
-        if ("CANCELADA".equalsIgnoreCase(ventaSeleccionada.getEstado())) {
-            mostrarAlerta("Venta Ya Anulada", "La venta ID " + ventaSeleccionada.getId() + " ya fue cancelada anteriormente.", Alert.AlertType.INFORMATION);
-            return;
-        }
-
-        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmacion.setTitle("Confirmar Anulación");
-        confirmacion.setHeaderText("¿Deseas anular la Venta #" + ventaSeleccionada.getId() + "?");
-        confirmacion.setContentText("Esta acción cambiará el estado a CANCELADA y reintegrará el stock de los productos al inventario.");
-
-        Optional<ButtonType> respuesta = confirmacion.showAndWait();
-        if (respuesta.isPresent() && respuesta.get() == ButtonType.OK) {
-            if (ventaRepository.cancelarVenta(ventaSeleccionada.getId())) {
-                mostrarAlerta("Éxito", "La venta fue anulada correctamente y el stock ha sido devuelto.", Alert.AlertType.INFORMATION);
-                onBuscarVentas(null);
-            } else {
-                mostrarAlerta("Error", "No se pudo anular la venta en la base de datos.", Alert.AlertType.ERROR);
-            }
-        }
-    }
-
-    private void mostrarDetalleVenta(Venta venta) {
-        lblVentaSeleccionada.setText("Ticket Venta #" + venta.getId() + " - Cliente: " + (venta.getCliente() != null ? venta.getCliente().getNombre() : "N/A"));
-        List<DetalleVenta> detalles = ventaRepository.listarDetallesPorVenta(venta.getId());
-        listaDetalles.setAll(detalles);
-    }
-
     private void recalcularSumatoriaHistorica() {
-        // Al estar listaVentas bien tipada con <Venta>, Venta::getTotal funciona correctamente
         double totalCompleto = listaVentas.stream()
                 .filter(v -> "COMPLETADA".equalsIgnoreCase(v.getEstado()))
                 .mapToDouble(Venta::getTotal)
