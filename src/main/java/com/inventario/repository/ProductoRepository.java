@@ -18,7 +18,7 @@ public interface ProductoRepository {
     
     // --- MONITOREO DE INVENTARIO ---
     List<Producto> listarProductosStockBajo(int limiteMinimo);
-    boolean actualizarStock(int productoId, int nuevaCantidad);
+    boolean actualizarStock(int productoId, double nuevaCantidad);
 
     // --- PERSISTENCIA Y VALIDACIONES ---
     boolean guardar(Producto producto);

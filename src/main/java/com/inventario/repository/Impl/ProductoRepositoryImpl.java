@@ -20,7 +20,6 @@ public class ProductoRepositoryImpl implements ProductoRepository {
     public List<Producto> listarTodos() {
         List<Producto> productos = new ArrayList<>();
 
-        // SELECT completo p.* para traer codigo_barras, descripcion, precio_compra, stock_minimo, etc.
         String sql = "SELECT p.*, "
                 + "c.nombre AS categoria_nombre, c.estado AS categoria_estado, "
                 + "prov.nombre AS proveedor_nombre, prov.contacto AS proveedor_contacto, "
@@ -33,7 +32,6 @@ public class ProductoRepositoryImpl implements ProductoRepository {
         try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                // Usamos directamente el método mapearProducto ya existente
                 productos.add(mapearProducto(rs));
             }
         } catch (SQLException e) {
@@ -44,28 +42,33 @@ public class ProductoRepositoryImpl implements ProductoRepository {
 
     @Override
     public boolean guardar(Producto producto) {
-        String sql = "INSERT INTO productos (codigo_barras, nombre, descripcion, precio, precio_compra, stock, stock_minimo, estado, categoria_id, proveedor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO productos (codigo_barras, nombre, descripcion, precio, precio_mayoreo, "
+                + "precio_compra, porcentaje_ganancia, stock, stock_minimo, tipo_venta, estado, categoria_id, proveedor_id) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, producto.getCodigoBarras());
             stmt.setString(2, producto.getNombre());
             stmt.setString(3, producto.getDescripcion());
             stmt.setDouble(4, producto.getPrecio());
-            stmt.setDouble(5, producto.getPrecioCompra());
-            stmt.setInt(6, producto.getStock());
-            stmt.setInt(7, producto.getStockMinimo());
-            stmt.setString(8, producto.getEstado());
+            stmt.setDouble(5, producto.getPrecioMayoreo());
+            stmt.setDouble(6, producto.getPrecioCompra());
+            stmt.setDouble(7, producto.getPorcentajeGanancia());
+            stmt.setDouble(8, producto.getStock());
+            stmt.setDouble(9, producto.getStockMinimo());
+            stmt.setString(10, producto.getTipoVenta());
+            stmt.setString(11, producto.getEstado());
 
             if (producto.getCategoria() != null) {
-                stmt.setInt(9, producto.getCategoria().getId());
+                stmt.setInt(12, producto.getCategoria().getId());
             } else {
-                stmt.setNull(9, Types.INTEGER);
+                stmt.setNull(12, Types.INTEGER);
             }
 
             if (producto.getProveedor() != null) {
-                stmt.setInt(10, producto.getProveedor().getId());
+                stmt.setInt(13, producto.getProveedor().getId());
             } else {
-                stmt.setNull(10, Types.INTEGER);
+                stmt.setNull(13, Types.INTEGER);
             }
 
             return stmt.executeUpdate() > 0;
@@ -77,31 +80,36 @@ public class ProductoRepositoryImpl implements ProductoRepository {
 
     @Override
     public boolean actualizar(Producto producto) {
-        String sql = "UPDATE productos SET codigo_barras = ?, nombre = ?, descripcion = ?, precio = ?, precio_compra = ?, stock = ?, stock_minimo = ?, estado = ?, categoria_id = ?, proveedor_id = ? WHERE id = ?";
+        String sql = "UPDATE productos SET codigo_barras = ?, nombre = ?, descripcion = ?, precio = ?, "
+                + "precio_mayoreo = ?, precio_compra = ?, porcentaje_ganancia = ?, stock = ?, stock_minimo = ?, "
+                + "tipo_venta = ?, estado = ?, categoria_id = ?, proveedor_id = ? WHERE id = ?";
 
         try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, producto.getCodigoBarras());
             stmt.setString(2, producto.getNombre());
             stmt.setString(3, producto.getDescripcion());
             stmt.setDouble(4, producto.getPrecio());
-            stmt.setDouble(5, producto.getPrecioCompra());
-            stmt.setInt(6, producto.getStock());
-            stmt.setInt(7, producto.getStockMinimo());
-            stmt.setString(8, producto.getEstado());
+            stmt.setDouble(5, producto.getPrecioMayoreo());
+            stmt.setDouble(6, producto.getPrecioCompra());
+            stmt.setDouble(7, producto.getPorcentajeGanancia());
+            stmt.setDouble(8, producto.getStock());
+            stmt.setDouble(9, producto.getStockMinimo());
+            stmt.setString(10, producto.getTipoVenta());
+            stmt.setString(11, producto.getEstado());
 
             if (producto.getCategoria() != null) {
-                stmt.setInt(9, producto.getCategoria().getId());
+                stmt.setInt(12, producto.getCategoria().getId());
             } else {
-                stmt.setNull(9, Types.INTEGER);
+                stmt.setNull(12, Types.INTEGER);
             }
 
             if (producto.getProveedor() != null) {
-                stmt.setInt(10, producto.getProveedor().getId());
+                stmt.setInt(13, producto.getProveedor().getId());
             } else {
-                stmt.setNull(10, Types.INTEGER);
+                stmt.setNull(13, Types.INTEGER);
             }
 
-            stmt.setInt(11, producto.getId());
+            stmt.setInt(14, producto.getId());
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -128,7 +136,7 @@ public class ProductoRepositoryImpl implements ProductoRepository {
     public List<Producto> listarActivos() {
         return listarTodos().stream()
                 .filter(p -> "ACTIVO".equalsIgnoreCase(p.getEstado()))
-                .collect(Collectors.toList()); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -179,7 +187,6 @@ public class ProductoRepositoryImpl implements ProductoRepository {
     public List<Producto> buscarPorNombre(String termino) {
         List<Producto> productos = new ArrayList<>();
 
-        // Se incluye la instrucción SELECT al inicio
         String sql = "SELECT p.*, c.nombre AS categoria_nombre, c.estado AS categoria_estado, "
                 + "prov.nombre AS proveedor_nombre, prov.contacto AS proveedor_contacto, "
                 + "prov.telefono AS proveedor_telefono, prov.email AS proveedor_email, prov.estado AS proveedor_estado "
@@ -189,12 +196,9 @@ public class ProductoRepositoryImpl implements ProductoRepository {
                 + "WHERE p.nombre ILIKE ? OR p.codigo_barras ILIKE ?";
 
         try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             String patron = "%" + termino + "%";
-
-            // Se asignan los dos parámetros del WHERE
-            stmt.setString(1, patron); // Para p.nombre ILIKE ?
-            stmt.setString(2, patron); // Para p.codigo_barras ILIKE ?
+            stmt.setString(1, patron);
+            stmt.setString(2, patron);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -255,7 +259,7 @@ public class ProductoRepositoryImpl implements ProductoRepository {
         return productos;
     }
 
-// Método auxiliar de mapeo centralizado
+    // Método auxiliar de mapeo centralizado
     private Producto mapearProducto(ResultSet rs) throws SQLException {
         Categoria cat = null;
         int catId = rs.getInt("categoria_id");
@@ -286,9 +290,12 @@ public class ProductoRepositoryImpl implements ProductoRepository {
                 rs.getString("nombre"),
                 rs.getString("descripcion"),
                 rs.getDouble("precio"),
+                rs.getDouble("precio_mayoreo"),
                 rs.getDouble("precio_compra"),
-                rs.getInt("stock"),
-                rs.getInt("stock_minimo"),
+                rs.getDouble("porcentaje_ganancia"),
+                rs.getDouble("stock"),
+                rs.getDouble("stock_minimo"),
+                rs.getString("tipo_venta"),
                 rs.getString("estado"),
                 cat,
                 prov
@@ -303,10 +310,10 @@ public class ProductoRepositoryImpl implements ProductoRepository {
     }
 
     @Override
-    public boolean actualizarStock(int productoId, int nuevaCantidad) {
+    public boolean actualizarStock(int productoId, double nuevaCantidad) {
         String sql = "UPDATE productos SET stock = ? WHERE id = ?";
         try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, nuevaCantidad);
+            stmt.setDouble(1, nuevaCantidad);
             stmt.setInt(2, productoId);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {

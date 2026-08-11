@@ -34,7 +34,7 @@ import javax.sound.sampled.SourceDataLine;
 public class InventarioController implements Initializable {
 
     @FXML
-    private TextField txtCodigoBarras; // NUEVO
+    private TextField txtCodigoBarras;
     @FXML
     private TextField txtNombre;
     @FXML
@@ -42,15 +42,21 @@ public class InventarioController implements Initializable {
     @FXML
     private TextArea txtDescripcion;
     @FXML
-    private TextField txtPrecio;
+    private TextField txtPrecio; // Precio Venta
     @FXML
     private TextField txtPrecioCompra;
+    @FXML
+    private TextField txtPorcentajeGanancia;
+    @FXML
+    private TextField txtPrecioMayoreo;
     @FXML
     private TextField txtStock;
     @FXML
     private TextField txtStockMinimo;
     @FXML
     private ComboBox<String> cmbEstado;
+    @FXML
+    private ComboBox<String> cmbTipoVenta; // "UNIDAD", "GRANEL", "PAQUETE"
     @FXML
     private ComboBox<Categoria> cmbCategoria;
     @FXML
@@ -65,11 +71,13 @@ public class InventarioController implements Initializable {
     private TableColumn<Producto, String> colDescripcion;
     private TableColumn<Producto, Double> colPrecio;
     private TableColumn<Producto, Double> colPrecioCompra;
-    private TableColumn<Producto, Integer> colStock;
-    private TableColumn<Producto, Integer> colStockMin;
+    private TableColumn<Producto, Double> colPorcentajeGanancia;
+    private TableColumn<Producto, Double> colPrecioMayoreo;
+    private TableColumn<Producto, Double> colStock;
+    private TableColumn<Producto, Double> colStockMin;
+    private TableColumn<Producto, String> colTipoVenta;
     private TableColumn<Producto, String> colEstado;
     private TableColumn<Producto, String> colCategoria;
-
     private TableColumn<Producto, String> colProveedor;
 
     // Dependencias
@@ -86,20 +94,23 @@ public class InventarioController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // 1. Inicializar el ComboBox con las opciones de Estado
+        // 1. Inicializar ComboBoxes
         cmbEstado.setItems(FXCollections.observableArrayList("Activo", "Inactivo"));
         cmbEstado.setValue("Activo");
+
+        cmbTipoVenta.setItems(FXCollections.observableArrayList("UNIDAD", "GRANEL", "PAQUETE"));
+        cmbTipoVenta.setValue("UNIDAD");
 
         cargarComboCategorias();
         cargarComboProveedores();
 
-        // 2. Configurar las columnas del TableView de forma dinámica
+        // 2. Configurar las columnas de la tabla
         configurarColumnas();
 
-        // 3. Cargar los datos desde PostgreSQL a la lista observable
+        // 3. Cargar datos
         listarProductos();
 
-        // 4. Escuchar los clics de la tabla para rellenar los campos de texto al seleccionar un producto
+        // 4. Listener para selección en la tabla
         tblProductos.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 productoSeleccionado = newSelection;
@@ -108,13 +119,18 @@ public class InventarioController implements Initializable {
                 txtDescripcion.setText(productoSeleccionado.getDescripcion() != null ? productoSeleccionado.getDescripcion() : "");
                 txtPrecio.setText(String.valueOf(productoSeleccionado.getPrecio()));
                 txtPrecioCompra.setText(String.valueOf(productoSeleccionado.getPrecioCompra()));
+                txtPorcentajeGanancia.setText(String.valueOf(productoSeleccionado.getPorcentajeGanancia()));
+                txtPrecioMayoreo.setText(String.valueOf(productoSeleccionado.getPrecioMayoreo()));
                 txtStock.setText(String.valueOf(productoSeleccionado.getStock()));
                 txtStockMinimo.setText(String.valueOf(productoSeleccionado.getStockMinimo()));
+
                 cmbEstado.setValue(productoSeleccionado.getEstado());
+                cmbTipoVenta.setValue(productoSeleccionado.getTipoVenta() != null ? productoSeleccionado.getTipoVenta() : "UNIDAD");
                 cmbCategoria.setValue(productoSeleccionado.getCategoria());
                 cmbProveedor.setValue(productoSeleccionado.getProveedor());
             }
         });
+
         txtBuscar.textProperty().addListener((observable, oldValue, newValue) -> {
             buscarProductos(newValue);
         });
@@ -231,7 +247,6 @@ public class InventarioController implements Initializable {
     }
 
     private void configurarColumnas() {
-        // Creamos las columnas programáticamente para mantener un control absoluto del tipado
         colId = new TableColumn<>("ID");
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
 
@@ -250,11 +265,20 @@ public class InventarioController implements Initializable {
         colPrecioCompra = new TableColumn<>("P. Costo");
         colPrecioCompra.setCellValueFactory(new PropertyValueFactory<>("precioCompra"));
 
+        colPorcentajeGanancia = new TableColumn<>("% Gan.");
+        colPorcentajeGanancia.setCellValueFactory(new PropertyValueFactory<>("porcentajeGanancia"));
+
+        colPrecioMayoreo = new TableColumn<>("P. Mayoreo");
+        colPrecioMayoreo.setCellValueFactory(new PropertyValueFactory<>("precioMayoreo"));
+
         colStock = new TableColumn<>("Stock");
         colStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
 
         colStockMin = new TableColumn<>("Mín.");
         colStockMin.setCellValueFactory(new PropertyValueFactory<>("stockMinimo"));
+
+        colTipoVenta = new TableColumn<>("Tipo Venta");
+        colTipoVenta.setCellValueFactory(new PropertyValueFactory<>("tipoVenta"));
 
         colEstado = new TableColumn<>("Estado");
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
@@ -275,10 +299,10 @@ public class InventarioController implements Initializable {
             return new SimpleStringProperty("Sin Proveedor");
         });
 
-        // Añadimos las columnas configuradas al TableView limpiando las que Scene Builder trae por defecto
         tblProductos.getColumns().setAll(
-                colId, colCodigo, colNombre, colDescripcion, colCategoria,
-                colProveedor, colPrecio, colPrecioCompra, colStock, colStockMin, colEstado
+                colId, colCodigo, colNombre, colTipoVenta, colPrecio, colPrecioCompra,
+                colPrecioMayoreo, colPorcentajeGanancia, colStock, colStockMin,
+                colCategoria, colProveedor, colEstado
         );
     }
 
@@ -293,33 +317,31 @@ public class InventarioController implements Initializable {
         if (validarCampos()) {
             String codigo = txtCodigoBarras.getText() != null ? txtCodigoBarras.getText().trim() : "";
 
-            // Validar que el código de barras no exista previamente en otro producto
             if (!codigo.isEmpty() && repository.existeCodigoBarras(codigo, 0)) {
-                mostrarAlerta("Código Duplicado", "Ya existe un producto registrado con el código de barras: " + codigo, Alert.AlertType.WARNING);
+                mostrarAlerta("Código Duplicado", "Ya existe un producto registrado con el código: " + codigo, Alert.AlertType.WARNING);
                 return;
             }
 
-            String nombre = txtNombre.getText().trim();
-            String descripcion = txtDescripcion.getText() != null ? txtDescripcion.getText().trim() : "";// Reservado para observaciones
-            double precioVenta = Double.parseDouble(txtPrecio.getText().trim());
-            double precioCompra = txtPrecioCompra.getText().trim().isEmpty() ? 0.0 : Double.parseDouble(txtPrecioCompra.getText().trim());
-            int stock = Integer.parseInt(txtStock.getText().trim());
-            int stockMin = txtStockMinimo.getText().trim().isEmpty() ? 5 : Integer.parseInt(txtStockMinimo.getText().trim());
-            String estado = cmbEstado.getValue() != null ? cmbEstado.getValue() : "ACTIVO";
+            // Crear el objeto con el constructor por defecto y poblar sus campos
+            Producto nuevoProducto = new Producto();
 
-            // CONSTRUCTOR CORREGIDO DE 10 PARÁMETROS
-            Producto nuevoProducto = new Producto(
-                    codigo,
-                    nombre,
-                    descripcion,
-                    precioVenta,
-                    precioCompra,
-                    stock,
-                    stockMin,
-                    estado,
-                    cmbCategoria.getValue(),
-                    cmbProveedor.getValue()
-            );
+            nuevoProducto.setNombre(txtNombre.getText().trim());
+            nuevoProducto.setCodigoBarras(codigo);
+            nuevoProducto.setDescripcion(txtDescripcion.getText() != null ? txtDescripcion.getText().trim() : "");
+
+            nuevoProducto.setPrecio(Double.parseDouble(txtPrecio.getText().trim()));
+            nuevoProducto.setPrecioCompra(txtPrecioCompra.getText().trim().isEmpty() ? 0.0 : Double.parseDouble(txtPrecioCompra.getText().trim()));
+            nuevoProducto.setPorcentajeGanancia(txtPorcentajeGanancia.getText().trim().isEmpty() ? 0.0 : Double.parseDouble(txtPorcentajeGanancia.getText().trim()));
+            nuevoProducto.setPrecioMayoreo(txtPrecioMayoreo.getText().trim().isEmpty() ? 0.0 : Double.parseDouble(txtPrecioMayoreo.getText().trim()));
+
+            nuevoProducto.setStock(Double.parseDouble(txtStock.getText().trim()));
+            nuevoProducto.setStockMinimo(txtStockMinimo.getText().trim().isEmpty() ? 5.0 : Double.parseDouble(txtStockMinimo.getText().trim()));
+
+            nuevoProducto.setEstado(cmbEstado.getValue() != null ? cmbEstado.getValue() : "Activo");
+            nuevoProducto.setTipoVenta(cmbTipoVenta.getValue() != null ? cmbTipoVenta.getValue() : "UNIDAD");
+
+            nuevoProducto.setCategoria(cmbCategoria.getValue());
+            nuevoProducto.setProveedor(cmbProveedor.getValue());
 
             if (repository.guardar(nuevoProducto)) {
                 mostrarAlerta("Éxito", "Producto agregado correctamente", Alert.AlertType.INFORMATION);
@@ -341,9 +363,8 @@ public class InventarioController implements Initializable {
         if (validarCampos()) {
             String codigo = txtCodigoBarras.getText() != null ? txtCodigoBarras.getText().trim() : "";
 
-            // Validar que el nuevo código de barras no le pertenezca a OTRO producto distinto al actual
             if (!codigo.isEmpty() && repository.existeCodigoBarras(codigo, productoSeleccionado.getId())) {
-                mostrarAlerta("Código Duplicado", "El código de barras '" + codigo + "' ya le pertenece a otro producto registrado.", Alert.AlertType.WARNING);
+                mostrarAlerta("Código Duplicado", "El código de barras '" + codigo + "' ya pertenece a otro producto.", Alert.AlertType.WARNING);
                 return;
             }
 
@@ -352,9 +373,13 @@ public class InventarioController implements Initializable {
             productoSeleccionado.setDescripcion(txtDescripcion.getText() != null ? txtDescripcion.getText().trim() : "");
             productoSeleccionado.setPrecio(Double.parseDouble(txtPrecio.getText().trim()));
             productoSeleccionado.setPrecioCompra(txtPrecioCompra.getText().trim().isEmpty() ? 0.0 : Double.parseDouble(txtPrecioCompra.getText().trim()));
-            productoSeleccionado.setStock(Integer.parseInt(txtStock.getText().trim()));
-            productoSeleccionado.setStockMinimo(txtStockMinimo.getText().trim().isEmpty() ? 5 : Integer.parseInt(txtStockMinimo.getText().trim()));
+            productoSeleccionado.setPorcentajeGanancia(txtPorcentajeGanancia.getText().trim().isEmpty() ? 0.0 : Double.parseDouble(txtPorcentajeGanancia.getText().trim()));
+            productoSeleccionado.setPrecioMayoreo(txtPrecioMayoreo.getText().trim().isEmpty() ? 0.0 : Double.parseDouble(txtPrecioMayoreo.getText().trim()));
+            productoSeleccionado.setStock(Double.parseDouble(txtStock.getText().trim()));
+            productoSeleccionado.setStockMinimo(txtStockMinimo.getText().trim().isEmpty() ? 5.0 : Double.parseDouble(txtStockMinimo.getText().trim()));
+
             productoSeleccionado.setEstado(cmbEstado.getValue());
+            productoSeleccionado.setTipoVenta(cmbTipoVenta.getValue());
             productoSeleccionado.setCategoria(cmbCategoria.getValue());
             productoSeleccionado.setProveedor(cmbProveedor.getValue());
 
@@ -396,11 +421,19 @@ public class InventarioController implements Initializable {
         if (txtPrecioCompra != null) {
             txtPrecioCompra.clear();
         }
+        if (txtPorcentajeGanancia != null) {
+            txtPorcentajeGanancia.clear();
+        }
+        if (txtPrecioMayoreo != null) {
+            txtPrecioMayoreo.clear();
+        }
         txtStock.clear();
         if (txtStockMinimo != null) {
             txtStockMinimo.clear();
         }
-        cmbEstado.setValue("ACTIVO");
+
+        cmbEstado.setValue("Activo");
+        cmbTipoVenta.setValue("UNIDAD");
         cmbCategoria.setValue(null);
         cmbProveedor.setValue(null);
         productoSeleccionado = null;
@@ -425,16 +458,22 @@ public class InventarioController implements Initializable {
 
         try {
             Double.parseDouble(txtPrecio.getText().trim());
-            Integer.parseInt(txtStock.getText().trim());
+            Double.parseDouble(txtStock.getText().trim());
 
             if (txtPrecioCompra != null && !txtPrecioCompra.getText().trim().isEmpty()) {
                 Double.parseDouble(txtPrecioCompra.getText().trim());
             }
+            if (txtPorcentajeGanancia != null && !txtPorcentajeGanancia.getText().trim().isEmpty()) {
+                Double.parseDouble(txtPorcentajeGanancia.getText().trim());
+            }
+            if (txtPrecioMayoreo != null && !txtPrecioMayoreo.getText().trim().isEmpty()) {
+                Double.parseDouble(txtPrecioMayoreo.getText().trim());
+            }
             if (txtStockMinimo != null && !txtStockMinimo.getText().trim().isEmpty()) {
-                Integer.parseInt(txtStockMinimo.getText().trim());
+                Double.parseDouble(txtStockMinimo.getText().trim());
             }
         } catch (NumberFormatException e) {
-            mostrarAlerta("Datos inválidos", "Precio y Stock deben ser números válidos", Alert.AlertType.ERROR);
+            mostrarAlerta("Datos inválidos", "Los campos numéricos (Precio, Costo, Stock, etc.) deben contener valores numéricos válidos", Alert.AlertType.ERROR);
             return false;
         }
         return true;

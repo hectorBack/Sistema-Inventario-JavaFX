@@ -14,60 +14,55 @@ public class Producto {
     private final IntegerProperty id;
     private final StringProperty nombre;
     private final DoubleProperty precio; // Precio Venta
-    private final IntegerProperty stock;
+    private final DoubleProperty stock;
     private final StringProperty estado;
     private final StringProperty codigoBarras;
     private final DoubleProperty precioCompra;
-    private final IntegerProperty stockMinimo;
+    private final DoubleProperty porcentajeGanancia;
+    private final DoubleProperty stockMinimo;
     private final StringProperty descripcion;
+    private final StringProperty tipoVenta; // "UNIDAD", "GRANEL", "PAQUETE"
+    private final DoubleProperty precioMayoreo;
 
     private final ObjectProperty<Categoria> categoria;
     private final ObjectProperty<Proveedor> proveedor;
 
     // Constructor completo (Para cuando traes datos de la BD)
-    // Constructor completo actualizado (con Categoría)
-    public Producto(int id, String codigoBarras, String nombre, String descripcion, double precio, double precioCompra,
-            int stock, int stockMinimo, String estado, Categoria categoria, Proveedor proveedor) {
+    // --- CONSTRUCTOR COMPLETO (Base de Datos) ---
+    public Producto(int id, String codigoBarras, String nombre, String descripcion, double precio,
+            double precioMayoreo, double precioCompra, double porcentajeGanancia,
+            double stock, double stockMinimo, String tipoVenta, String estado,
+            Categoria categoria, Proveedor proveedor) {
         this.id = new SimpleIntegerProperty(id);
         this.codigoBarras = new SimpleStringProperty(codigoBarras);
         this.nombre = new SimpleStringProperty(nombre);
         this.descripcion = new SimpleStringProperty(descripcion);
         this.precio = new SimpleDoubleProperty(precio);
+        this.precioMayoreo = new SimpleDoubleProperty(precioMayoreo);
         this.precioCompra = new SimpleDoubleProperty(precioCompra);
-        this.stock = new SimpleIntegerProperty(stock);
-        this.stockMinimo = new SimpleIntegerProperty(stockMinimo);
+        this.porcentajeGanancia = new SimpleDoubleProperty(porcentajeGanancia);
+        this.stock = new SimpleDoubleProperty(stock);
+        this.stockMinimo = new SimpleDoubleProperty(stockMinimo);
+        this.tipoVenta = new SimpleStringProperty(tipoVenta != null ? tipoVenta : "UNIDAD");
         this.estado = new SimpleStringProperty(estado);
         this.categoria = new SimpleObjectProperty<>(categoria);
         this.proveedor = new SimpleObjectProperty<>(proveedor);
     }
 
-    public Producto(IntegerProperty id, StringProperty nombre, DoubleProperty precio, IntegerProperty stock, StringProperty estado, StringProperty codigoBarras, DoubleProperty precioCompra, IntegerProperty stockMinimo, StringProperty descripcion, ObjectProperty<Categoria> categoria, ObjectProperty<Proveedor> proveedor) {
-        this.id = id;
-        this.nombre = nombre;
-        this.precio = precio;
-        this.stock = stock;
-        this.estado = estado;
-        this.codigoBarras = codigoBarras;
-        this.precioCompra = precioCompra;
-        this.stockMinimo = stockMinimo;
-        this.descripcion = descripcion;
-        this.categoria = categoria;
-        this.proveedor = proveedor;
-    }
-    
-
-    // Constructor sin ID actualizado
-    public Producto(String codigoBarras, String nombre, String descripcion, double precio, double precioCompra,
-            int stock, int stockMinimo, String estado, Categoria categoria, Proveedor proveedor) {
-        this(0, codigoBarras, nombre, descripcion, precio, precioCompra, stock, stockMinimo, estado, categoria, proveedor);
+    // --- CONSTRUCTOR SIN ID (Nuevos Registros) ---
+    public Producto(String codigoBarras, String nombre, String descripcion, double precio,
+            double precioMayoreo, double precioCompra, double porcentajeGanancia,
+            double stock, double stockMinimo, String tipoVenta, String estado,
+            Categoria categoria, Proveedor proveedor) {
+        this(0, codigoBarras, nombre, descripcion, precio, precioMayoreo, precioCompra,
+                porcentajeGanancia, stock, stockMinimo, tipoVenta, estado, categoria, proveedor);
     }
 
     // Constructor por defecto
     public Producto() {
-        this(0, "", "", "", 0.0, 0.0, 0, 5, "ACTIVO", null, null);
+        this(0, "", "", "", 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, "UNIDAD", "ACTIVO", null, null);
     }
 
-    // --- GETTERS Y SETTERS ESTÁNDAR ---
     // --- GETTERS Y SETTERS ESTÁNDAR ---
     public int getId() {
         return id.get();
@@ -109,6 +104,14 @@ public class Producto {
         precio.set(value);
     }
 
+    public double getPrecioMayoreo() {
+        return precioMayoreo.get();
+    }
+
+    public void setPrecioMayoreo(double value) {
+        precioMayoreo.set(value);
+    }
+
     public double getPrecioCompra() {
         return precioCompra.get();
     }
@@ -117,20 +120,36 @@ public class Producto {
         precioCompra.set(value);
     }
 
-    public int getStock() {
+    public double getPorcentajeGanancia() {
+        return porcentajeGanancia.get();
+    }
+
+    public void setPorcentajeGanancia(double value) {
+        porcentajeGanancia.set(value);
+    }
+
+    public double getStock() {
         return stock.get();
     }
 
-    public void setStock(int value) {
+    public void setStock(double value) {
         stock.set(value);
     }
 
-    public int getStockMinimo() {
+    public double getStockMinimo() {
         return stockMinimo.get();
     }
 
-    public void setStockMinimo(int value) {
+    public void setStockMinimo(double value) {
         stockMinimo.set(value);
+    }
+
+    public String getTipoVenta() {
+        return tipoVenta.get();
+    }
+
+    public void setTipoVenta(String value) {
+        tipoVenta.set(value);
     }
 
     public String getEstado() {
@@ -162,16 +181,44 @@ public class Producto {
         return id;
     }
 
+    public StringProperty codigoBarrasProperty() {
+        return codigoBarras;
+    }
+
     public StringProperty nombreProperty() {
         return nombre;
+    }
+
+    public StringProperty descripcionProperty() {
+        return descripcion;
     }
 
     public DoubleProperty precioProperty() {
         return precio;
     }
 
-    public IntegerProperty stockProperty() {
+    public DoubleProperty precioMayoreoProperty() {
+        return precioMayoreo;
+    }
+
+    public DoubleProperty precioCompraProperty() {
+        return precioCompra;
+    }
+
+    public DoubleProperty porcentajeGananciaProperty() {
+        return porcentajeGanancia;
+    }
+
+    public DoubleProperty stockProperty() {
         return stock;
+    }
+
+    public DoubleProperty stockMinimoProperty() {
+        return stockMinimo;
+    }
+
+    public StringProperty tipoVentaProperty() {
+        return tipoVenta;
     }
 
     public StringProperty estadoProperty() {
@@ -182,7 +229,6 @@ public class Producto {
         return categoria;
     }
 
-    // NUEVO: Propiedad para enlace reactivo del Proveedor
     public ObjectProperty<Proveedor> proveedorProperty() {
         return proveedor;
     }
