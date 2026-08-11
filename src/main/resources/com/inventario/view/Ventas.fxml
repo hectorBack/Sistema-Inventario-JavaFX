@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox prefHeight="600.0" prefWidth="900.0" spacing="25.0" style="-fx-background-color: #f8fafc; -fx-padding: 25;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.VentasController">
+<HBox prefHeight="600.0" prefWidth="900.0" spacing="25.0" style="-fx-background-color: #f8fafc; -fx-padding: 25;" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.VentasController">
     <children>
       
         <!-- PANEL IZQUIERDO: SELECCIÓN Y FORMULARIO DE INGRESO -->
@@ -33,19 +33,19 @@
                                 <Font name="System Bold" size="12.0" />
                             </font>
                         </Label>
-                        <TextField fx:id="txtCodigoBarras" onAction="#onEscanearCodigoBarras" prefHeight="40.0" promptText="🔍 Escanea aquí el código..." style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #3b82f6; -fx-background-color: #ffffff;" />
+                        <TextField fx:id="txtCodigoBarras" onAction="#onEscanearCodigoBarras" prefHeight="40.0" promptText="Escanea o escribe codigo x cantidad" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #3b82f6; -fx-background-color: #ffffff;" />
                     </children>
                 </VBox>
             
                 <!-- SELECCIÓN DE CLIENTE -->
                 <VBox spacing="5.0" style="-fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0; -fx-padding: 0 0 15 0;">
                     <children>
-                        <Label text="Seleccionar Cliente" textFill="#64748b">
+                        <Label text="Seleccionar Cliente (Opcional)" textFill="#64748b">
                             <font>
                                 <Font name="System Bold" size="12.0" />
                             </font>
                         </Label>
-                        <ComboBox fx:id="cmbCliente" prefHeight="35.0" prefWidth="260.0" promptText="Buscar o seleccionar cliente" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" />
+                        <ComboBox fx:id="cmbCliente" prefHeight="35.0" prefWidth="260.0" promptText="Público General / Seleccionar" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" />
                     </children>
                 </VBox>
             
@@ -88,7 +88,7 @@
                                                 <Font name="System Bold" size="12.0" />
                                             </font>
                                         </Label>
-                                        <TextField fx:id="txtPrecio" editable="false" prefHeight="35.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #e2e8f0; -fx-background-color: #f8fafc;" text="0.00" />
+                                        <TextField fx:id="txtPrecio" editable="false" prefHeight="35.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #e2e8f0; -fx-background-color: #f8fafc;" />
                                     </children>
                                 </VBox>
                             </children>
@@ -127,17 +127,31 @@
                     </columnResizePolicy>
                 </TableView>
             
-                <HBox alignment="CENTER_RIGHT" spacing="20.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-padding: 15;">
+                <HBox alignment="CENTER_RIGHT" spacing="15.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-padding: 15;">
                     <children>
-                  
-                        <Button fx:id="btnQuitarItem" mnemonicParsing="false" onAction="#onQuitarItem" prefHeight="38.0" style="-fx-background-color: transparent; -fx-border-color: #ef4444; -fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand;" text="Quitar Artículo" textFill="#ef4444">
-                            <font>
-                                <Font name="System Bold" size="13.0" />
-                            </font>
+                    
+                        <HBox alignment="CENTER_LEFT" spacing="6.0">
+                            <children>
+                                <Button fx:id="btnDecrementar" mnemonicParsing="false" onAction="#onDecrementarCantidad" prefHeight="38.0" prefWidth="40.0" style="-fx-background-color: #f1f5f9; -fx-border-color: #cbd5e1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand;" text="-" textFill="#334155">
+                                    <font>
+                                        <Font name="System Bold" size="16.0" />
+                                    </font>
+                                </Button>
+                                <Button fx:id="btnIncrementar" mnemonicParsing="false" onAction="#onIncrementarCantidad" prefHeight="38.0" prefWidth="40.0" style="-fx-background-color: #f1f5f9; -fx-border-color: #cbd5e1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand;" text="+" textFill="#334155">
+                                    <font>
+                                        <Font name="System Bold" size="16.0" />
+                                    </font>
+                                </Button>
+                                <Button fx:id="btnQuitarItem" mnemonicParsing="false" onAction="#onQuitarItem" prefHeight="38.0" style="-fx-background-color: transparent; -fx-border-color: #ef4444; -fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand;" text="Quitar (Supr)" textFill="#ef4444">
+                                    <font>
+                                        <Font name="System Bold" size="13.0" />
+                                    </font>
+                                </Button>
+                            </children>
                             <HBox.margin>
-                                <Insets right="30.0" />
+                                <Insets right="20.0" />
                             </HBox.margin>
-                        </Button>
+                        </HBox>
                   
                         <VBox alignment="CENTER_RIGHT" spacing="2.0">
                             <children>
@@ -146,7 +160,7 @@
                                         <Font name="System Bold" size="11.0" />
                                     </font>
                                 </Label>
-                                <Label fx:id="lblTotal" text="0.00" textFill="#0f172a">
+                                <Label fx:id="lblTotal" textFill="#0f172a">
                                     <font>
                                         <Font name="System Bold" size="28.0" />
                                     </font>
@@ -157,7 +171,7 @@
                             </HBox.margin>
                         </VBox>
                   
-                        <Button fx:id="btnRegistrarVenta" mnemonicParsing="false" onAction="#onRegistrarVentaCompleta" prefHeight="50.0" prefWidth="160.0" style="-fx-background-color: #10b981; -fx-background-radius: 6; -fx-cursor: hand;" text="✔ Procesar Venta" textFill="WHITE">
+                        <Button fx:id="btnRegistrarVenta" mnemonicParsing="false" onAction="#onRegistrarVentaCompleta" prefHeight="50.0" prefWidth="170.0" style="-fx-background-color: #10b981; -fx-background-radius: 6; -fx-cursor: hand;" text="F12 - Cobrar" textFill="WHITE">
                             <font>
                                 <Font name="System Bold" size="15.0" />
                             </font>
