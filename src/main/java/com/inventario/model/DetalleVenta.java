@@ -15,7 +15,7 @@ public class DetalleVenta {
     private final IntegerProperty ventaId;
     private final ObjectProperty<Producto> producto;
     private final StringProperty nombreProducto; // Auxiliar para la interfaz visual
-    private final IntegerProperty cantidad;
+    private final DoubleProperty cantidad;
     private final DoubleProperty precioUnitario;
     private final DoubleProperty subtotal;
 
@@ -24,28 +24,28 @@ public class DetalleVenta {
         this.ventaId = new SimpleIntegerProperty(0);
         this.producto = new SimpleObjectProperty<>(null);
         this.nombreProducto = new SimpleStringProperty("");
-        this.cantidad = new SimpleIntegerProperty(0);
+        this.cantidad = new SimpleDoubleProperty(0);
         this.precioUnitario = new SimpleDoubleProperty(0.0);
         this.subtotal = new SimpleDoubleProperty(0.0);
     }
 
     // Constructor para items en carrito (sin ID ni ventaId)
-    public DetalleVenta(Producto producto, int cantidad, double precioUnitario) {
+    public DetalleVenta(Producto producto, double cantidad, double precioUnitario) {
         this.id = new SimpleIntegerProperty(0);
         this.ventaId = new SimpleIntegerProperty(0);
         this.producto = new SimpleObjectProperty<>(producto);
         this.nombreProducto = new SimpleStringProperty(producto != null ? producto.getNombre() : "");
-        this.cantidad = new SimpleIntegerProperty(cantidad);
+        this.cantidad = new SimpleDoubleProperty(cantidad);
         this.precioUnitario = new SimpleDoubleProperty(precioUnitario);
         this.subtotal = new SimpleDoubleProperty(cantidad * precioUnitario);
     }
 
-    public DetalleVenta(int id, int ventaId, Producto producto, int cantidad, double precioUnitario) {
+    public DetalleVenta(int id, int ventaId, Producto producto, double cantidad, double precioUnitario) {
         this.id = new SimpleIntegerProperty(id);
         this.ventaId = new SimpleIntegerProperty(ventaId);
         this.producto = new SimpleObjectProperty<>(producto);
         this.nombreProducto = new SimpleStringProperty(producto != null ? producto.getNombre() : "");
-        this.cantidad = new SimpleIntegerProperty(cantidad);
+        this.cantidad = new SimpleDoubleProperty(cantidad);
         this.precioUnitario = new SimpleDoubleProperty(precioUnitario);
         this.subtotal = new SimpleDoubleProperty(cantidad * precioUnitario);
     }
@@ -82,11 +82,11 @@ public class DetalleVenta {
         return nombreProducto.get();
     }
 
-    public int getCantidad() {
+    public double getCantidad() {
         return cantidad.get();
     }
 
-    public void setCantidad(int value) {
+    public void setCantidad(double value) {
         this.cantidad.set(value);
         this.subtotal.set(value * getPrecioUnitario());
     }
@@ -101,7 +101,8 @@ public class DetalleVenta {
     }
 
     public double getSubtotal() {
-        return subtotal.get();
+        double sub = this.cantidad.get() * this.precioUnitario.get();
+        return Math.round(sub * 100.0) / 100.0;
     }
 
     // Properties para el TableView
@@ -121,7 +122,7 @@ public class DetalleVenta {
         return nombreProducto;
     }
 
-    public IntegerProperty cantidadProperty() {
+    public DoubleProperty cantidadProperty() {
         return cantidad;
     }
 

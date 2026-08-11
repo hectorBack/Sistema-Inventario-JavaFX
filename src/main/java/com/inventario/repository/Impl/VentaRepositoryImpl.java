@@ -54,15 +54,15 @@ public class VentaRepositoryImpl implements VentaRepository {
             for (DetalleVenta detalle : detalles) {
                 stmtDetalle.setInt(1, idVentaGenerado);
                 stmtDetalle.setInt(2, detalle.getProducto().getId());
-                stmtDetalle.setInt(3, detalle.getCantidad());
+                stmtDetalle.setDouble(3, detalle.getCantidad());
                 stmtDetalle.setDouble(4, detalle.getPrecioUnitario());
                 stmtDetalle.setDouble(5, detalle.getSubtotal());
                 stmtDetalle.executeUpdate();
 
                 // 3. Descontar stock evaluando disponibilidad
-                stmtStock.setInt(1, detalle.getCantidad());
+                stmtStock.setDouble(1, detalle.getCantidad());
                 stmtStock.setInt(2, detalle.getProducto().getId());
-                stmtStock.setInt(3, detalle.getCantidad()); // Condición stock >= cantidad
+                stmtStock.setDouble(3, detalle.getCantidad()); // Condición stock >= cantidad
 
                 int filasAfectadasStock = stmtStock.executeUpdate();
                 if (filasAfectadasStock == 0) {
@@ -171,7 +171,7 @@ public class VentaRepositoryImpl implements VentaRepository {
 
             stmtReintegrar = conn.prepareStatement(sqlReintegrarStock);
             for (DetalleVenta detalle : detalles) {
-                stmtReintegrar.setInt(1, detalle.getCantidad());
+                stmtReintegrar.setDouble(1, detalle.getCantidad());
                 stmtReintegrar.setInt(2, detalle.getProducto().getId());
                 stmtReintegrar.executeUpdate();
             }
