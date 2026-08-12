@@ -2,6 +2,7 @@ package com.inventario.repository.Impl;
 
 import com.inventario.config.ConexionDB;
 import com.inventario.model.Categoria;
+import com.inventario.model.DetallePaquete;
 import com.inventario.model.Producto;
 import com.inventario.model.Proveedor;
 import com.inventario.repository.ProductoRepository;
@@ -9,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +48,9 @@ public class ProductoRepositoryImpl implements ProductoRepository {
                 + "precio_compra, porcentaje_ganancia, stock, stock_minimo, tipo_venta, estado, categoria_id, proveedor_id) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+        // 1. Agregar Statement.RETURN_GENERATED_KEYS aquí
+        try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             stmt.setString(1, producto.getCodigoBarras());
             stmt.setString(2, producto.getNombre());
             stmt.setString(3, producto.getDescripcion());
@@ -71,7 +75,19 @@ public class ProductoRepositoryImpl implements ProductoRepository {
                 stmt.setNull(13, Types.INTEGER);
             }
 
-            return stmt.executeUpdate() > 0;
+            int filasAfectadas = stmt.executeUpdate();
+
+            // 2. Recuperar el ID generado por la BD y asignarlo al objeto
+            if (filasAfectadas > 0) {
+                try (ResultSet rs = stmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        producto.setId(rs.getInt(1)); // Asigna el ID autoincrementado
+                    }
+                }
+                return true;
+            }
+
+            return false;
         } catch (SQLException e) {
             System.out.println("Error al guardar producto: " + e.getMessage());
             return false;
@@ -365,6 +381,82 @@ public class ProductoRepositoryImpl implements ProductoRepository {
             System.out.println("Error al verificar historial: " + e.getMessage());
         }
         return false;
+    }
+
+    @Override
+    public List<DetallePaquete> obtenerDetallesPaquete(int idProductoPadre) {
+        List<DetallePaquete> lista = new ArrayList<>();
+
+        // Ajusta la consulta SQL según los nombres exactos de tus tablas y columnas
+        String sql = "SELECT dp.cantidad, p.id, p.codigo_barras, p.nombre, p.precio, p.precio_compra "
+                + "FROM detalle_paquete dp "
+                + "INNER JOIN productos p ON dp.id_producto_hijo = p.id "
+                + "WHERE dp.id_producto_padre = ?";
+
+        try (Connection con = ConexionDB.getConexion(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idProductoPadre);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Producto hijo = new Producto();
+                    hijo.setId(rs.getInt("id"));
+                    hijo.setCodigoBarras(rs.getString("codigo_barras"));
+                    hijo.setNombre(rs.getString("nombre"));
+                    hijo.setPrecio(rs.getDouble("precio"));
+                    hijo.setPrecioCompra(rs.getDouble("precio_compra"));
+
+                    double cantidad = rs.getDouble("cantidad");
+
+                    lista.add(new DetallePaquete(hijo, cantidad));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener detalles del paquete: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
+    @Override
+    public boolean guardarDetallesPaquete(int idProductoPadre, List<DetallePaquete> detalles) {
+        String sql = "INSERT INTO detalle_paquete (id_producto_padre, id_producto_hijo, cantidad) VALUES (?, ?, ?)";
+
+        try (Connection con = ConexionDB.getConexion(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            for (DetallePaquete detalle : detalles) {
+                ps.setInt(1, idProductoPadre);
+                ps.setInt(2, detalle.getProducto().getId());
+                ps.setDouble(3, detalle.getCantidad());
+                ps.addBatch();
+            }
+
+            ps.executeBatch();
+            return true;
+        } catch (SQLException e) {
+            System.err.println("Error al guardar detalles del paquete: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean reemplazarDetallesPaquete(int idProductoPadre, List<DetallePaquete> detalles) {
+        String sqlDelete = "DELETE FROM detalle_paquete WHERE id_producto_padre = ?";
+
+        try (Connection con = ConexionDB.getConexion(); PreparedStatement psDelete = con.prepareStatement(sqlDelete)) {
+
+            psDelete.setInt(1, idProductoPadre);
+            psDelete.executeUpdate();
+
+            if (detalles != null && !detalles.isEmpty()) {
+                return guardarDetallesPaquete(idProductoPadre, detalles);
+            }
+            return true;
+        } catch (SQLException e) {
+            System.err.println("Error al reemplazar detalles del paquete: " + e.getMessage());
+            return false;
+        }
     }
 
 }

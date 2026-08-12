@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
@@ -167,6 +168,22 @@
                                 </VBox>
                             </children>
                         </HBox>
+                        
+                        <!-- BOTÓN CONFIGURAR PAQUETE (Aparece solo cuando el combo es "PAQUETE") -->
+                        <VBox fx:id="pnlContenidoPaquete" managed="false" visible="false" spacing="4.0">
+                            <children>
+                                <Label style="-fx-text-fill: #334155;" text="Contenido del Paquete">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Label>
+                                <Button fx:id="btnConfigurarPaquete" mnemonicParsing="false" onAction="#onAbrirModalPaquete" prefHeight="35.0" prefWidth="260.0" style="-fx-background-color: #0284c7; -fx-background-radius: 6; -fx-cursor: hand;" text="📦 Configurar Productos (0)" textFill="WHITE">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Button>
+                            </children>
+                        </VBox>
 
                         <!-- CATEGORÍA -->
                         <VBox spacing="4.0">
