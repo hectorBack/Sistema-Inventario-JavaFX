@@ -8,6 +8,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,19 +51,19 @@ public class MovimientoRepositoryImpl implements MovimientoRepository {
             try (PreparedStatement stmtInsert = conn.prepareStatement(sqlInsert)) {
                 stmtInsert.setInt(1, movimiento.getProductoId());
                 stmtInsert.setString(2, movimiento.getTipoMovimiento().toUpperCase());
-                stmtInsert.setInt(3, movimiento.getCantidad());
+                stmtInsert.setDouble(3, movimiento.getCantidad());
                 stmtInsert.setString(4, movimiento.getMotivo());
                 stmtInsert.executeUpdate();
             }
 
             // 2. Actualizar stock del producto
             try (PreparedStatement stmtUpdate = conn.prepareStatement(sqlUpdateStock)) {
-                stmtUpdate.setInt(1, movimiento.getCantidad());
+                stmtUpdate.setDouble(1, movimiento.getCantidad());
                 stmtUpdate.setInt(2, movimiento.getProductoId());
 
                 // Si es SALIDA, se asigna el 3er parámetro para validar stock suficiente
                 if (!"ENTRADA".equalsIgnoreCase(movimiento.getTipoMovimiento())) {
-                    stmtUpdate.setInt(3, movimiento.getCantidad());
+                    stmtUpdate.setDouble(3, movimiento.getCantidad());
                 }
 
                 int filasAfectadas = stmtUpdate.executeUpdate();
@@ -246,15 +247,21 @@ public class MovimientoRepositoryImpl implements MovimientoRepository {
     }
 
     private MovimientoInventario mapearMovimiento(ResultSet rs) throws SQLException {
-        return new MovimientoInventario(
-                rs.getInt("id"),
-                rs.getInt("producto_id"),
-                rs.getString("producto_nombre"),
-                rs.getString("tipo_movimiento"),
-                rs.getInt("cantidad"),
-                rs.getString("motivo"),
-                rs.getTimestamp("fecha_movimiento").toLocalDateTime()
-        );
+        MovimientoInventario m = new MovimientoInventario();
+        m.setId(rs.getInt("id"));
+        m.setProductoId(rs.getInt("producto_id"));
+        m.setNombreProducto(rs.getString("producto_nombre"));
+        m.setTipoMovimiento(rs.getString("tipo_movimiento"));
+        m.setCantidad(rs.getDouble("cantidad"));
+        m.setMotivo(rs.getString("motivo"));
+
+        Timestamp ts = rs.getTimestamp("fecha_movimiento");
+        if (ts != null) {
+            m.setFechaMovimiento(ts.toLocalDateTime());
+        }
+       
+
+        return m;
     }
 
 }

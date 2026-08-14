@@ -8,6 +8,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
@@ -22,6 +23,19 @@
                     </font>
                 </Label>
 
+                <!-- FILTRO POR PERÍODO -->
+                <VBox spacing="5.0">
+                    <children>
+                        <Label fx:id="lblMostrarVentas" text="Mostrar ventas de:" textFill="#64748b">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Label>
+                        <ComboBox fx:id="cmbPeriodo" prefHeight="35.0" prefWidth="200.0" promptText="Seleccionar periodo" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1;" />
+                    </children>
+                </VBox>
+
+                <!-- RANGO DE FECHAS -->
                 <VBox spacing="5.0">
                     <children>
                         <Label text="Fecha Inicial" textFill="#64748b">
@@ -44,6 +58,7 @@
                     </children>
                 </VBox>
 
+                <!-- FILTRO POR CLIENTE -->
                 <VBox spacing="5.0">
                     <children>
                         <Label text="Filtrar por Cliente" textFill="#64748b">
@@ -55,6 +70,7 @@
                     </children>
                 </VBox>
 
+                <!-- BOTONES DE ACCIÓN DE FILTRO -->
                 <VBox spacing="10.0">
                     <children>
                         <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onBuscarVentas" prefHeight="38.0" style="-fx-background-color: #3b82f6; -fx-background-radius: 6; -fx-cursor: hand;" text="🔍 Filtrar" textFill="WHITE">
@@ -75,14 +91,29 @@
             </children>
         </VBox>
 
-        <!-- TABLA PRINCIPAL Y TOTALES -->
+        <!-- TABLA PRINCIPAL, BARRA DE HERRAMIENTAS Y TOTALES -->
         <VBox spacing="15.0" HBox.hgrow="ALWAYS">
             <children>
-                <Label text="Historial de Ventas" textFill="#0f172a">
-                    <font>
-                        <Font name="System Bold" size="22.0" />
-                    </font>
-                </Label>
+                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                    <children>
+                        <Label text="Historial de Ventas" textFill="#0f172a">
+                            <font>
+                                <Font name="System Bold" size="22.0" />
+                            </font>
+                        </Label>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" onAction="#onExportarExcel" prefHeight="35.0" style="-fx-background-color: #10b981; -fx-background-radius: 6; -fx-cursor: hand;" text="📊 Exportar Excel" textFill="WHITE">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Button>
+                        <Button mnemonicParsing="false" onAction="#onImprimir" prefHeight="35.0" style="-fx-background-color: #6366f1; -fx-background-radius: 6; -fx-cursor: hand;" text="🖨 Imprimir" textFill="WHITE">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Button>
+                    </children>
+                </HBox>
 
                 <TableView fx:id="tblVentas" prefHeight="430.0" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0;" VBox.vgrow="ALWAYS">
                     <columns>

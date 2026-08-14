@@ -16,6 +16,8 @@ public class MainLayoutController implements Initializable {
     @FXML
     private BorderPane mainContainer;
     @FXML
+    private Button btnProductos;
+    @FXML
     private Button btnInventario;
     @FXML
     private Button btnCategorias;
@@ -34,12 +36,18 @@ public class MainLayoutController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // Al arrancar, cargamos por defecto el inventario en el centro
-        cargarVista("view/Inventario");
+        cargarVista("view/ProductosView");
+    }
+
+    @FXML
+    void mostrarProductos(ActionEvent event) {
+        cargarVista("view/ProductosView");
+        actualizarEstiloMenu(btnProductos, btnInventario, btnCategorias, btnMovimientos, btnProveedores, btnClientes, btnVentas, btnHistorialVentas);
     }
 
     @FXML
     void mostrarInventario(ActionEvent event) {
-        cargarVista("view/Inventario");
+        cargarVista("view/InventarioView");
         // Activamos Inventario, apagamos Categorías y Movimientos
         actualizarEstiloMenu(btnInventario, btnCategorias, btnMovimientos, btnProveedores, btnClientes, btnVentas);
     }

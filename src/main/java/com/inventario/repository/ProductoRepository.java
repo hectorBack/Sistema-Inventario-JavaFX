@@ -6,44 +6,16 @@ import java.util.List;
 
 public interface ProductoRepository {
 
-    // --- OPERACIONES BÁSICAS Y ESTADO ---
-    List<Producto> listarTodos();
-
-    List<Producto> listarActivos();
-
-    Producto buscarPorId(int id);
-
-    // --- BÚSQUEDAS DE NEGOCIO ---
-    Producto buscarPorCodigoBarras(String codigoBarras);
-
-    List<Producto> buscarPorNombre(String termino);
-
-    List<Producto> listarPorCategoria(int categoriaId);
-
-    List<Producto> listarPorProveedor(int proveedorId);
-
-    List<DetallePaquete> obtenerDetallesPaquete(int idProductoPadre);
-
-    boolean guardarDetallesPaquete(int idProductoPadre, List<DetallePaquete> detalles);
+    boolean guardar(Producto p);
+    boolean actualizar(Producto p);
     
-    boolean reemplazarDetallesPaquete(int idProductoPadre, List<DetallePaquete> detalles);
-
-    // --- MONITOREO DE INVENTARIO ---
-    List<Producto> listarProductosStockBajo(int limiteMinimo);
-
-    boolean actualizarStock(int productoId, double nuevaCantidad);
-
-    // --- PERSISTENCIA Y VALIDACIONES ---
-    boolean guardar(Producto producto);
-
-    boolean actualizar(Producto producto);
-
-    boolean desactivar(int id); // Borrado Lógico (Recomendado)
-
     boolean eliminar(int id);
-
-    boolean existeCodigoBarras(String codigoBarras, int idExcluir);
-
-    boolean tieneMovimientosAsociados(int productoId);
-
+    List<Producto> listarTodos();
+    Producto buscarPorCodigoBarras(String codigo);
+    List<Producto> buscarPorNombre(String nombre);
+    boolean existeCodigoBarras(String codigo, int idExcluir);
+    List<DetallePaquete> obtenerDetallesPaquete(int idPaquete);
+    boolean guardarDetallesPaquete(int idPaquete, List<DetallePaquete> detalles);
+    boolean reemplazarDetallesPaquete(int idPaquete, List<DetallePaquete> detalles);
+    
 }

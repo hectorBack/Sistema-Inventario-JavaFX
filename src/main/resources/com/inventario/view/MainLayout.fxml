@@ -20,6 +20,12 @@
                         <Insets bottom="25.0" top="10.0" />
                     </VBox.margin>
                 </Label>
+                
+                <Button fx:id="btnProductos" alignment="BASELINE_LEFT" mnemonicParsing="false" onAction="#mostrarProductos" prefHeight="45.0" prefWidth="200.0" style="-fx-background-color: #334155; -fx-background-radius: 6; -fx-cursor: hand;" text=" 🏷️  Productos" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="14.0" />
+                    </font>
+                </Button>
             
                 <Button fx:id="btnInventario" alignment="BASELINE_LEFT" mnemonicParsing="false" onAction="#mostrarInventario" prefHeight="45.0" prefWidth="200.0" style="-fx-background-color: #334155; -fx-background-radius: 6; -fx-cursor: hand;" text=" 📦  Inventario" textFill="WHITE">
                     <font>

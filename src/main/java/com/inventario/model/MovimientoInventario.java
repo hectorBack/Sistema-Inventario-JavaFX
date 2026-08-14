@@ -6,9 +6,10 @@ public class MovimientoInventario {
 
     private int id;
     private int productoId;
+    private String codigoProducto;
     private String nombreProducto; // Campo auxiliar para mostrar de forma amigable en la tabla FX
     private String tipoMovimiento; // "ENTRADA" o "SALIDA"
-    private int cantidad;
+    private double cantidad;
     private String motivo;
     private LocalDateTime fechaMovimiento;
 
@@ -17,7 +18,7 @@ public class MovimientoInventario {
     }
 
     // Constructor para insertar nuevos registros
-    public MovimientoInventario(int productoId, String tipoMovimiento, int cantidad, String motivo) {
+    public MovimientoInventario(int productoId, String tipoMovimiento, double cantidad, String motivo) {
         this.productoId = productoId;
         this.tipoMovimiento = tipoMovimiento;
         this.cantidad = cantidad;
@@ -25,7 +26,7 @@ public class MovimientoInventario {
     }
 
     // Constructor completo para listar
-    public MovimientoInventario(int id, int productoId, String nombreProducto, String tipoMovimiento, int cantidad, String motivo, LocalDateTime fechaMovimiento) {
+    public MovimientoInventario(int id, int productoId, String nombreProducto, String tipoMovimiento, double cantidad, String motivo, LocalDateTime fechaMovimiento, String codigoProducto) {
         this.id = id;
         this.productoId = productoId;
         this.nombreProducto = nombreProducto;
@@ -33,6 +34,7 @@ public class MovimientoInventario {
         this.cantidad = cantidad;
         this.motivo = motivo;
         this.fechaMovimiento = fechaMovimiento;
+        this.codigoProducto = codigoProducto;
     }
 
     // Getters y Setters
@@ -68,11 +70,11 @@ public class MovimientoInventario {
         this.tipoMovimiento = tipoMovimiento;
     }
 
-    public int getCantidad() {
+    public double getCantidad() {
         return cantidad;
     }
 
-    public void setCantidad(int cantidad) {
+    public void setCantidad(double cantidad) {
         this.cantidad = cantidad;
     }
 
@@ -90,6 +92,14 @@ public class MovimientoInventario {
 
     public void setFechaMovimiento(LocalDateTime fechaMovimiento) {
         this.fechaMovimiento = fechaMovimiento;
+    }
+
+    public String getCodigoProducto() {
+        return codigoProducto;
+    }
+
+    public void setCodigoProducto(String codigoProducto) {
+        this.codigoProducto = codigoProducto;
     }
 
 }

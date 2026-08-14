@@ -36,7 +36,7 @@ public class InventarioUIUtil {
             TextField txtPorcentaje,
             TextField txtMayoreo,
             TextField txtStock,
-            TextField txtStockMin,
+            TextField txtStockMinimo,
             ComboBox<String> cmbEstado,
             ComboBox<String> cmbTipoVenta,
             ComboBox<Categoria> cmbCategoria,
@@ -54,7 +54,7 @@ public class InventarioUIUtil {
         p.setPrecioMayoreo(txtMayoreo != null && !txtMayoreo.getText().trim().isEmpty() ? Double.parseDouble(txtMayoreo.getText().trim()) : 0.0);
 
         p.setStock(Double.parseDouble(txtStock.getText().trim()));
-        p.setStockMinimo(txtStockMin != null && !txtStockMin.getText().trim().isEmpty() ? Double.parseDouble(txtStockMin.getText().trim()) : 5.0);
+        p.setStockMinimo(txtStockMinimo != null && !txtStockMinimo.getText().trim().isEmpty() ? Double.parseDouble(txtStockMinimo.getText().trim()) : 5.0);
 
         p.setEstado(cmbEstado.getValue() != null ? cmbEstado.getValue() : "Activo");
         p.setTipoVenta(cmbTipoVenta.getValue() != null ? cmbTipoVenta.getValue() : "UNIDAD");
@@ -75,7 +75,7 @@ public class InventarioUIUtil {
             TextField txtPorcentaje,
             TextField txtMayoreo,
             TextField txtStock,
-            TextField txtStockMin,
+            TextField txtStockMinimo,
             ComboBox<String> cmbEstado,
             ComboBox<String> cmbTipoVenta,
             ComboBox<Categoria> cmbCategoria,
@@ -93,7 +93,7 @@ public class InventarioUIUtil {
         txtPorcentaje.setText(String.valueOf(p.getPorcentajeGanancia()));
         txtMayoreo.setText(String.valueOf(p.getPrecioMayoreo()));
         txtStock.setText(String.valueOf(p.getStock()));
-        txtStockMin.setText(String.valueOf(p.getStockMinimo()));
+        txtStockMinimo.setText(String.valueOf(p.getStockMinimo()));
 
         cmbEstado.setValue(p.getEstado());
         cmbTipoVenta.setValue(p.getTipoVenta() != null ? p.getTipoVenta() : "UNIDAD");

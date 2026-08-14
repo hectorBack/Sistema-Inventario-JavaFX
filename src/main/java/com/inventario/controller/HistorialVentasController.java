@@ -7,6 +7,10 @@ import com.inventario.repository.ClienteRepository;
 import com.inventario.repository.VentaRepository;
 import com.inventario.repository.Impl.ClienteRepositoryImpl;
 import com.inventario.repository.Impl.VentaRepositoryImpl;
+import com.inventario.util.Ventas.ExcelExporter;
+import com.inventario.util.Ventas.FiltroPeriodo;
+import com.inventario.util.Ventas.ReportePrinterManager;
+import java.io.File;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -37,11 +41,16 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class HistorialVentasController implements Initializable {
 
+    @FXML
+    private Label lblMostrarVentas;
+    @FXML
+    private ComboBox<FiltroPeriodo> cmbPeriodo;
     @FXML
     private DatePicker dpInicio;
     @FXML
@@ -78,11 +87,41 @@ public class HistorialVentasController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         configurarTablas();
         cargarClientes();
+        configurarFiltroPeriodo();
 
-        // Cargar únicamente el día de hoy por defecto
-        dpInicio.setValue(LocalDate.now());
-        dpFin.setValue(LocalDate.now());
+        // Cargar por defecto la opción "Hoy"
+        cmbPeriodo.getSelectionModel().select(FiltroPeriodo.HOY);
+        aplicarRangoPorPeriodo(FiltroPeriodo.HOY);
         onBuscarVentas(null);
+    }
+
+    private void configurarFiltroPeriodo() {
+        if (lblMostrarVentas != null) {
+            lblMostrarVentas.setText("Mostrar ventas de:");
+        }
+        cmbPeriodo.setItems(FXCollections.observableArrayList(FiltroPeriodo.values()));
+        cmbPeriodo.setOnAction(event -> {
+            FiltroPeriodo seleccionado = cmbPeriodo.getValue();
+            if (seleccionado != null) {
+                aplicarRangoPorPeriodo(seleccionado);
+                onBuscarVentas(null);
+            }
+        });
+    }
+
+    private void aplicarRangoPorPeriodo(FiltroPeriodo periodo) {
+        if (periodo == FiltroPeriodo.PERIODO_PERSONALIZADO) {
+            dpInicio.setDisable(false);
+            dpFin.setDisable(false);
+        } else {
+            LocalDate[] rango = periodo.obtenerRangoFechas();
+            if (rango != null) {
+                dpInicio.setValue(rango[0]);
+                dpFin.setValue(rango[1]);
+                dpInicio.setDisable(true);
+                dpFin.setDisable(true);
+            }
+        }
     }
 
     private void configurarTablas() {
@@ -225,10 +264,51 @@ public class HistorialVentasController implements Initializable {
 
     @FXML
     void onLimpiarFiltros(ActionEvent event) {
-        dpInicio.setValue(LocalDate.now());
-        dpFin.setValue(LocalDate.now());
+        cmbPeriodo.getSelectionModel().select(FiltroPeriodo.HOY);
+        aplicarRangoPorPeriodo(FiltroPeriodo.HOY);
         cmbFiltroCliente.getSelectionModel().clearSelection();
         onBuscarVentas(null);
+    }
+
+    @FXML
+    void onExportarExcel(ActionEvent event) {
+        if (listaVentas.isEmpty()) {
+            mostrarAlerta("Atención", "No hay registros disponibles para exportar.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Guardar Historial de Ventas");
+        fileChooser.setInitialFileName("Historial_Ventas_" + LocalDate.now() + ".csv");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Archivos Excel / CSV (*.csv)", "*.csv")
+        );
+
+        Stage stage = (Stage) tblVentas.getScene().getWindow();
+        File file = fileChooser.showSaveDialog(stage);
+
+        if (file != null) {
+            try {
+                ExcelExporter.exportarVentasCSV(listaVentas, file);
+                mostrarAlerta("Éxito", "El archivo se ha exportado correctamente en:\n" + file.getAbsolutePath(), Alert.AlertType.INFORMATION);
+            } catch (Exception e) {
+                e.printStackTrace();
+                mostrarAlerta("Error", "No se pudo exportar el archivo: " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        }
+    }
+
+    @FXML
+    void onImprimir(ActionEvent event) {
+        if (listaVentas.isEmpty()) {
+            mostrarAlerta("Atención", "No hay registros para imprimir.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        boolean impreso = ReportePrinterManager.imprimirNodo(tblVentas);
+        if (impreso) {
+            mostrarAlerta("Éxito", "El documento fue enviado a la impresora.", Alert.AlertType.INFORMATION);
+        }
     }
 
     private void recalcularSumatoriaHistorica() {
