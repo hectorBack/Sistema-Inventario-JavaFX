@@ -77,8 +77,14 @@ public class HistorialVentasController implements Initializable {
     @FXML
     private Label lblTotalHistorico;
 
-    private final VentaRepository ventaRepository = new VentaRepositoryImpl();
-    private final ClienteRepository clienteRepository = new ClienteRepositoryImpl();
+    private final VentaRepository ventaRepository;
+    private final ClienteRepository clienteRepository;
+
+    public HistorialVentasController(VentaRepository ventaRepository, ClienteRepository clienteRepository) {
+        this.ventaRepository = ventaRepository;
+        this.clienteRepository = clienteRepository;
+    }
+
     private final ObservableList<Venta> listaVentas = FXCollections.observableArrayList();
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");

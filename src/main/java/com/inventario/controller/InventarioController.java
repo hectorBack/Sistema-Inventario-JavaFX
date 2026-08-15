@@ -47,8 +47,13 @@ public class InventarioController implements Initializable {
     @FXML
     private TableColumn<MovimientoInventario, String> colFecha;
 
-    private final InventarioRepository invRepository = new InventarioRepositoryImpl();
-    private final ProductoRepository prodRepository = new ProductoRepositoryImpl();
+    private final InventarioRepository invRepository;
+    private final ProductoRepository prodRepository;
+
+    public InventarioController(InventarioRepository invRepository, ProductoRepository prodRepository) {
+        this.invRepository = invRepository;
+        this.prodRepository = prodRepository;
+    }
 
     private final ObservableList<MovimientoInventario> listaMovimientos = FXCollections.observableArrayList();
     private Producto productoEncontrado;

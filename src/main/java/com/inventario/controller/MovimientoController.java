@@ -51,8 +51,14 @@ public class MovimientoController implements Initializable {
     @FXML
     private TableView<MovimientoInventario> tblMovimientos;
 
-    private final MovimientoRepository movRepository = new MovimientoRepositoryImpl();
-    private final ProductoRepository prodRepository = new ProductoRepositoryImpl();
+    private final MovimientoRepository movRepository;
+    private final ProductoRepository prodRepository;
+
+    public MovimientoController(MovimientoRepository movRepository, ProductoRepository prodRepository) {
+        this.movRepository = movRepository;
+        this.prodRepository = prodRepository;
+    }
+
     private final ObservableList<MovimientoInventario> listaMovimientos = FXCollections.observableArrayList();
 
     @Override

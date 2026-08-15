@@ -35,7 +35,12 @@ public class ProveedorController implements Initializable {
     @FXML
     private TextField txtBuscar;
 
-    private final ProveedorRepository repo = new ProveedorRepositoryImpl();
+    private final ProveedorRepository repo;
+
+    public ProveedorController(ProveedorRepository repo) {
+        this.repo = repo;
+    }
+
     private final ObservableList<Proveedor> listaProveedores = FXCollections.observableArrayList();
     private Proveedor proveedorSeleccionado = null;
 

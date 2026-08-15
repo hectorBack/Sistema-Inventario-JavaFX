@@ -47,7 +47,12 @@ public class ClientesController implements Initializable {
     private TableColumn<Cliente, String> colEstado;
 
     // Dependencias y Listas
-    private final ClienteRepository repository = new ClienteRepositoryImpl();
+    private final ClienteRepository repository;
+
+    public ClientesController(ClienteRepository repository) {
+        this.repository = repository;
+    }
+
     private final ObservableList<Cliente> listaClientes = FXCollections.observableArrayList();
 
     private Cliente clienteSeleccionado;

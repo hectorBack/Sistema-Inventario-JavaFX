@@ -33,7 +33,12 @@ public class ConfigurarPaqueteModalController {
     private TableColumn<DetallePaquete, String> colCantidad;
 
     private final ObservableList<DetallePaquete> listaDetalles = FXCollections.observableArrayList();
-    private final ProductoRepository repository = new ProductoRepositoryImpl();
+    private final ProductoRepository repository;
+
+    public ConfigurarPaqueteModalController(ProductoRepository repository) {
+        this.repository = repository;
+    }
+
     private Producto productoEncontrado;
     private boolean guardado = false;
 

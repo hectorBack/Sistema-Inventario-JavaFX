@@ -48,7 +48,12 @@ public class DetalleVentaModalController implements Initializable {
     @FXML
     private Button btnAnularVenta;
 
-    private final VentaRepository ventaRepository = new VentaRepositoryImpl();
+    private final VentaRepository ventaRepository;
+
+    public DetalleVentaModalController(VentaRepository ventaRepository) {
+        this.ventaRepository = ventaRepository;
+    }
+
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private Venta venta;
     private boolean estadoCambiado = false;

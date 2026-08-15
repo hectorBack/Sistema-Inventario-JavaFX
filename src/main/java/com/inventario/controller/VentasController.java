@@ -65,9 +65,15 @@ public class VentasController implements Initializable {
     private TableColumn<DetalleVenta, Double> colSubtotal;
 
     // Repositorios de datos
-    private final VentaRepository ventaRepository = new VentaRepositoryImpl();
-    private final ClienteRepository clienteRepository = new ClienteRepositoryImpl();
-    private final ProductoRepository productoRepository = new ProductoRepositoryImpl();
+    private final VentaRepository ventaRepository;
+    private final ClienteRepository clienteRepository;
+    private final ProductoRepository productoRepository;
+
+    public VentasController(VentaRepository ventaRepository, ClienteRepository clienteRepository, ProductoRepository productoRepository) {
+        this.ventaRepository = ventaRepository;
+        this.clienteRepository = clienteRepository;
+        this.productoRepository = productoRepository;
+    }
 
     // Lista en memoria que actúa como el carrito de compras temporal
     private final ObservableList<DetalleVenta> carritoItems = FXCollections.observableArrayList();
