@@ -40,8 +40,8 @@ public class CategoriaController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        cmbEstado.setItems(FXCollections.observableArrayList("Activo", "Inactivo"));
-        cmbEstado.setValue("Activo");
+        cmbEstado.setItems(FXCollections.observableArrayList("ACTIVO", "INACTIVO"));
+        cmbEstado.setValue("ACTIVO");
 
         configurarColumnas();
         listarCategorias();
@@ -213,7 +213,7 @@ public class CategoriaController implements Initializable {
 
     private void limpiarFormulario() {
         txtNombre.clear();
-        cmbEstado.setValue("Activo");
+        cmbEstado.setValue("ACTIVO");
         categoriaSeleccionada = null;
         tblCategorias.getSelectionModel().clearSelection();
     }

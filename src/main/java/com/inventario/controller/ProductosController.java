@@ -17,6 +17,7 @@ import com.inventario.util.audio.SoundUtil;
 import java.net.URL;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import javafx.beans.property.SimpleStringProperty;
@@ -27,6 +28,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -70,8 +72,8 @@ public class ProductosController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        cmbEstado.setItems(FXCollections.observableArrayList("Activo", "Inactivo"));
-        cmbEstado.setValue("Activo");
+        cmbEstado.setItems(FXCollections.observableArrayList("ACTIVO", "INACTIVO"));
+        cmbEstado.setValue("ACTIVO");
 
         cmbTipoVenta.setItems(FXCollections.observableArrayList("UNIDAD", "GRANEL", "PAQUETE"));
         cmbTipoVenta.setValue("UNIDAD");
@@ -221,16 +223,47 @@ public class ProductosController implements Initializable {
     @FXML
     void onEliminar(ActionEvent event) {
         if (productoSeleccionado == null) {
-            InventarioUIUtil.mostrarAlerta("Advertencia", "Selecciona un producto para eliminar", Alert.AlertType.WARNING);
+            InventarioUIUtil.mostrarAlerta("Advertencia", "Selecciona un producto de la tabla para eliminar", Alert.AlertType.WARNING);
             return;
         }
 
-        if (repository.eliminar(productoSeleccionado.getId())) {
-            InventarioUIUtil.mostrarAlerta("Éxito", "Producto eliminado correctamente", Alert.AlertType.INFORMATION);
-            limpiarFormulario();
-            listarProductos();
+        // 1. Verificar si el producto tiene historial/relaciones en ventas o inventario
+        boolean tieneHistorial = repository.tieneAsociaciones(productoSeleccionado.getId());
+
+        if (tieneHistorial) {
+            // --- BORRADO LÓGICO (Desactivación) ---
+            boolean confirmar = mostrarConfirmacion(
+                    "Producto con historial",
+                    "Este producto tiene ventas o movimientos asociados.",
+                    "No se puede eliminar de forma definitiva para mantener el historial. ¿Deseas deshabilitarlo/cambiar su estado a INACTIVO?"
+            );
+
+            if (confirmar) {
+                if (repository.eliminarLogico(productoSeleccionado.getId())) {
+                    InventarioUIUtil.mostrarAlerta("Éxito", "El producto ha sido deshabilitado correctamente (Estado: Inactivo).", Alert.AlertType.INFORMATION);
+                    limpiarFormulario();
+                    listarProductos();
+                } else {
+                    InventarioUIUtil.mostrarAlerta("Error", "No se pudo deshabilitar el producto.", Alert.AlertType.ERROR);
+                }
+            }
         } else {
-            InventarioUIUtil.mostrarAlerta("Error", "No se pudo eliminar el producto", Alert.AlertType.ERROR);
+            // --- BORRADO FÍSICO (DELETE) ---
+            boolean confirmar = mostrarConfirmacion(
+                    "Confirmar eliminación",
+                    "¿Eliminar producto definitivamente?",
+                    "El producto '" + productoSeleccionado.getNombre() + "' no tiene historial registrado y se eliminará permanentemente."
+            );
+
+            if (confirmar) {
+                if (repository.eliminar(productoSeleccionado.getId())) {
+                    InventarioUIUtil.mostrarAlerta("Éxito", "Producto eliminado correctamente de la base de datos.", Alert.AlertType.INFORMATION);
+                    limpiarFormulario();
+                    listarProductos();
+                } else {
+                    InventarioUIUtil.mostrarAlerta("Error", "No se pudo eliminar el producto.", Alert.AlertType.ERROR);
+                }
+            }
         }
     }
 
@@ -263,17 +296,14 @@ public class ProductosController implements Initializable {
 
     private void cargarComboCategorias() {
         listaCategorias.clear();
-        listaCategorias.addAll(catRepository.listarTodas());
+        listaCategorias.addAll(catRepository.listarActivas());
         cmbCategoria.setItems(listaCategorias);
         cmbCategoria.setConverter(crearStringConverter(Categoria::getNombre));
     }
 
     private void cargarComboProveedores() {
         listaProveedores.clear();
-        List<Proveedor> activos = provRepository.listarTodos().stream()
-                .filter(p -> "ACTIVO".equalsIgnoreCase(p.getEstado()))
-                .collect(Collectors.toList());
-        listaProveedores.addAll(activos);
+        listaProveedores.addAll(provRepository.listarActivos());
         cmbProveedor.setItems(listaProveedores);
         cmbProveedor.setConverter(crearStringConverter(Proveedor::getNombre));
     }
@@ -365,7 +395,7 @@ public class ProductosController implements Initializable {
             txtStockMinimo.clear();
         }
 
-        cmbEstado.setValue("Activo");
+        cmbEstado.setValue("ACTIVO");
         cmbTipoVenta.setValue("UNIDAD");
         cmbCategoria.setValue(null);
         cmbProveedor.setValue(null);
@@ -416,5 +446,15 @@ public class ProductosController implements Initializable {
         if (btnConfigurarPaquete != null) {
             btnConfigurarPaquete.setText("🎁 Configurar Productos (" + listaDetallePaquete.size() + ")");
         }
+    }
+
+    private boolean mostrarConfirmacion(String titulo, String encabezado, String contenido) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(titulo);
+        alert.setHeaderText(encabezado);
+        alert.setContentText(contenido);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.OK;
     }
 }

@@ -258,7 +258,7 @@ public class ProductoRepositoryImpl implements ProductoRepository {
             }
 
             // Usamos el constructor completo (id, nombre, estado)
-            Categoria cat = new Categoria(idCat, nomCat != null ? nomCat : "", "Activo");
+            Categoria cat = new Categoria(idCat, nomCat != null ? nomCat : "", "ACTIVO");
             p.setCategoria(cat);
         }
 
@@ -279,6 +279,61 @@ public class ProductoRepositoryImpl implements ProductoRepository {
         }
 
         return p;
+    }
+
+    @Override
+    public boolean eliminarLogico(int id) {
+        String sql = "UPDATE productos SET estado = 'INACTIVO' WHERE id = ?";
+        try (Connection conn = ConexionDB.getConexion(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean tieneAsociaciones(int id) {
+        // Revisa si existe en ventas o en movimientos de inventario
+        String sql = "SELECT "
+                + "(SELECT COUNT(*) FROM detalle_ventas WHERE producto_id = ?) + "
+                + "(SELECT COUNT(*) FROM movimientos_inventario WHERE producto_id = ?) AS total";
+
+        try (Connection conn = ConexionDB.getConexion(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.setInt(2, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("total") > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public List<Producto> listarActivos() {
+        List<Producto> lista = new ArrayList<>();
+        String sql = "SELECT p.*, "
+                + "c.nombre AS nombre_categoria, "
+                + "pr.nombre AS nombre_proveedor "
+                + "FROM productos p "
+                + "LEFT JOIN categorias c ON p.id_categoria = c.id "
+                + "LEFT JOIN proveedores pr ON p.id_proveedor = pr.id "
+                + "WHERE p.estado = 'ACTIVO' "
+                + "ORDER BY p.id DESC";
+
+        try (Connection conn = ConexionDB.getConexion(); Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                lista.add(mapearProducto(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
     }
 
 }
