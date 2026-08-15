@@ -5,6 +5,9 @@ public class DetallePaquete {
     private Producto producto;
     private double cantidad;
 
+    public DetallePaquete() {
+    }
+
     public DetallePaquete(Producto producto, double cantidad) {
         this.producto = producto;
         this.cantidad = cantidad;

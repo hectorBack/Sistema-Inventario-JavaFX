@@ -12,8 +12,10 @@ import com.inventario.repository.ProductoRepository;
 import com.inventario.repository.ProveedorRepository;
 import com.inventario.util.Inventario.InventarioCalculosUtil;
 import com.inventario.util.Inventario.InventarioUIUtil;
-import com.inventario.util.Inventario.PaqueteModalDialog;
+import com.inventario.util.Productos.KeyboardShortcutUtil;
+import com.inventario.util.Productos.ProductosTableUtil;
 import com.inventario.util.audio.SoundUtil;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Locale;
@@ -22,10 +24,14 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -36,6 +42,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
 public class ProductosController implements Initializable {
@@ -54,14 +62,14 @@ public class ProductosController implements Initializable {
     @FXML
     private VBox pnlContenidoPaquete;
     @FXML
-    private Button btnConfigurarPaquete;
+    private Button btnAgregar, btnActualizar, btnEliminar, btnConfigurarPaquete;
 
     @FXML
     private TableView<Producto> tblProductos;
 
-    private final ProductoRepository repository = new ProductoRepositoryImpl();
-    private final CategoriaRepository catRepository = new CategoriaRepositoryImpl();
-    private final ProveedorRepository provRepository = new ProveedorRepositoryImpl();
+    private final ProductoRepository repository;
+    private final CategoriaRepository catRepository;
+    private final ProveedorRepository provRepository;
 
     private final ObservableList<Producto> listaProductos = FXCollections.observableArrayList();
     private final ObservableList<Categoria> listaCategorias = FXCollections.observableArrayList();
@@ -70,13 +78,36 @@ public class ProductosController implements Initializable {
 
     private Producto productoSeleccionado;
 
+    // Constructor para inyección de dependencias (o constructor por defecto según tu setup)
+    public ProductosController() {
+        this(new ProductoRepositoryImpl(), new CategoriaRepositoryImpl(), new ProveedorRepositoryImpl());
+    }
+
+    public ProductosController(ProductoRepository repository, CategoriaRepository catRepository, ProveedorRepository provRepository) {
+        this.repository = repository;
+        this.catRepository = catRepository;
+        this.provRepository = provRepository;
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        inicializarCombos();
+        configurarListeners();
+        configurarTabla();
+        cargarDatos();
+        configurarAtajosTeclado();
+    }
+
+    private void inicializarCombos() {
         cmbEstado.setItems(FXCollections.observableArrayList("ACTIVO", "INACTIVO"));
         cmbEstado.setValue("ACTIVO");
 
         cmbTipoVenta.setItems(FXCollections.observableArrayList("UNIDAD", "GRANEL", "PAQUETE"));
         cmbTipoVenta.setValue("UNIDAD");
+    }
+
+    private void configurarListeners() {
+        listaDetallePaquete.addListener((ListChangeListener<DetallePaquete>) change -> actualizarTextoBotonPaquete());
 
         cmbTipoVenta.valueProperty().addListener((obs, oldVal, newVal) -> {
             boolean esPaquete = "PAQUETE".equalsIgnoreCase(newVal);
@@ -84,27 +115,10 @@ public class ProductosController implements Initializable {
                 pnlContenidoPaquete.setVisible(esPaquete);
                 pnlContenidoPaquete.setManaged(esPaquete);
             }
-        });
-
-        cargarComboCategorias();
-        cargarComboProveedores();
-        configurarColumnas();
-        listarProductos();
-
-        tblProductos.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                productoSeleccionado = newSelection;
-                InventarioUIUtil.cargarProductoEnFormulario(productoSeleccionado, txtCodigoBarras, txtNombre, txtDescripcion, txtPrecio, txtPrecioCompra, txtPorcentajeGanancia, txtPrecioMayoreo, txtStock, txtStockMinimo, cmbEstado, cmbTipoVenta, cmbCategoria, cmbProveedor);
-
+            if (!esPaquete && !listaDetallePaquete.isEmpty()) {
                 listaDetallePaquete.clear();
-                if ("PAQUETE".equalsIgnoreCase(productoSeleccionado.getTipoVenta())) {
-                    List<DetallePaquete> detalles = repository.obtenerDetallesPaquete(productoSeleccionado.getId());
-                    if (detalles != null) {
-                        listaDetallePaquete.addAll(detalles);
-                    }
-                }
-                actualizarTextoBotonPaquete();
             }
+            actualizarTextoBotonPaquete();
         });
 
         if (txtBuscar != null) {
@@ -119,18 +133,109 @@ public class ProductosController implements Initializable {
         }
     }
 
+    private void configurarTabla() {
+        ProductosTableUtil.configurarColumnasProductos(tblProductos);
+        tblProductos.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> onSeleccionarProducto(newSel));
+    }
+
+    private void onSeleccionarProducto(Producto newSelection) {
+        boolean productoCargado = (newSelection != null);
+
+        if (btnActualizar != null) {
+            btnActualizar.setDisable(!productoCargado);
+        }
+        if (btnEliminar != null) {
+            btnEliminar.setDisable(!productoCargado);
+        }
+        if (btnAgregar != null) {
+            btnAgregar.setDisable(productoCargado);
+        }
+
+        listaDetallePaquete.clear();
+
+        if (productoCargado) {
+            productoSeleccionado = newSelection;
+
+            if ("PAQUETE".equalsIgnoreCase(productoSeleccionado.getTipoVenta())) {
+                List<DetallePaquete> detalles = repository.obtenerDetallesPaquete(productoSeleccionado.getId());
+                if (detalles != null) {
+                    listaDetallePaquete.addAll(detalles);
+                }
+            }
+
+            InventarioUIUtil.cargarProductoEnFormulario(
+                    productoSeleccionado, txtCodigoBarras, txtNombre, txtDescripcion,
+                    txtPrecio, txtPrecioCompra, txtPorcentajeGanancia, txtPrecioMayoreo,
+                    txtStock, txtStockMinimo, cmbEstado, cmbTipoVenta, cmbCategoria, cmbProveedor
+            );
+        } else {
+            productoSeleccionado = null;
+        }
+
+        actualizarTextoBotonPaquete();
+    }
+
+    private void cargarDatos() {
+        cargarComboCategorias();
+        cargarComboProveedores();
+        listarProductos();
+    }
+
+    private void configurarAtajosTeclado() {
+        KeyboardShortcutUtil.registrarAtajosCrud(
+                tblProductos,
+                () -> {
+                    limpiarFormulario();
+                    if (txtCodigoBarras != null) {
+                        txtCodigoBarras.requestFocus();
+                    } else {
+                        txtNombre.requestFocus();
+                    }
+                },
+                () -> onAgregar(null),
+                () -> onActualizar(null),
+                () -> onEliminar(null),
+                () -> {
+                    if (txtBuscar != null) {
+                        txtBuscar.requestFocus();
+                        txtBuscar.selectAll();
+                    }
+                },
+                this::limpiarFormulario
+        );
+    }
+
+    // --- ACCIONES FXML ---
     @FXML
     private void onAbrirModalPaquete(ActionEvent event) {
-        PaqueteModalDialog.mostrar(repository, listaDetallePaquete).ifPresent(nuevosDetalles -> {
-            listaDetallePaquete.setAll(nuevosDetalles);
-            actualizarTextoBotonPaquete();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/inventario/view/ConfigurarPaqueteModalView.fxml"));
+            Parent root = loader.load();
 
-            double costoTotal = InventarioCalculosUtil.calcularCostoTotalPaquete(listaDetallePaquete);
-            if (txtPrecioCompra != null) {
-                txtPrecioCompra.setText(String.format(Locale.US, "%.2f", costoTotal));
+            ConfigurarPaqueteModalController modalController = loader.getController();
+            modalController.setDetallesExistentes(listaDetallePaquete);
+
+            Stage stage = new Stage();
+            stage.setTitle("Configurar Componentes del Paquete");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+
+            if (modalController.isGuardado()) {
+                listaDetallePaquete.clear();
+                listaDetallePaquete.addAll(modalController.getListaDetalles());
+                actualizarTextoBotonPaquete();
+
+                double costoTotal = listaDetallePaquete.stream().mapToDouble(DetallePaquete::getSubtotalCosto).sum();
+
+                if (txtPrecioCompra != null) {
+                    txtPrecioCompra.setText(String.format(Locale.US, "%.2f", costoTotal));
+                }
+                calcularPrecioVenta();
             }
-            calcularPrecioVenta();
-        });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -207,11 +312,9 @@ public class ProductosController implements Initializable {
         InventarioUIUtil.extraerProductoDeFormulario(productoSeleccionado, txtCodigoBarras, txtNombre, txtDescripcion, txtPrecio, txtPrecioCompra, txtPorcentajeGanancia, txtPrecioMayoreo, txtStock, txtStockMinimo, cmbEstado, cmbTipoVenta, cmbCategoria, cmbProveedor);
 
         if (repository.actualizar(productoSeleccionado)) {
-            if ("PAQUETE".equalsIgnoreCase(productoSeleccionado.getTipoVenta())) {
-                repository.reemplazarDetallesPaquete(productoSeleccionado.getId(), listaDetallePaquete);
-            } else {
-                repository.reemplazarDetallesPaquete(productoSeleccionado.getId(), null);
-            }
+            List<DetallePaquete> detallesAActualizar = "PAQUETE".equalsIgnoreCase(productoSeleccionado.getTipoVenta()) ? listaDetallePaquete : null;
+            repository.reemplazarDetallesPaquete(productoSeleccionado.getId(), detallesAActualizar);
+
             InventarioUIUtil.mostrarAlerta("Éxito", "Producto actualizado correctamente", Alert.AlertType.INFORMATION);
             limpiarFormulario();
             listarProductos();
@@ -227,46 +330,36 @@ public class ProductosController implements Initializable {
             return;
         }
 
-        // 1. Verificar si el producto tiene historial/relaciones en ventas o inventario
         boolean tieneHistorial = repository.tieneAsociaciones(productoSeleccionado.getId());
 
         if (tieneHistorial) {
-            // --- BORRADO LÓGICO (Desactivación) ---
-            boolean confirmar = mostrarConfirmacion(
+            boolean confirmar = InventarioUIUtil.mostrarConfirmacion(
                     "Producto con historial",
                     "Este producto tiene ventas o movimientos asociados.",
                     "No se puede eliminar de forma definitiva para mantener el historial. ¿Deseas deshabilitarlo/cambiar su estado a INACTIVO?"
             );
 
-            if (confirmar) {
-                if (repository.eliminarLogico(productoSeleccionado.getId())) {
-                    InventarioUIUtil.mostrarAlerta("Éxito", "El producto ha sido deshabilitado correctamente (Estado: Inactivo).", Alert.AlertType.INFORMATION);
-                    limpiarFormulario();
-                    listarProductos();
-                } else {
-                    InventarioUIUtil.mostrarAlerta("Error", "No se pudo deshabilitar el producto.", Alert.AlertType.ERROR);
-                }
+            if (confirmar && repository.eliminarLogico(productoSeleccionado.getId())) {
+                InventarioUIUtil.mostrarAlerta("Éxito", "El producto ha sido deshabilitado correctamente (Estado: Inactivo).", Alert.AlertType.INFORMATION);
+                limpiarFormulario();
+                listarProductos();
             }
         } else {
-            // --- BORRADO FÍSICO (DELETE) ---
-            boolean confirmar = mostrarConfirmacion(
+            boolean confirmar = InventarioUIUtil.mostrarConfirmacion(
                     "Confirmar eliminación",
                     "¿Eliminar producto definitivamente?",
                     "El producto '" + productoSeleccionado.getNombre() + "' no tiene historial registrado y se eliminará permanentemente."
             );
 
-            if (confirmar) {
-                if (repository.eliminar(productoSeleccionado.getId())) {
-                    InventarioUIUtil.mostrarAlerta("Éxito", "Producto eliminado correctamente de la base de datos.", Alert.AlertType.INFORMATION);
-                    limpiarFormulario();
-                    listarProductos();
-                } else {
-                    InventarioUIUtil.mostrarAlerta("Error", "No se pudo eliminar el producto.", Alert.AlertType.ERROR);
-                }
+            if (confirmar && repository.eliminar(productoSeleccionado.getId())) {
+                InventarioUIUtil.mostrarAlerta("Éxito", "Producto eliminado correctamente de la base de datos.", Alert.AlertType.INFORMATION);
+                limpiarFormulario();
+                listarProductos();
             }
         }
     }
 
+    // --- MÉTODOS PRIVADOS DE APOYO ---
     private void calcularPrecioVenta() {
         try {
             double costo = Double.parseDouble(txtPrecioCompra.getText().trim());
@@ -298,72 +391,14 @@ public class ProductosController implements Initializable {
         listaCategorias.clear();
         listaCategorias.addAll(catRepository.listarActivas());
         cmbCategoria.setItems(listaCategorias);
-        cmbCategoria.setConverter(crearStringConverter(Categoria::getNombre));
+        cmbCategoria.setConverter(ProductosTableUtil.crearStringConverter(Categoria::getNombre));
     }
 
     private void cargarComboProveedores() {
         listaProveedores.clear();
         listaProveedores.addAll(provRepository.listarActivos());
         cmbProveedor.setItems(listaProveedores);
-        cmbProveedor.setConverter(crearStringConverter(Proveedor::getNombre));
-    }
-
-    private <T> StringConverter<T> crearStringConverter(java.util.function.Function<T, String> extractorNombre) {
-        return new StringConverter<>() {
-            @Override
-            public String toString(T object) {
-                return object == null ? "" : extractorNombre.apply(object);
-            }
-
-            @Override
-            public T fromString(String string) {
-                return null;
-            }
-        };
-    }
-
-    @SuppressWarnings("unchecked")
-    private void configurarColumnas() {
-        TableColumn<Producto, Integer> colId = new TableColumn<>("ID");
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-
-        TableColumn<Producto, String> colCodigo = new TableColumn<>("Código");
-        colCodigo.setCellValueFactory(new PropertyValueFactory<>("codigoBarras"));
-
-        TableColumn<Producto, String> colNombre = new TableColumn<>("Nombre");
-        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
-
-        TableColumn<Producto, String> colTipoVenta = new TableColumn<>("Tipo Venta");
-        colTipoVenta.setCellValueFactory(new PropertyValueFactory<>("tipoVenta"));
-
-        TableColumn<Producto, Double> colPrecio = new TableColumn<>("P. Venta");
-        colPrecio.setCellValueFactory(new PropertyValueFactory<>("precio"));
-
-        TableColumn<Producto, Double> colPrecioCompra = new TableColumn<>("P. Costo");
-        colPrecioCompra.setCellValueFactory(new PropertyValueFactory<>("precioCompra"));
-
-        TableColumn<Producto, Double> colPorcentajeGanancia = new TableColumn<>("% Gan.");
-        colPorcentajeGanancia.setCellValueFactory(new PropertyValueFactory<>("porcentajeGanancia"));
-
-        TableColumn<Producto, Double> colPrecioMayoreo = new TableColumn<>("P. Mayoreo");
-        colPrecioMayoreo.setCellValueFactory(new PropertyValueFactory<>("precioMayoreo"));
-
-        TableColumn<Producto, Double> colStock = new TableColumn<>("Stock");
-        colStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
-
-        TableColumn<Producto, Double> colStockMin = new TableColumn<>("Mín.");
-        colStockMin.setCellValueFactory(new PropertyValueFactory<>("stockMinimo"));
-
-        TableColumn<Producto, String> colEstado = new TableColumn<>("Estado");
-        colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
-
-        TableColumn<Producto, String> colCategoria = new TableColumn<>("Categoría");
-        colCategoria.setCellValueFactory(c -> c.getValue().getCategoria() != null ? c.getValue().getCategoria().nombreProperty() : new SimpleStringProperty("Sin Categoría"));
-
-        TableColumn<Producto, String> colProveedor = new TableColumn<>("Proveedor");
-        colProveedor.setCellValueFactory(c -> c.getValue().getProveedor() != null ? c.getValue().getProveedor().nombreProperty() : new SimpleStringProperty("Sin Proveedor"));
-
-        tblProductos.getColumns().setAll(colId, colCodigo, colNombre, colTipoVenta, colPrecio, colPrecioCompra, colPrecioMayoreo, colPorcentajeGanancia, colStock, colStockMin, colCategoria, colProveedor, colEstado);
+        cmbProveedor.setConverter(ProductosTableUtil.crearStringConverter(Proveedor::getNombre));
     }
 
     private void listarProductos() {
@@ -373,6 +408,7 @@ public class ProductosController implements Initializable {
     }
 
     private void limpiarFormulario() {
+        // Campos que se deben vaciar por completo
         if (txtCodigoBarras != null) {
             txtCodigoBarras.clear();
         }
@@ -380,25 +416,30 @@ public class ProductosController implements Initializable {
         if (txtDescripcion != null) {
             txtDescripcion.clear();
         }
-        txtPrecio.clear();
+
+        // Valores numéricos por defecto (coincidentes con la interfaz)
         if (txtPrecioCompra != null) {
-            txtPrecioCompra.clear();
+            txtPrecioCompra.setText("0.00");
         }
         if (txtPorcentajeGanancia != null) {
-            txtPorcentajeGanancia.clear();
+            txtPorcentajeGanancia.setText("20.00");
         }
+        txtPrecio.setText("0.00");
         if (txtPrecioMayoreo != null) {
-            txtPrecioMayoreo.clear();
+            txtPrecioMayoreo.setText("0.00");
         }
-        txtStock.clear();
+        txtStock.setText("0");
         if (txtStockMinimo != null) {
-            txtStockMinimo.clear();
+            txtStockMinimo.setText("5");
         }
 
+        // ComboBoxes a sus estados iniciales
         cmbEstado.setValue("ACTIVO");
         cmbTipoVenta.setValue("UNIDAD");
         cmbCategoria.setValue(null);
         cmbProveedor.setValue(null);
+
+        // Reseteo de selección y detalles de paquete
         productoSeleccionado = null;
         tblProductos.getSelectionModel().clearSelection();
 
@@ -444,17 +485,7 @@ public class ProductosController implements Initializable {
 
     private void actualizarTextoBotonPaquete() {
         if (btnConfigurarPaquete != null) {
-            btnConfigurarPaquete.setText("🎁 Configurar Productos (" + listaDetallePaquete.size() + ")");
+            btnConfigurarPaquete.setText("Configurar Productos (" + listaDetallePaquete.size() + ")");
         }
-    }
-
-    private boolean mostrarConfirmacion(String titulo, String encabezado, String contenido) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle(titulo);
-        alert.setHeaderText(encabezado);
-        alert.setContentText(contenido);
-
-        Optional<ButtonType> result = alert.showAndWait();
-        return result.isPresent() && result.get() == ButtonType.OK;
     }
 }

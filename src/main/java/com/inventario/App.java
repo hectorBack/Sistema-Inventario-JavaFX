@@ -20,6 +20,7 @@ public class App extends Application {
         stage.setTitle("Sistema de Gestión de Inventario");
         stage.setMinWidth(1120);
         stage.setMinHeight(640);
+        stage.setMaximized(true);
         stage.show();
     }
 

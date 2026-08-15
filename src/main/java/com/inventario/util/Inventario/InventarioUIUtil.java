@@ -1,21 +1,15 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.inventario.util.Inventario;
 
 import com.inventario.model.Categoria;
 import com.inventario.model.Producto;
 import com.inventario.model.Proveedor;
+import java.util.Optional;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
-/**
- *
- * @author azulc
- */
 public class InventarioUIUtil {
 
     public static void mostrarAlerta(String titulo, String mensaje, Alert.AlertType tipo) {
@@ -99,5 +93,15 @@ public class InventarioUIUtil {
         cmbTipoVenta.setValue(p.getTipoVenta() != null ? p.getTipoVenta() : "UNIDAD");
         cmbCategoria.setValue(p.getCategoria());
         cmbProveedor.setValue(p.getProveedor());
+    }
+
+    public static boolean mostrarConfirmacion(String titulo, String encabezado, String contenido) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(titulo);
+        alert.setHeaderText(encabezado);
+        alert.setContentText(contenido);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.OK;
     }
 }
