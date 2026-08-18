@@ -6,6 +6,7 @@ import com.inventario.repository.Impl.MovimientoRepositoryImpl;
 import com.inventario.repository.Impl.ProductoRepositoryImpl;
 import com.inventario.repository.MovimientoRepository;
 import com.inventario.repository.ProductoRepository;
+import com.inventario.util.Productos.KeyboardShortcutUtil;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -92,6 +93,21 @@ public class MovimientoController implements Initializable {
         cargarProductosEnCombo();
         configurarColumnas();
         listarMovimientos();
+        configurarAtajosTeclado();
+    }
+
+    private void configurarAtajosTeclado() {
+        KeyboardShortcutUtil.registrarAtajosMovimiento(
+                cmbProducto,
+                () -> onRegistrar(null), // Ctrl + S: Procesar ajuste de movimiento
+                () -> {                             // Ctrl + F: Focus al campo de búsqueda
+                    if (txtBuscar != null) {
+                        txtBuscar.requestFocus();
+                        txtBuscar.selectAll();
+                    }
+                },
+                () -> onLimpiarFiltros(null) // ESC: Limpiar filtros de búsqueda
+        );
     }
 
     private void cargarProductosEnCombo() {
