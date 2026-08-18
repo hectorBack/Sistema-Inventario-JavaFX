@@ -50,6 +50,10 @@ public class InventarioController implements Initializable {
     private final InventarioRepository invRepository;
     private final ProductoRepository prodRepository;
 
+    public InventarioController() {
+        this(new InventarioRepositoryImpl(), new ProductoRepositoryImpl());
+    }
+
     public InventarioController(InventarioRepository invRepository, ProductoRepository prodRepository) {
         this.invRepository = invRepository;
         this.prodRepository = prodRepository;

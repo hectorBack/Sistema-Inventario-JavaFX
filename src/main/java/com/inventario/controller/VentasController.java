@@ -10,11 +10,20 @@ import com.inventario.repository.Impl.ProductoRepositoryImpl;
 import com.inventario.repository.Impl.VentaRepositoryImpl;
 import com.inventario.repository.ProductoRepository;
 import com.inventario.repository.VentaRepository;
+import com.inventario.util.Productos.KeyboardShortcutUtil;
+import com.inventario.util.Ventas.CarritoService;
+import com.inventario.util.Ventas.ClienteHelper;
+import com.inventario.util.Ventas.CodigoBarrasParser;
+import com.inventario.util.Ventas.ModalNavigationUtil;
+import com.inventario.util.Ventas.VentasTablaUtil;
+import com.inventario.util.audio.SoundUtil;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -68,11 +77,17 @@ public class VentasController implements Initializable {
     private final VentaRepository ventaRepository;
     private final ClienteRepository clienteRepository;
     private final ProductoRepository productoRepository;
+    private final CarritoService carritoService;
 
-    public VentasController(VentaRepository ventaRepository, ClienteRepository clienteRepository, ProductoRepository productoRepository) {
+    public VentasController() {
+        this(new VentaRepositoryImpl(), new ClienteRepositoryImpl(), new ProductoRepositoryImpl(), new CarritoService());
+    }
+
+    public VentasController(VentaRepository ventaRepository, ClienteRepository clienteRepository, ProductoRepository productoRepository, CarritoService carritoService) {
         this.ventaRepository = ventaRepository;
         this.clienteRepository = clienteRepository;
         this.productoRepository = productoRepository;
+        this.carritoService = carritoService;
     }
 
     // Lista en memoria que actúa como el carrito de compras temporal
@@ -82,54 +97,89 @@ public class VentasController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         cargarCombosIniciales();
-        configurarColumnasCarrito();
+
+        // Delegamos la configuración de la tabla a la clase utilitaria
+        VentasTablaUtil.configurarColumnasCarrito(tblCarrito);
+        tblCarrito.setItems(carritoService.getItems());
 
         cmbProducto.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             txtPrecio.setText(newVal != null ? String.format("%.2f", newVal.getPrecio()) : "0.00");
         });
 
-        // Configuración de escuchas de teclado
-        tblCarrito.setOnKeyPressed(this::manejarTeclasTabla);
+        configurarEventosTeclado();
 
         Platform.runLater(() -> {
             if (txtCodigoBarras != null) {
                 txtCodigoBarras.requestFocus();
-                txtCodigoBarras.getScene().setOnKeyPressed(this::manejarTeclasGlobales);
             }
         });
     }
 
-    private void manejarTeclasGlobales(KeyEvent event) {
-        if (event.getCode() == KeyCode.F12) {
-            onRegistrarVentaCompleta(null);
-            event.consume();
-        }
-    }
+    private void configurarEventosTeclado() {
+        tblCarrito.setOnKeyPressed(event -> {
+            switch (event.getCode()) {
+                case ADD:
+                case PLUS:
+                    onIncrementarCantidad(null);
+                    event.consume();
+                    break;
+                case SUBTRACT:
+                case MINUS:
+                    onDecrementarCantidad(null);
+                    event.consume();
+                    break;
+                default:
+                    break;
+            }
+        });
 
-    private void manejarTeclasTabla(KeyEvent event) {
-        KeyCode code = event.getCode();
-        if (code == KeyCode.DELETE) {
-            onQuitarItem(null);
-            event.consume();
-        } else if (code == KeyCode.ADD || code == KeyCode.PLUS || (event.isShiftDown() && code == KeyCode.EQUALS)) {
-            onIncrementarCantidad(null);
-            event.consume();
-        } else if (code == KeyCode.SUBTRACT || code == KeyCode.MINUS) {
-            onDecrementarCantidad(null);
-            event.consume();
+        KeyboardShortcutUtil.registrarAtajosVentas(
+                txtCodigoBarras != null ? txtCodigoBarras : tblCarrito,
+                () -> onAgregarAlCarrito(null),
+                () -> onQuitarItem(null),
+                () -> onRegistrarVentaCompleta(null),
+                () -> {
+                    if (txtCodigoBarras != null) {
+                        txtCodigoBarras.requestFocus();
+                        txtCodigoBarras.selectAll();
+                    } else if (cmbProducto != null) {
+                        cmbProducto.requestFocus();
+                    }
+                },
+                this::limpiarPantallaCompleta
+        );
+
+        if (txtCodigoBarras != null) {
+            txtCodigoBarras.setOnKeyPressed(event -> {
+                if (event.getCode() == KeyCode.ADD || event.getCode() == KeyCode.PLUS) {
+                    if (txtCodigoBarras.getText().isEmpty() && !tblCarrito.getItems().isEmpty()) {
+                        if (tblCarrito.getSelectionModel().getSelectedItem() == null) {
+                            tblCarrito.getSelectionModel().selectLast();
+                        }
+                        onIncrementarCantidad(null);
+                        event.consume();
+                    }
+                } else if (event.getCode() == KeyCode.SUBTRACT || event.getCode() == KeyCode.MINUS) {
+                    if (txtCodigoBarras.getText().isEmpty() && !tblCarrito.getItems().isEmpty()) {
+                        if (tblCarrito.getSelectionModel().getSelectedItem() == null) {
+                            tblCarrito.getSelectionModel().selectLast();
+                        }
+                        onDecrementarCantidad(null);
+                        event.consume();
+                    }
+                }
+            });
         }
     }
 
     @FXML
     void onRegistrarVentaCompleta(ActionEvent event) {
-        if (carritoItems.isEmpty()) {
+        if (carritoService.estaVacio()) {
             mostrarAlerta("Carrito Vacío", "No hay artículos en el carrito.", Alert.AlertType.WARNING);
             return;
         }
 
         Cliente cliente = cmbCliente.getValue();
-
-        // Si no seleccionaron ningún cliente de la lista, buscamos o creamos "Público en General"
         if (cliente == null) {
             cliente = obtenerOCrearClienteGeneral();
         }
@@ -139,52 +189,56 @@ public class VentasController implements Initializable {
             return;
         }
 
+        final Cliente clienteFinal = cliente;
+        final double total = carritoService.calcularTotal();
+
+        boolean modalCargado = ModalNavigationUtil.<CobroModalController>abrirModal(
+                getClass(),
+                "/com/inventario/view/CobroModal.fxml",
+                "Procesar Pago",
+                modalCtrl -> modalCtrl.initData(
+                        total,
+                        carritoService.calcularTotalArticulos(),
+                        (montoPago, debeImprimirTicket) -> {
+                            // Callback ejecutado cuando el usuario presiona [F1] o [F2]
+                            procesarPersistenciaVenta(clienteFinal, montoPago, debeImprimirTicket);
+                        }
+                )
+        );
+
+        if (!modalCargado) {
+            mostrarAlerta("Error de Vista", "No se pudo cargar la ventana de cobro.", Alert.AlertType.ERROR);
+        }
+    }
+
+    /**
+     * Persiste la venta en la base de datos, manda a imprimir si corresponde y
+     * reinicia el estado del carrito/pantalla.
+     */
+    private void procesarPersistenciaVenta(Cliente cliente, double pagoCon, boolean imprimirTicket) {
         try {
-            URL fxmlLocation = getClass().getResource("/com/inventario/view/CobroModal.fxml");
-            if (fxmlLocation == null) {
-                // Intento de fallback relativo a la estructura de paquetes
-                fxmlLocation = getClass().getResource("CobroModal.fxml");
-            }
+            Venta nuevaVenta = new Venta();
+            nuevaVenta.setCliente(cliente);
+            nuevaVenta.setTotal(carritoService.calcularTotal());
 
-            if (fxmlLocation == null) {
-                mostrarAlerta("Error de Recurso", "No se encontró el archivo CobroModal.fxml en la ruta especificada.", Alert.AlertType.ERROR);
-                return;
-            }
+            List<DetalleVenta> detalles = new ArrayList<>(carritoService.getItems());
+            boolean guardadoExitoso = ventaRepository.registrarVenta(nuevaVenta, detalles);
 
-            FXMLLoader loader = new FXMLLoader(fxmlLocation);
-            Parent root = loader.load();
-
-            CobroModalController controller = loader.getController();
-
-            Stage modalStage = new Stage();
-            modalStage.setTitle("Procesar Pago");
-            modalStage.initModality(Modality.APPLICATION_MODAL);
-            modalStage.setScene(new Scene(root));
-
-            int totalArticulos = (int) carritoItems.stream().mapToDouble(DetalleVenta::getCantidad).sum();
-            controller.initData(totalAcumulado, totalArticulos);
-
-            modalStage.showAndWait();
-
-            if (controller.isVentaConfirmada()) {
-                Venta nuevaVenta = new Venta(cliente, totalAcumulado, "COMPLETADA");
-
-                if (ventaRepository.registrarVenta(nuevaVenta, carritoItems)) {
-                    emitirBeep(900, 120);
-                    if (controller.isImprimirTicket()) {
-                        // Lógica de impresión
-                    }
-                    mostrarAlerta("Venta Exitosa", "La transacción ha sido registrada.", Alert.AlertType.INFORMATION);
-                    limpiarPantallaCompleta();
-                    cargarCombosIniciales();
-                } else {
-                    mostrarAlerta("Error Crítico", "Ocurrió un problema en la transacción SQL.", Alert.AlertType.ERROR);
+            if (guardadoExitoso) {
+                if (imprimirTicket) {
+                    // TicketService.imprimirTicket(nuevaVenta, detalles, pagoCon);
+                    mostrarAlerta("Venta Exitosa", "La venta se registró e imprimió correctamente.", Alert.AlertType.INFORMATION);
                 }
+
+                // Limpia pantalla y carrito inmediatamente sin frenar el flujo
+                limpiarPantallaCompleta();
+
+            } else {
+                mostrarAlerta("Error de Guardado", "No se pudo completar el registro de la venta en la base de datos.", Alert.AlertType.ERROR);
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-            mostrarAlerta("Error de Vista", "Detalle del error: " + e.toString(), Alert.AlertType.ERROR);
+            mostrarAlerta("Error Inesperado", "Ocurrió un problema al procesar la venta: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
@@ -230,82 +284,33 @@ public class VentasController implements Initializable {
     }
 
     /**
-     * Emite un tono sintético vía AudioSystem sin requerir archivos .wav
-     * externos.
-     */
-    private void emitirBeep(int hz, int msecs) {
-        new Thread(() -> {
-            try {
-                byte[] buf = new byte[1];
-                AudioFormat af = new AudioFormat(8000f, 8, 1, true, false);
-                SourceDataLine sdl = AudioSystem.getSourceDataLine(af);
-                sdl.open(af);
-                sdl.start();
-                for (int i = 0; i < msecs * 8; i++) {
-                    double angle = i / (8000f / hz) * 2.0 * Math.PI;
-                    buf[0] = (byte) (Math.sin(angle) * 100);
-                    sdl.write(buf, 0, 1);
-                }
-                sdl.drain();
-                sdl.stop();
-                sdl.close();
-            } catch (Exception ignored) {
-            }
-        }).start();
-    }
-
-    /**
      * Evento ejecutado automáticamente cuando la pistola escanea un código y
      * envía la tecla ENTER al final.
      */
     @FXML
     void onEscanearCodigoBarras(ActionEvent event) {
         String entrada = txtCodigoBarras.getText().trim();
-
         if (entrada.isEmpty()) {
             return;
         }
 
-        String codigo = entrada;
-        double cantidadSuma = 1.0;
+        try {
+            CodigoBarrasParser.ResultadoParseo parseo = CodigoBarrasParser.parsear(entrada);
+            Producto producto = productoRepository.buscarPorCodigoBarras(parseo.getCodigo());
 
-        // Parseo de multiplicación por asterisco '*'
-        if (entrada.contains("*")) {
-            String[] partes = entrada.split("\\*");
-            if (partes.length == 2) {
-                try {
-                    if (partes[0].length() < 5 && partes[1].length() >= 5) {
-                        // Formato: CANTIDAD*CODIGO (ej. 100*75010001)
-                        cantidadSuma = Double.parseDouble(partes[0].trim());
-                        codigo = partes[1].trim();
-                    } else {
-                        // Formato: CODIGO*CANTIDAD (ej. 75010001*100 o 1*100)
-                        codigo = partes[0].trim();
-                        cantidadSuma = Double.parseDouble(partes[1].trim());
-                    }
-                } catch (NumberFormatException e) {
-                    mostrarAlerta("Formato inválido", "No se pudo interpretar la cantidad introducida con *", Alert.AlertType.WARNING);
-                    txtCodigoBarras.clear();
-                    txtCodigoBarras.requestFocus();
-                    return;
+            if (producto != null) {
+                SoundUtil.emitirBeep(900, 120);
+                if ("GRANEL".equalsIgnoreCase(producto.getTipoVenta())) {
+                    abrirModalGranel(producto, parseo.getCantidad());
+                } else {
+                    procesarAgregadoACarrito(producto, parseo.getCantidad());
                 }
-            }
-        }
-
-        Producto productoEncontrado = productoRepository.buscarPorCodigoBarras(codigo);
-
-        if (productoEncontrado != null) {
-            emitirBeep(900, 120);
-
-            // SI EL PRODUCTO ES A GRANEL SE ABRE EL MODAL
-            if ("GRANEL".equalsIgnoreCase(productoEncontrado.getTipoVenta())) {
-                abrirModalGranel(productoEncontrado, cantidadSuma);
             } else {
-                procesarAgregadoACarrito(productoEncontrado, cantidadSuma);
+                SoundUtil.emitirBeep(450, 180);
+                mostrarAlerta("Producto no encontrado", "No se encontró ningún artículo con el código: " + parseo.getCodigo(), Alert.AlertType.WARNING);
             }
-        } else {
-            emitirBeep(450, 180);
-            mostrarAlerta("Producto no encontrado", "No se encontró ningún artículo con el código: " + codigo, Alert.AlertType.WARNING);
+        } catch (NumberFormatException e) {
+            mostrarAlerta("Formato inválido", "No se pudo interpretar la cantidad introducida con *", Alert.AlertType.WARNING);
         }
 
         txtCodigoBarras.clear();
@@ -313,40 +318,34 @@ public class VentasController implements Initializable {
     }
 
     private void abrirModalGranel(Producto producto, double cantidadInicial) {
-        try {
-            URL fxmlLocation = getClass().getResource("/com/inventario/view/CantidadGranelModal.fxml");
-            if (fxmlLocation == null) {
-                // Fallback relativo al paquete actual
-                fxmlLocation = getClass().getResource("CantidadGranelModal.fxml");
+        // Declaramos un arreglo de un solo elemento para capturar el controlador
+        final CantidadGranelModalController[] modalCtrlRef = new CantidadGranelModalController[1];
+
+        boolean modalCargado = ModalNavigationUtil.<CantidadGranelModalController>abrirModal(
+                getClass(),
+                "/com/inventario/view/CantidadGranelModal.fxml",
+                "Cantidad de Producto",
+                modalController -> {
+                    modalController.initData(producto, cantidadInicial);
+                    modalCtrlRef[0] = modalController; // Guardamos la referencia
+                }
+        );
+
+        if (modalCargado && modalCtrlRef[0] != null) {
+            CantidadGranelModalController modalCtrl = modalCtrlRef[0];
+            // Evaluamos si el usuario presionó 'Aceptar' o dio Enter
+            if (modalCtrl.isAceptado()) {
+                double cantidadFinal = modalCtrl.getCantidadIngresada();
+                procesarAgregadoACarrito(producto, cantidadFinal);
             }
-
-            if (fxmlLocation == null) {
-                mostrarAlerta("Error de Recurso", "No se encontró el archivo CantidadGranelModal.fxml en la ruta especificada.", Alert.AlertType.ERROR);
-                return;
-            }
-
-            FXMLLoader loader = new FXMLLoader(fxmlLocation);
-            Parent root = loader.load();
-
-            CantidadGranelModalController modalController = loader.getController();
-
-            Stage modalStage = new Stage();
-            modalStage.setTitle("Cantidad de Producto");
-            modalStage.initModality(Modality.APPLICATION_MODAL);
-            modalStage.setScene(new Scene(root));
-
-            modalController.initData(producto, cantidadInicial);
-
-            modalStage.showAndWait();
-
-            if (modalController.isAceptado()) {
-                procesarAgregadoACarrito(producto, modalController.getCantidadIngresada());
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            mostrarAlerta("Error de Vista", "Detalle del error: " + e.toString(), Alert.AlertType.ERROR);
+        } else {
+            mostrarAlerta("Error", "No se pudo cargar la ventana para venta a granel.", Alert.AlertType.ERROR);
         }
+    }
+
+    @FXML
+    private void onLimpiar(ActionEvent event) {
+        limpiarPantallaCompleta();
     }
 
     @FXML
@@ -377,15 +376,12 @@ public class VentasController implements Initializable {
             seleccionado.setCantidad(nuevaCantidad);
             tblCarrito.refresh();
         }
-        recalcularTotal();
+        actualizarEtiquetaTotal();
     }
 
     private void cargarCombosIniciales() {
-        List<Cliente> clientesLista = clienteRepository.listarActivos();
-        // Cargar Clientes Activos usando el repositorio
         ObservableList<Cliente> clientes = FXCollections.observableArrayList(clienteRepository.listarActivos());
         cmbCliente.setItems(clientes);
-
         cmbCliente.setCellFactory(lv -> new ListCell<Cliente>() {
             @Override
             protected void updateItem(Cliente item, boolean empty) {
@@ -395,14 +391,12 @@ public class VentasController implements Initializable {
         });
         cmbCliente.setButtonCell(cmbCliente.getCellFactory().call(null));
 
-        // Cargar Productos Disponibles
         ObservableList<Producto> productos = FXCollections.observableArrayList(
                 productoRepository.listarTodos().stream()
                         .filter(p -> p.getStock() > 0)
-                        .collect(java.util.stream.Collectors.toList())
+                        .collect(Collectors.toList())
         );
         cmbProducto.setItems(productos);
-
         cmbProducto.setCellFactory(lv -> new ListCell<Producto>() {
             @Override
             protected void updateItem(Producto item, boolean empty) {
@@ -411,60 +405,6 @@ public class VentasController implements Initializable {
             }
         });
         cmbProducto.setButtonCell(cmbProducto.getCellFactory().call(null));
-    }
-
-    private void configurarColumnasCarrito() {
-        TableColumn<DetalleVenta, String> colProducto = new TableColumn<>("Producto");
-        colProducto.setCellValueFactory(new PropertyValueFactory<>("nombreProducto"));
-
-        TableColumn<DetalleVenta, Double> colCantidad = new TableColumn<>("Cantidad");
-        colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
-        colCantidad.setStyle("-fx-alignment: CENTER;");
-        colCantidad.setCellFactory(tc -> new TableCell<DetalleVenta, Double>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    // Muestra 3 decimales si tiene decimales, o número entero si no los tiene
-                    setText(item % 1 == 0 ? String.format("%.0f", item) : String.format("%.3f", item));
-                }
-            }
-        });
-
-        TableColumn<DetalleVenta, Double> colPrecioUnitario = new TableColumn<>("Precio Unit.");
-        colPrecioUnitario.setCellValueFactory(new PropertyValueFactory<>("precioUnitario"));
-        colPrecioUnitario.setStyle("-fx-alignment: CENTER-RIGHT;");
-        colPrecioUnitario.setCellFactory(tc -> new TableCell<DetalleVenta, Double>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("$%.2f", item));
-                }
-            }
-        });
-
-        TableColumn<DetalleVenta, Double> colSubtotal = new TableColumn<>("Subtotal");
-        colSubtotal.setCellValueFactory(new PropertyValueFactory<>("subtotal"));
-        colSubtotal.setStyle("-fx-alignment: CENTER-RIGHT;");
-        colSubtotal.setCellFactory(tc -> new TableCell<DetalleVenta, Double>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("$%.2f", item));
-                }
-            }
-        });
-
-        tblCarrito.getColumns().setAll(colProducto, colCantidad, colPrecioUnitario, colSubtotal);
-        tblCarrito.setItems(carritoItems);
     }
 
     @FXML
@@ -487,7 +427,7 @@ public class VentasController implements Initializable {
                 abrirModalGranel(prodSeleccionado, cantidad);
             } else {
                 if (procesarAgregadoACarrito(prodSeleccionado, cantidad)) {
-                    emitirBeep(900, 120);
+                    SoundUtil.emitirBeep(900, 120);
                 }
             }
             txtCantidad.clear();
@@ -501,35 +441,13 @@ public class VentasController implements Initializable {
      * agregar/incrementar renglones.
      */
     private boolean procesarAgregadoACarrito(Producto producto, double cantidadAñadir) {
-        if (producto.getStock() <= 0) {
-            mostrarAlerta("Sin Stock", "El producto está agotado en almacén.", Alert.AlertType.WARNING);
+        String errorStock = carritoService.agregarOActualizarProducto(producto, cantidadAñadir);
+        if (errorStock != null) {
+            mostrarAlerta("Stock", errorStock, Alert.AlertType.WARNING);
             return false;
         }
-
-        DetalleVenta itemExistente = carritoItems.stream()
-                .filter(item -> item.getProducto() != null && item.getProducto().getId() == producto.getId())
-                .findFirst().orElse(null);
-
-        if (itemExistente != null) {
-            double nuevaCantidadTotal = "GRANEL".equalsIgnoreCase(producto.getTipoVenta())
-                    ? cantidadAñadir
-                    : itemExistente.getCantidad() + cantidadAñadir;
-
-            if (nuevaCantidadTotal > producto.getStock()) {
-                mostrarAlerta("Stock Insuficiente", "Supera el stock disponible (" + producto.getStock() + ").", Alert.AlertType.WARNING);
-                return false;
-            }
-            itemExistente.setCantidad(nuevaCantidadTotal);
-            tblCarrito.refresh();
-        } else {
-            if (cantidadAñadir > producto.getStock()) {
-                mostrarAlerta("Stock Insuficiente", "Solo quedan " + producto.getStock() + " unidades.", Alert.AlertType.WARNING);
-                return false;
-            }
-            carritoItems.add(new DetalleVenta(producto, cantidadAñadir, producto.getPrecio()));
-        }
-
-        recalcularTotal();
+        tblCarrito.refresh();
+        actualizarEtiquetaTotal();
         return true;
     }
 
@@ -540,19 +458,16 @@ public class VentasController implements Initializable {
             mostrarAlerta("Selección vacía", "Elige un artículo de la tabla para removerlo del carrito.", Alert.AlertType.WARNING);
             return;
         }
-        carritoItems.remove(itemSeleccionado);
-        recalcularTotal();
+        carritoService.removerItem(itemSeleccionado);
+        actualizarEtiquetaTotal();
 
         if (txtCodigoBarras != null) {
             txtCodigoBarras.requestFocus();
         }
     }
 
-    private void recalcularTotal() {
-        double sumaRaw = carritoItems.stream().mapToDouble(DetalleVenta::getSubtotal).sum();
-        // Redondea a 2 decimales exactos
-        this.totalAcumulado = Math.round(sumaRaw * 100.0) / 100.0;
-        lblTotal.setText(String.format("$%.2f", totalAcumulado));
+    private void actualizarEtiquetaTotal() {
+        lblTotal.setText(String.format("$%.2f", carritoService.calcularTotal()));
     }
 
     private void limpiarPantallaCompleta() {
@@ -560,8 +475,8 @@ public class VentasController implements Initializable {
         cmbProducto.getSelectionModel().clearSelection();
         txtCantidad.clear();
         txtPrecio.setText("0.00");
-        carritoItems.clear();
-        recalcularTotal();
+        carritoService.limpiar();
+        actualizarEtiquetaTotal();
 
         if (txtCodigoBarras != null) {
             txtCodigoBarras.clear();

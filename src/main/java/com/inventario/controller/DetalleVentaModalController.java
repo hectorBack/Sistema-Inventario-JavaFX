@@ -24,7 +24,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 public class DetalleVentaModalController implements Initializable {
-
+    
     @FXML
     private Label lblTituloVenta;
     @FXML
@@ -33,7 +33,7 @@ public class DetalleVentaModalController implements Initializable {
     private Label lblEstadoVenta;
     @FXML
     private Label lblTotalVenta;
-
+    
     @FXML
     private TableView<DetalleVenta> tblDetalles;
     @FXML
@@ -44,25 +44,29 @@ public class DetalleVentaModalController implements Initializable {
     private TableColumn<DetalleVenta, Double> colPrecio;
     @FXML
     private TableColumn<DetalleVenta, Double> colSubtotal;
-
+    
     @FXML
     private Button btnAnularVenta;
-
+    
     private final VentaRepository ventaRepository;
-
+    
+    public DetalleVentaModalController() {
+        this(new VentaRepositoryImpl());
+    }
+    
     public DetalleVentaModalController(VentaRepository ventaRepository) {
         this.ventaRepository = ventaRepository;
     }
-
+    
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private Venta venta;
     private boolean estadoCambiado = false;
-
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         configurarTabla();
     }
-
+    
     private void configurarTabla() {
         // 1. Enlace directo de la propiedad de texto
         colProducto.setCellValueFactory(cellData -> cellData.getValue().nombreProductoProperty());
@@ -105,17 +109,17 @@ public class DetalleVentaModalController implements Initializable {
             }
         });
     }
-
+    
     public void initData(Venta venta) {
         this.venta = venta;
         lblTituloVenta.setText("Detalle de Venta #" + venta.getId());
-
+        
         String clienteNombre = (venta.getCliente() != null) ? venta.getCliente().getNombre() : "Público en General";
         String fechaFormateada = (venta.getFecha() != null) ? venta.getFecha().format(formatter) : "N/A";
         lblInfoClienteFecha.setText("Cliente: " + clienteNombre + " | Fecha: " + fechaFormateada);
-
+        
         lblTotalVenta.setText(String.format("$%.2f", venta.getTotal()));
-
+        
         if ("CANCELADA".equalsIgnoreCase(venta.getEstado())) {
             lblEstadoVenta.setText("CANCELADA");
             lblEstadoVenta.setStyle("-fx-background-color: #fee2e2; -fx-padding: 4 12; -fx-background-radius: 12;");
@@ -127,18 +131,18 @@ public class DetalleVentaModalController implements Initializable {
             lblEstadoVenta.setTextFill(javafx.scene.paint.Color.web("#15803d"));
             btnAnularVenta.setDisable(false);
         }
-
+        
         List<DetalleVenta> detalles = ventaRepository.listarDetallesPorVenta(venta.getId());
         tblDetalles.setItems(FXCollections.observableArrayList(detalles));
     }
-
+    
     @FXML
     void onAnularVenta(ActionEvent event) {
         Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
         confirmacion.setTitle("Confirmar Anulación");
         confirmacion.setHeaderText("¿Deseas anular la Venta #" + venta.getId() + "?");
         confirmacion.setContentText("Esta acción devolverá las existencias al inventario.");
-
+        
         Optional<ButtonType> resp = confirmacion.showAndWait();
         if (resp.isPresent() && resp.get() == ButtonType.OK) {
             if (ventaRepository.cancelarVenta(venta.getId())) {
@@ -148,14 +152,14 @@ public class DetalleVentaModalController implements Initializable {
             }
         }
     }
-
+    
     @FXML
     void onCerrar(ActionEvent event) {
         ((Stage) lblTituloVenta.getScene().getWindow()).close();
     }
-
+    
     public boolean isEstadoCambiado() {
         return estadoCambiado;
     }
-
+    
 }

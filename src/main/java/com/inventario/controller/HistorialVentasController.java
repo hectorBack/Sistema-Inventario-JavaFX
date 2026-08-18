@@ -7,9 +7,9 @@ import com.inventario.repository.ClienteRepository;
 import com.inventario.repository.VentaRepository;
 import com.inventario.repository.Impl.ClienteRepositoryImpl;
 import com.inventario.repository.Impl.VentaRepositoryImpl;
-import com.inventario.util.Ventas.ExcelExporter;
-import com.inventario.util.Ventas.FiltroPeriodo;
-import com.inventario.util.Ventas.ReportePrinterManager;
+import com.inventario.util.HistorialVentas.ExcelExporter;
+import com.inventario.util.HistorialVentas.FiltroPeriodo;
+import com.inventario.util.HistorialVentas.ReportePrinterManager;
 import java.io.File;
 import java.net.URL;
 import java.time.LocalDate;
@@ -79,6 +79,10 @@ public class HistorialVentasController implements Initializable {
 
     private final VentaRepository ventaRepository;
     private final ClienteRepository clienteRepository;
+
+    public HistorialVentasController() {
+        this(new VentaRepositoryImpl(), new ClienteRepositoryImpl());
+    }
 
     public HistorialVentasController(VentaRepository ventaRepository, ClienteRepository clienteRepository) {
         this.ventaRepository = ventaRepository;

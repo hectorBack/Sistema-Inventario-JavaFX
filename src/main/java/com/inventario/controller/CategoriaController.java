@@ -3,6 +3,7 @@ package com.inventario.controller;
 import com.inventario.model.Categoria;
 import com.inventario.repository.CategoriaRepository;
 import com.inventario.repository.Impl.CategoriaRepositoryImpl;
+import com.inventario.util.Productos.KeyboardShortcutUtil;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -33,7 +34,16 @@ public class CategoriaController implements Initializable {
     private TableColumn<Categoria, String> colNombre;
     private TableColumn<Categoria, String> colEstado;
 
-    private final CategoriaRepository repository = new CategoriaRepositoryImpl();
+    private final CategoriaRepository repository;
+
+    public CategoriaController() {
+        this(new CategoriaRepositoryImpl());
+    }
+
+    public CategoriaController(CategoriaRepository repository) {
+        this.repository = repository;
+    }
+
     private final ObservableList<Categoria> listaCategorias = FXCollections.observableArrayList();
 
     private Categoria categoriaSeleccionada;
@@ -58,6 +68,29 @@ public class CategoriaController implements Initializable {
                 categoriaSeleccionada = newSelection;
                 txtNombre.setText(categoriaSeleccionada.getNombre());
                 cmbEstado.setValue(categoriaSeleccionada.getEstado());
+            }
+        });
+
+        // Registrar atajos de teclado una vez que la escena esté lista
+        txtNombre.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                KeyboardShortcutUtil.registrarAtajosCrud(
+                        txtNombre,
+                        () -> {
+                            limpiarFormulario();
+                            txtNombre.requestFocus();
+                        }, // accionNuevo (Ctrl + N)
+                        () -> onAgregar(null), // accionGuardar (Ctrl + S)
+                        () -> onActualizar(null), // accionActualizar (Ctrl + U)
+                        () -> onEliminar(null), // accionEliminar (DELETE)
+                        () -> {
+                            if (txtBuscar != null) {
+                                txtBuscar.requestFocus();
+                                txtBuscar.selectAll();
+                            }
+                        }, // accionBuscar (Ctrl + F)
+                        this::limpiarFormulario // accionCancelar (ESC)
+                );
             }
         });
     }

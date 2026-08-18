@@ -1,5 +1,6 @@
 package com.inventario.controller;
 
+import java.util.function.BiConsumer;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -36,22 +37,21 @@ public class CobroModalController {
     private boolean ventaConfirmada = false;
     private boolean imprimirTicket = false;
 
-    public void initData(double total, int cantidadArticulos) {
+    private BiConsumer<Double, Boolean> onPagoConfirmado;
+
+    public void initData(double total, int cantidadArticulos, BiConsumer<Double, Boolean> onPagoConfirmado) {
         this.totalAPagar = total;
+        this.onPagoConfirmado = onPagoConfirmado;
+
         this.lblTotalPagar.setText(String.format("$%.2f", total));
         this.lblTotalArticulos.setText(String.valueOf(cantidadArticulos));
 
         cmbFormaPago.setItems(FXCollections.observableArrayList("Efectivo"));
         cmbFormaPago.getSelectionModel().selectFirst();
 
-        // 1. Asignar el total directamente formateado al campo txtPagoCon
         txtPagoCon.setText(String.format(java.util.Locale.US, "%.2f", total));
-
-        // 2. Calcular automáticamente el cambio inicial ($0.00)
         onCalcularCambio(null);
 
-        // 3. Seleccionar todo el texto para que si el cajero quiere ingresar otro monto, 
-        // lo sobreescriba directamente al teclear sin tener que borrar manualmente
         Platform.runLater(() -> {
             if (txtPagoCon.getScene() != null) {
                 txtPagoCon.getScene().setOnKeyPressed(this::manejarTeclasModal);
@@ -101,7 +101,14 @@ public class CobroModalController {
         if (validarPago()) {
             this.ventaConfirmada = true;
             this.imprimirTicket = true;
+
+            double montoPago = Double.parseDouble(txtPagoCon.getText().trim());
             cerrarModal();
+
+            // Ejecutar el callback
+            if (onPagoConfirmado != null) {
+                onPagoConfirmado.accept(montoPago, true);
+            }
         }
     }
 
@@ -110,7 +117,14 @@ public class CobroModalController {
         if (validarPago()) {
             this.ventaConfirmada = true;
             this.imprimirTicket = false;
+
+            double montoPago = Double.parseDouble(txtPagoCon.getText().trim());
             cerrarModal();
+
+            // Ejecutar el callback
+            if (onPagoConfirmado != null) {
+                onPagoConfirmado.accept(montoPago, false);
+            }
         }
     }
 

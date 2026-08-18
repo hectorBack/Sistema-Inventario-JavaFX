@@ -3,6 +3,7 @@ package com.inventario.controller;
 import com.inventario.model.Cliente;
 import com.inventario.repository.ClienteRepository;
 import com.inventario.repository.Impl.ClienteRepositoryImpl;
+import com.inventario.util.Productos.KeyboardShortcutUtil;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -49,6 +50,10 @@ public class ClientesController implements Initializable {
     // Dependencias y Listas
     private final ClienteRepository repository;
 
+    public ClientesController() {
+        this(new ClienteRepositoryImpl());
+    }
+
     public ClientesController(ClienteRepository repository) {
         this.repository = repository;
     }
@@ -68,6 +73,7 @@ public class ClientesController implements Initializable {
 
         // 3. Cargar datos de la BD
         listarClientes();
+        configurarAtajosTeclado();
 
         // 4. Búsqueda en tiempo real
         if (txtBuscar != null) {
@@ -118,6 +124,30 @@ public class ClientesController implements Initializable {
         listaClientes.clear();
         listaClientes.addAll(repository.listarTodos());
         tblClientes.setItems(listaClientes);
+    }
+
+    private void configurarAtajosTeclado() {
+        KeyboardShortcutUtil.registrarAtajosCrud(
+                tblClientes,
+                () -> {
+                    limpiarFormulario();
+                    if (txtNombre != null) {
+                        txtNombre.requestFocus();
+                    } else {
+                        txtNombre.requestFocus();
+                    }
+                },
+                () -> onAgregar(null),
+                () -> onActualizar(null),
+                () -> onEliminar(null),
+                () -> {
+                    if (txtBuscar != null) {
+                        txtBuscar.requestFocus();
+                        txtBuscar.selectAll();
+                    }
+                },
+                this::limpiarFormulario
+        );
     }
 
     private void filtrarClientes(String criterio) {

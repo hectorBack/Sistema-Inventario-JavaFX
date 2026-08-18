@@ -10,11 +10,11 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox prefHeight="600.0" prefWidth="900.0" spacing="25.0" style="-fx-background-color: #f8fafc; -fx-padding: 25;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.ClientesController">
+<HBox spacing="25.0" style="-fx-background-color: #f8fafc; -fx-padding: 25;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.ClientesController">
     <children>
       
         <!-- FORMULARIO LATERAL -->
-        <VBox minWidth="280.0" prefWidth="280.0" spacing="12.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-padding: 20;">
+        <VBox minWidth="300.0" prefWidth="300.0" spacing="12.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-padding: 20;">
             <children>
                 <Label text="Datos del Cliente" textFill="#0f172a">
                     <font>
@@ -87,7 +87,7 @@
                                 <Font name="System Bold" size="12.0" />
                             </font>
                         </Label>
-                        <ComboBox fx:id="cmbEstado" prefHeight="35.0" prefWidth="240.0" promptText="ACTIVO" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" />
+                        <ComboBox fx:id="cmbEstado" prefHeight="35.0" prefWidth="260.0" promptText="ACTIVO" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" />
                     </children>
                 </VBox>
             </children>
@@ -101,10 +101,10 @@
                     <children>
                         <Label text="Catálogo de Clientes" textFill="#0f172a">
                             <font>
-                                <Font name="System Bold" size="22.0" />
+                                <Font name="System Bold" size="24.0" />
                             </font>
                         </Label>
-                        <TextField fx:id="txtBuscar" prefHeight="35.0" prefWidth="220.0" promptText="🔍 Buscar por nombre, RFC..." style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" HBox.hgrow="ALWAYS" />
+                        <TextField fx:id="txtBuscar" prefHeight="35.0" prefWidth="220.0" promptText="🔍 Buscar por nombre, RFC... (Ctrl+F)" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" HBox.hgrow="ALWAYS" />
                     </children>
                 </HBox>
             
@@ -116,19 +116,19 @@
             
                 <HBox alignment="CENTER_RIGHT" prefHeight="50.0" spacing="12.0">
                     <children>
-                        <Button fx:id="btnAgregar" mnemonicParsing="false" onAction="#onAgregar" prefHeight="38.0" prefWidth="110.0" style="-fx-background-color: #10b981; -fx-background-radius: 6; -fx-cursor: hand;" text="Agregar" textFill="WHITE">
+                        <Button fx:id="btnAgregar" mnemonicParsing="false" onAction="#onAgregar" prefHeight="38.0" prefWidth="130.0" style="-fx-background-color: #10b981; -fx-background-radius: 6; -fx-cursor: hand;" text="Agregar (Ctrl+S)" textFill="WHITE">
                             <font>
-                                <Font name="System Bold" size="13.0" />
+                                <Font name="System Bold" size="12.0" />
                             </font>
                         </Button>
-                        <Button fx:id="btnActualizar" mnemonicParsing="false" onAction="#onActualizar" prefHeight="38.0" prefWidth="110.0" style="-fx-background-color: #3b82f6; -fx-background-radius: 6; -fx-cursor: hand;" text="Actualizar" textFill="WHITE">
+                        <Button fx:id="btnActualizar" mnemonicParsing="false" onAction="#onActualizar" prefHeight="38.0" prefWidth="135.0" style="-fx-background-color: #3b82f6; -fx-background-radius: 6; -fx-cursor: hand;" text="Actualizar (Ctrl+U)" textFill="WHITE">
                             <font>
-                                <Font name="System Bold" size="13.0" />
+                                <Font name="System Bold" size="12.0" />
                             </font>
                         </Button>
-                        <Button fx:id="btnEliminar" mnemonicParsing="false" onAction="#onEliminar" prefHeight="38.0" prefWidth="110.0" style="-fx-background-color: #ef4444; -fx-background-radius: 6; -fx-cursor: hand;" text="Eliminar" textFill="WHITE">
+                        <Button fx:id="btnEliminar" mnemonicParsing="false" onAction="#onEliminar" prefHeight="38.0" prefWidth="125.0" style="-fx-background-color: #ef4444; -fx-background-radius: 6; -fx-cursor: hand;" text="Eliminar (Supr)" textFill="WHITE">
                             <font>
-                                <Font name="System Bold" size="13.0" />
+                                <Font name="System Bold" size="12.0" />
                             </font>
                         </Button>
                     </children>

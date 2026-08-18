@@ -54,6 +54,10 @@ public class MovimientoController implements Initializable {
     private final MovimientoRepository movRepository;
     private final ProductoRepository prodRepository;
 
+    public MovimientoController() {
+        this(new MovimientoRepositoryImpl(), new ProductoRepositoryImpl());
+    }
+
     public MovimientoController(MovimientoRepository movRepository, ProductoRepository prodRepository) {
         this.movRepository = movRepository;
         this.prodRepository = prodRepository;

@@ -1,4 +1,4 @@
-package com.inventario.util.Ventas;
+package com.inventario.util.HistorialVentas;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;

@@ -1,4 +1,4 @@
-package com.inventario.util.Ventas;
+package com.inventario.util.HistorialVentas;
 
 import javafx.print.PageLayout;
 import javafx.print.PageOrientation;

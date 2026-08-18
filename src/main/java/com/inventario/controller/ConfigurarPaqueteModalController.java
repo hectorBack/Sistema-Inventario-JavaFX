@@ -35,6 +35,10 @@ public class ConfigurarPaqueteModalController {
     private final ObservableList<DetallePaquete> listaDetalles = FXCollections.observableArrayList();
     private final ProductoRepository repository;
 
+    public ConfigurarPaqueteModalController() {
+        this(new ProductoRepositoryImpl());
+    }
+
     public ConfigurarPaqueteModalController(ProductoRepository repository) {
         this.repository = repository;
     }

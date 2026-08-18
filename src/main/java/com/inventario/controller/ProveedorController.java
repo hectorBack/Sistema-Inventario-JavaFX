@@ -3,6 +3,7 @@ package com.inventario.controller;
 import com.inventario.model.Proveedor;
 import com.inventario.repository.Impl.ProveedorRepositoryImpl;
 import com.inventario.repository.ProveedorRepository;
+import com.inventario.util.Productos.KeyboardShortcutUtil;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -37,6 +38,10 @@ public class ProveedorController implements Initializable {
 
     private final ProveedorRepository repo;
 
+    public ProveedorController() {
+        this(new ProveedorRepositoryImpl());
+    }
+
     public ProveedorController(ProveedorRepository repo) {
         this.repo = repo;
     }
@@ -51,6 +56,7 @@ public class ProveedorController implements Initializable {
 
         configurarColumnas();
         listarProveedores();
+        configurarAtajosTeclado();
 
         // Búsqueda en tiempo real
         if (txtBuscar != null) {
@@ -106,6 +112,30 @@ public class ProveedorController implements Initializable {
         listaProveedores.clear();
         listaProveedores.addAll(repo.buscarConFiltro(criterio));
         tblProveedores.setItems(listaProveedores);
+    }
+
+    private void configurarAtajosTeclado() {
+        KeyboardShortcutUtil.registrarAtajosCrud(
+                tblProveedores,
+                () -> {
+                    limpiarCampos();
+                    if (txtNombre != null) {
+                        txtNombre.requestFocus();
+                    } else {
+                        txtNombre.requestFocus();
+                    }
+                },
+                () -> onAgregar(null),
+                () -> onActualizar(null),
+                () -> onEliminar(null),
+                () -> {
+                    if (txtBuscar != null) {
+                        txtBuscar.requestFocus();
+                        txtBuscar.selectAll();
+                    }
+                },
+                this::limpiarCampos
+        );
     }
 
     @FXML

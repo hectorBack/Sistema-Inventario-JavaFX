@@ -2,6 +2,7 @@ package com.inventario.controller;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -27,7 +28,6 @@ public class MainLayoutController implements Initializable {
     private Button btnProveedores;
     @FXML
     private Button btnClientes;
-
     @FXML
     private Button btnVentas;
     @FXML
@@ -35,61 +35,57 @@ public class MainLayoutController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // Al arrancar, cargamos por defecto el inventario en el centro
+        // Al arrancar, cargamos por defecto el inventario en el centro y seleccionamos su botón
         cargarVista("view/ProductosView");
+        actualizarEstiloMenu(btnProductos);
     }
 
     @FXML
     void mostrarProductos(ActionEvent event) {
         cargarVista("view/ProductosView");
-        actualizarEstiloMenu(btnProductos, btnInventario, btnCategorias, btnMovimientos, btnProveedores, btnClientes, btnVentas, btnHistorialVentas);
+        actualizarEstiloMenu(btnProductos);
     }
 
     @FXML
     void mostrarInventario(ActionEvent event) {
         cargarVista("view/InventarioView");
-        // Activamos Inventario, apagamos Categorías y Movimientos
-        actualizarEstiloMenu(btnInventario, btnCategorias, btnMovimientos, btnProveedores, btnClientes, btnVentas);
+        actualizarEstiloMenu(btnInventario);
     }
 
     @FXML
     void mostrarCategorias(ActionEvent event) {
         cargarVista("view/Categoria");
-        // Activamos Categorías, apagamos Inventario y Movimientos
-        actualizarEstiloMenu(btnCategorias, btnInventario, btnMovimientos, btnProveedores, btnClientes, btnVentas);
+        actualizarEstiloMenu(btnCategorias);
     }
 
     @FXML
     void mostrarMovimientos(ActionEvent event) {
         cargarVista("view/Movimiento");
-        // Activamos Movimientos, apagamos Inventario y Categorías
-        actualizarEstiloMenu(btnMovimientos, btnInventario, btnCategorias, btnProveedores, btnClientes, btnVentas);
+        actualizarEstiloMenu(btnMovimientos);
     }
 
     @FXML
     void mostrarProveedores(ActionEvent event) {
         cargarVista("view/Proveedor");
-        // Encendemos Proveedores, apagamos los otros tres
-        actualizarEstiloMenu(btnProveedores, btnInventario, btnCategorias, btnMovimientos, btnClientes, btnVentas);
+        actualizarEstiloMenu(btnProveedores);
     }
 
     @FXML
     void mostrarClientes(ActionEvent event) {
         cargarVista("view/Clientes");
-        // Encendemos Clientes y pasamos el resto de botones para que se apaguen automáticamente
-        actualizarEstiloMenu(btnClientes, btnInventario, btnCategorias, btnMovimientos, btnProveedores, btnVentas);
+        actualizarEstiloMenu(btnClientes);
     }
 
     @FXML
     void mostrarVentas(ActionEvent event) {
         cargarVista("view/Ventas");
-        actualizarEstiloMenu(btnVentas, btnInventario, btnCategorias, btnMovimientos, btnProveedores, btnClientes);
+        actualizarEstiloMenu(btnVentas);
     }
 
     @FXML
     void mostrarHistorialVentas(ActionEvent event) {
         cargarVista("view/HistorialVentas");
-        actualizarEstiloMenu(btnHistorialVentas, btnInventario, btnCategorias, btnMovimientos, btnProveedores, btnClientes, btnVentas);
+        actualizarEstiloMenu(btnHistorialVentas);
     }
 
     private void cargarVista(String fxmlPath) {
@@ -105,15 +101,22 @@ public class MainLayoutController implements Initializable {
         }
     }
 
-    private void actualizarEstiloMenu(Button seleccionado, Button... deseleccionados) {
-        // 1. Estilo activo (Slate 700 / Texto Blanco)
-        seleccionado.setStyle("-fx-background-color: #334155; -fx-background-radius: 6; -fx-cursor: hand;");
-        seleccionado.setTextFill(javafx.scene.paint.Color.WHITE);
-
-        // 2. Apagar todos los botones que se pasen en los parámetros restantes
-        for (Button botonInactivo : deseleccionados) {
-            botonInactivo.setStyle("-fx-background-color: transparent; -fx-background-radius: 6; -fx-cursor: hand;");
-            botonInactivo.setTextFill(javafx.scene.paint.Color.web("#94a3b8"));
+    private void actualizarEstiloMenu(Button seleccionado) {
+        List<Button> todosLosBotones = List.of(
+            btnProductos, btnInventario, btnCategorias, btnMovimientos, 
+            btnProveedores, btnClientes, btnVentas, btnHistorialVentas
+        );
+        
+        for (Button boton : todosLosBotones) {
+            if (boton == seleccionado) {
+                // 1. Estilo activo (Slate 700 / Texto Blanco)
+                boton.setStyle("-fx-background-color: #334155; -fx-background-radius: 6; -fx-cursor: hand;");
+                boton.setTextFill(javafx.scene.paint.Color.WHITE);
+            } else {
+                // 2. Apagar los botones inactivos (Transparente / Slate 400)
+                boton.setStyle("-fx-background-color: transparent; -fx-background-radius: 6; -fx-cursor: hand;");
+                boton.setTextFill(javafx.scene.paint.Color.web("#94a3b8"));
+            }
         }
     }
 
