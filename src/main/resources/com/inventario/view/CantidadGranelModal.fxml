@@ -8,35 +8,25 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefWidth="480.0" spacing="15.0" style="-fx-background-color: #ffffff; -fx-padding: 25; -fx-background-radius: 10;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.CantidadGranelModalController">
+<VBox prefWidth="480.0" spacing="15.0" styleClass="modal-surface" stylesheets="@../styles/theme.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.CantidadGranelModalController">
     <children>
-        <!-- TITULO Y PRODUCTO -->
         <VBox spacing="2.0">
             <children>
-                <Label text="Venta a Granel" textFill="#0f172a">
-                    <font>
-                        <Font name="System Bold" size="22.0" />
-                    </font>
-                </Label>
-                <Label fx:id="lblNombreProducto" text="JITOMATE" textFill="#64748b">
-                    <font>
-                        <Font name="System Bold" size="14.0" />
-                    </font>
-                </Label>
+                <Label text="Venta a Granel" styleClass="modal-header"/>
+                <Label fx:id="lblNombreProducto" text="JITOMATE" styleClass="modal-subtitle"/>
             </children>
         </VBox>
 
-        <!-- RESUMEN PRECIO UNITARIO -->
-        <HBox spacing="15.0" style="-fx-background-color: #f8fafc; -fx-padding: 12 15; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;">
+        <HBox spacing="15.0" styleClass="summary-card">
             <children>
                 <VBox HBox.hgrow="ALWAYS">
                     <children>
-                        <Label text="PRECIO UNITARIO POR KG / UNIDAD" textFill="#64748b">
+                        <Label text="PRECIO UNITARIO POR KG / UNIDAD" styleClass="muted-text">
                             <font>
                                 <Font name="System Bold" size="11.0" />
                             </font>
                         </Label>
-                        <Label fx:id="lblPrecioUnitario" text="\$0.00" textFill="#0f172a">
+                        <Label fx:id="lblPrecioUnitario" text="\$0.00" styleClass="primary-text">
                             <font>
                                 <Font name="System Bold" size="20.0" />
                             </font>
@@ -46,45 +36,27 @@
             </children>
         </HBox>
 
-        <!-- CAMPOS DE ENTRADA: CANTIDAD E IMPORTE -->
         <HBox spacing="15.0">
             <children>
                 <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                     <children>
-                        <Label text="Cantidad (Kg / Unid):" textFill="#475569">
-                            <font>
-                                <Font name="System Bold" size="12.0" />
-                            </font>
-                        </Label>
-                        <TextField fx:id="txtCantidad" onAction="#onAceptar" prefHeight="45.0" promptText="1.000" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #3b82f6; -fx-font-size: 18px; -fx-font-weight: bold;" text="1.000" />
+                        <Label text="Cantidad (Kg / Unid):" styleClass="form-label"/>
+                        <TextField fx:id="txtCantidad" onAction="#onAceptar" prefHeight="45.0" promptText="1.000" text="1.000" styleClass="form-field"/>
                     </children>
                 </VBox>
                 <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                     <children>
-                        <Label text="Importe a Cobrar ($):" textFill="#475569">
-                            <font>
-                                <Font name="System Bold" size="12.0" />
-                            </font>
-                        </Label>
-                        <TextField fx:id="txtImporte" onAction="#onAceptar" prefHeight="45.0" promptText="0.00" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #10b981; -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-inner-color: #10b981;" text="0.00" />
+                        <Label text="Importe a Cobrar ($):" styleClass="form-label"/>
+                        <TextField fx:id="txtImporte" onAction="#onAceptar" prefHeight="45.0" promptText="0.00" text="0.00" styleClass="form-field"/>
                     </children>
                 </VBox>
             </children>
         </HBox>
 
-        <!-- BOTONES DE ACCION -->
         <VBox spacing="8.0">
             <children>
-                <Button fx:id="btnAceptar" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onAceptar" prefHeight="42.0" style="-fx-background-color: #10b981; -fx-background-radius: 6; -fx-cursor: hand;" text="ENTER - Aceptar" textFill="WHITE">
-                    <font>
-                        <Font name="System Bold" size="13.0" />
-                    </font>
-                </Button>
-                <Button fx:id="btnCancelar" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onCancelar" prefHeight="38.0" style="-fx-background-color: transparent; -fx-border-color: #94a3b8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand;" text="ESC - Cancelar" textFill="#64748b">
-                    <font>
-                        <Font name="System Bold" size="12.0" />
-                    </font>
-                </Button>
+                <Button fx:id="btnAceptar" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onAceptar" prefHeight="42.0" text="ENTER - Aceptar" styleClass="action-button, action-primary"/>
+                <Button fx:id="btnCancelar" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onCancelar" prefHeight="38.0" text="ESC - Cancelar" styleClass="action-button, action-ghost"/>
             </children>
             <VBox.margin>
                 <Insets top="10.0" />

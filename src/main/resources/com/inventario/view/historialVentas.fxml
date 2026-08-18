@@ -13,89 +13,58 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox spacing="25.0" style="-fx-background-color: #f8fafc; -fx-padding: 25;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.HistorialVentasController">
+<HBox spacing="25.0" styleClass="page-shell" stylesheets="@../styles/theme.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.HistorialVentasController">
     <children>
-        <!-- PANEL LATERAL DE FILTROS -->
-        <VBox minWidth="300.0" prefWidth="300.0" spacing="15.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-padding: 20;">
+        <VBox minWidth="300.0" prefWidth="300.0" spacing="15.0" styleClass="form-panel">
             <children>
-                <Label text="Filtros de Búsqueda" textFill="#0f172a">
-                    <font>
-                        <Font name="System Bold" size="18.0" />
-                    </font>
-                </Label>
+                <Label text="Filtros de Búsqueda" styleClass="section-title"/>
 
-                <!-- FILTRO POR PERÍODO -->
                 <VBox spacing="5.0">
                     <children>
-                        <Label fx:id="lblMostrarVentas" text="Mostrar ventas de:" textFill="#64748b">
-                            <font>
-                                <Font name="System Bold" size="12.0" />
-                            </font>
-                        </Label>
-                        <ComboBox fx:id="cmbPeriodo" prefHeight="35.0" prefWidth="260.0" promptText="Seleccionar periodo" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1;" />
-                    </children>
-                </VBox>
-
-                <!-- RANGO DE FECHAS -->
-                <VBox spacing="5.0">
-                    <children>
-                        <Label text="Fecha Inicial" textFill="#64748b">
-                            <font>
-                                <Font name="System Bold" size="12.0" />
-                            </font>
-                        </Label>
-                        <DatePicker fx:id="dpInicio" prefHeight="35.0" prefWidth="260.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1;" />
+                        <Label fx:id="lblMostrarVentas" text="Mostrar ventas de:" styleClass="form-label"/>
+                        <ComboBox fx:id="cmbPeriodo" prefHeight="35.0" prefWidth="260.0" promptText="Seleccionar periodo" styleClass="form-field"/>
                     </children>
                 </VBox>
 
                 <VBox spacing="5.0">
                     <children>
-                        <Label text="Fecha Final" textFill="#64748b">
-                            <font>
-                                <Font name="System Bold" size="12.0" />
-                            </font>
-                        </Label>
-                        <DatePicker fx:id="dpFin" prefHeight="35.0" prefWidth="260.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1;" />
+                        <Label text="Fecha Inicial" styleClass="form-label"/>
+                        <DatePicker fx:id="dpInicio" prefHeight="35.0" prefWidth="260.0" styleClass="form-field"/>
                     </children>
                 </VBox>
 
-                <!-- FILTRO POR CLIENTE -->
+                <VBox spacing="5.0">
+                    <children>
+                        <Label text="Fecha Final" styleClass="form-label"/>
+                        <DatePicker fx:id="dpFin" prefHeight="35.0" prefWidth="260.0" styleClass="form-field"/>
+                    </children>
+                </VBox>
+
                 <VBox spacing="5.0">
                     <children>
                         <HBox alignment="CENTER_LEFT">
                             <children>
-                                <Label text="Filtrar por Cliente" textFill="#64748b">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Label>
+                                <Label text="Filtrar por Cliente" styleClass="form-label"/>
                                 <Region HBox.hgrow="ALWAYS" />
-                                <Label text="(Ctrl + F)" textFill="#94a3b8">
+                                <Label text="(Ctrl + F)" styleClass="muted-text">
                                     <font>
                                         <Font name="System Italic" size="10.0" />
                                     </font>
                                 </Label>
                             </children>
                         </HBox>
-                        <ComboBox fx:id="cmbFiltroCliente" prefHeight="35.0" prefWidth="260.0" promptText="Todos los clientes" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1;" />
+                        <ComboBox fx:id="cmbFiltroCliente" prefHeight="35.0" prefWidth="260.0" promptText="Todos los clientes" styleClass="form-field"/>
                     </children>
                 </VBox>
 
-                <!-- BOTONES DE ACCIÓN DE FILTRO -->
                 <VBox spacing="10.0">
                     <children>
-                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onBuscarVentas" prefHeight="38.0" style="-fx-background-color: #3b82f6; -fx-background-radius: 6; -fx-cursor: hand;" text="🔍 Filtrar (Ctrl + L)" textFill="WHITE">
-                            <font>
-                                <Font name="System Bold" size="13.0" />
-                            </font>
+                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onBuscarVentas" prefHeight="38.0" text="🔍 Filtrar (Ctrl + L)" styleClass="action-button, action-secondary">
                             <tooltip>
                                 <Tooltip text="Aplicar Filtro (Ctrl + L)" />
                             </tooltip>
                         </Button>
-                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onLimpiarFiltros" prefHeight="35.0" style="-fx-background-color: #e2e8f0; -fx-background-radius: 6; -fx-cursor: hand;" text="Limpiar Filtros (ESC)" textFill="#334155">
-                            <font>
-                                <Font name="System Bold" size="12.0" />
-                            </font>
+                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onLimpiarFiltros" prefHeight="35.0" text="Limpiar Filtros (ESC)" styleClass="action-button, action-soft">
                             <tooltip>
                                 <Tooltip text="Limpiar Filtros (ESC)" />
                             </tooltip>
@@ -108,29 +77,18 @@
             </children>
         </VBox>
 
-        <!-- TABLA PRINCIPAL, BARRA DE HERRAMIENTAS Y TOTALES -->
         <VBox spacing="15.0" HBox.hgrow="ALWAYS">
             <children>
                 <HBox alignment="CENTER_LEFT" spacing="15.0">
                     <children>
-                        <Label text="Historial de Ventas" textFill="#0f172a">
-                            <font>
-                                <Font name="System Bold" size="24.0" />
-                            </font>
-                        </Label>
+                        <Label text="Historial de Ventas" styleClass="page-title"/>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button mnemonicParsing="false" onAction="#onExportarExcel" prefHeight="35.0" style="-fx-background-color: #10b981; -fx-background-radius: 6; -fx-cursor: hand;" text="📊 Exportar Excel" textFill="WHITE">
-                            <font>
-                                <Font name="System Bold" size="12.0" />
-                            </font>
+                        <Button mnemonicParsing="false" onAction="#onExportarExcel" prefHeight="35.0" text="📊 Exportar Excel" styleClass="action-button, action-primary">
                             <tooltip>
                                 <Tooltip text="Exportar a CSV / Excel (Ctrl + E)" />
                             </tooltip>
                         </Button>
-                        <Button mnemonicParsing="false" onAction="#onImprimir" prefHeight="35.0" style="-fx-background-color: #6366f1; -fx-background-radius: 6; -fx-cursor: hand;" text="🖨 Imprimir" textFill="WHITE">
-                            <font>
-                                <Font name="System Bold" size="12.0" />
-                            </font>
+                        <Button mnemonicParsing="false" onAction="#onImprimir" prefHeight="35.0" text="🖨 Imprimir" styleClass="action-button, action-secondary">
                             <tooltip>
                                 <Tooltip text="Imprimir Tabla (Ctrl + P)" />
                             </tooltip>
@@ -138,7 +96,7 @@
                     </children>
                 </HBox>
 
-                <TableView fx:id="tblVentas" prefHeight="430.0" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0;" VBox.vgrow="ALWAYS">
+                <TableView fx:id="tblVentas" prefHeight="430.0" styleClass="table-shell" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colId" prefWidth="60.0" text="ID" />
                         <TableColumn fx:id="colCliente" prefWidth="180.0" text="Cliente" />
@@ -152,14 +110,10 @@
                     </columnResizePolicy>
                 </TableView>
 
-                <HBox alignment="CENTER_RIGHT" prefHeight="50.0" spacing="15.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-padding: 10 20;">
+                <HBox alignment="CENTER_RIGHT" prefHeight="50.0" spacing="15.0" styleClass="toolbar-panel">
                     <children>
-                        <Label text="TOTAL COMPLETADO EN PERIODO:" textFill="#64748b">
-                            <font>
-                                <Font name="System Bold" size="12.0" />
-                            </font>
-                        </Label>
-                        <Label fx:id="lblTotalHistorico" text="\$0.00" textFill="#10b981">
+                        <Label text="TOTAL COMPLETADO EN PERIODO:" styleClass="muted-text"/>
+                        <Label fx:id="lblTotalHistorico" text="\$0.00" styleClass="success-text">
                             <font>
                                 <Font name="System Bold" size="22.0" />
                             </font>

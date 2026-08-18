@@ -14,198 +14,121 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox spacing="25.0" style="-fx-background-color: #f8fafc; -fx-padding: 25;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.ProductosController">
+<HBox spacing="25.0" styleClass="page-shell" stylesheets="@../styles/theme.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.ProductosController">
     <children>
-        <!-- FORMULARIO LATERAL: NUEVO PRODUCTO -->
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="300.0" prefWidth="300.0" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="300.0" prefWidth="300.0" styleClass="scroll-pane">
             <content>
-                <VBox spacing="12.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-padding: 20;">
+                <VBox spacing="12.0" styleClass="form-panel">
                     <children>
-                        <Label minHeight="25.0" style="-fx-text-fill: #0f172a;" text="Nuevo Producto">
-                            <font>
-                                <Font name="System Bold" size="18.0" />
-                            </font>
+                        <Label minHeight="25.0" text="Nuevo Producto" styleClass="section-title">
                             <VBox.margin>
                                 <Insets bottom="5.0" />
                             </VBox.margin>
                         </Label>
 
-                        <!-- CÓDIGO DE BARRAS -->
                         <VBox spacing="4.0">
                             <children>
-                                <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Código de barras del producto">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Label>
-                                <TextField fx:id="txtCodigoBarras" prefHeight="32.0" promptText="Escanea o escribe el código..." style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" />
+                                <Label minHeight="16.0" text="Código de barras del producto" styleClass="form-label"/>
+                                <TextField fx:id="txtCodigoBarras" prefHeight="32.0" promptText="Escanea o escribe el código..." styleClass="form-field"/>
                             </children>
                         </VBox>
 
-                        <!-- NOMBRE -->
                         <VBox spacing="4.0">
                             <children>
-                                <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Nombre del producto">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Label>
-                                <TextField fx:id="txtNombre" prefHeight="32.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" />
+                                <Label minHeight="16.0" text="Nombre del producto" styleClass="form-label"/>
+                                <TextField fx:id="txtNombre" prefHeight="32.0" styleClass="form-field"/>
                             </children>
                         </VBox>
 
-                        <!-- TIPO DE VENTA (SE VENDE) -->
                         <VBox spacing="4.0">
                             <children>
-                                <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Se vende por">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Label>
-                                <ComboBox fx:id="cmbTipoVenta" prefHeight="32.0" prefWidth="260.0" promptText="Por Unidad / Pieza" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" />
+                                <Label minHeight="16.0" text="Se vende por" styleClass="form-label"/>
+                                <ComboBox fx:id="cmbTipoVenta" prefHeight="32.0" prefWidth="260.0" promptText="Por Unidad / Pieza" styleClass="form-field"/>
                             </children>
                         </VBox>
 
-                        <!-- CONTENEDOR DINÁMICO PARA CONFIGURACIÓN DE PAQUETE -->
                         <VBox fx:id="pnlContenidoPaquete" managed="false" spacing="4.0" visible="false">
                             <children>
-                                <Button fx:id="btnConfigurarPaquete" 
-                                        maxWidth="1.7976931348623157E308" 
-                                        onAction="#onAbrirModalPaquete" 
-                                        prefHeight="35.0" 
-                                        style="-fx-background-color: #8b5cf6; -fx-background-radius: 6; -fx-cursor: hand;" 
-                                        text="📦 Configurar Paquete (0 items)" 
-                                        textFill="WHITE">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Button>
+                                <Button fx:id="btnConfigurarPaquete" maxWidth="1.7976931348623157E308" onAction="#onAbrirModalPaquete" prefHeight="35.0" text="📦 Configurar Paquete (0 items)" styleClass="action-button, action-warning"/>
                             </children>
                         </VBox>
 
-                        <!-- PRECIO COSTO Y GANANCIA -->
                         <HBox spacing="10.0">
                             <children>
                                 <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Precio Costo ($)">
-                                            <font>
-                                                <Font name="System Bold" size="12.0" />
-                                            </font>
-                                        </Label>
-                                        <TextField fx:id="txtPrecioCompra" prefHeight="32.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" text="0.00" />
+                                        <Label minHeight="16.0" text="Precio Costo ($)" styleClass="form-label"/>
+                                        <TextField fx:id="txtPrecioCompra" prefHeight="32.0" text="0.00" styleClass="form-field"/>
                                     </children>
                                 </VBox>
                                 <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Ganancia (%)">
-                                            <font>
-                                                <Font name="System Bold" size="12.0" />
-                                            </font>
-                                        </Label>
-                                        <TextField fx:id="txtPorcentajeGanancia" prefHeight="32.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" text="20.00" />
+                                        <Label minHeight="16.0" text="Ganancia (%)" styleClass="form-label"/>
+                                        <TextField fx:id="txtPorcentajeGanancia" prefHeight="32.0" text="20.00" styleClass="form-field"/>
                                     </children>
                                 </VBox>
                             </children>
                         </HBox>
 
-                        <!-- PRECIO VENTA & PRECIO MAYOREO -->
                         <HBox spacing="10.0">
                             <children>
                                 <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Precio Venta ($)">
-                                            <font>
-                                                <Font name="System Bold" size="12.0" />
-                                            </font>
-                                        </Label>
-                                        <TextField fx:id="txtPrecio" prefHeight="32.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" text="0.00" />
+                                        <Label minHeight="16.0" text="Precio Venta ($)" styleClass="form-label"/>
+                                        <TextField fx:id="txtPrecio" prefHeight="32.0" text="0.00" styleClass="form-field"/>
                                     </children>
                                 </VBox>
                                 <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="P. Mayoreo ($)">
-                                            <font>
-                                                <Font name="System Bold" size="12.0" />
-                                            </font>
-                                        </Label>
-                                        <TextField fx:id="txtPrecioMayoreo" prefHeight="32.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" text="0.00" />
+                                        <Label minHeight="16.0" text="P. Mayoreo ($)" styleClass="form-label"/>
+                                        <TextField fx:id="txtPrecioMayoreo" prefHeight="32.0" text="0.00" styleClass="form-field"/>
                                     </children>
                                 </VBox>
                             </children>
                         </HBox>
 
-                        <!-- STOCK ACTUAL Y STOCK MÍNIMO -->
                         <HBox spacing="10.0">
                             <children>
                                 <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Stock Actual">
-                                            <font>
-                                                <Font name="System Bold" size="12.0" />
-                                            </font>
-                                        </Label>
-                                        <TextField fx:id="txtStock" prefHeight="32.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" text="0" />
+                                        <Label minHeight="16.0" text="Stock Actual" styleClass="form-label"/>
+                                        <TextField fx:id="txtStock" prefHeight="32.0" text="0" styleClass="form-field"/>
                                     </children>
                                 </VBox>
                                 <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Stock Mínimo">
-                                            <font>
-                                                <Font name="System Bold" size="12.0" />
-                                            </font>
-                                        </Label>
-                                        <TextField fx:id="txtStockMinimo" prefHeight="32.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" text="5" />
+                                        <Label minHeight="16.0" text="Stock Mínimo" styleClass="form-label"/>
+                                        <TextField fx:id="txtStockMinimo" prefHeight="32.0" text="5" styleClass="form-field"/>
                                     </children>
                                 </VBox>
                             </children>
                         </HBox>
 
-                        <!-- DESCRIPCIÓN -->
                         <VBox spacing="4.0">
                             <children>
-                                <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Descripción">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Label>
-                                <TextArea fx:id="txtDescripcion" prefHeight="50.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" wrapText="true" />
+                                <Label minHeight="16.0" text="Descripción" styleClass="form-label"/>
+                                <TextArea fx:id="txtDescripcion" prefHeight="50.0" wrapText="true" styleClass="form-field"/>
                             </children>
                         </VBox>
 
-                        <!-- CATEGORÍA -->
                         <VBox spacing="4.0">
                             <children>
-                                <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Categoría">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Label>
-                                <ComboBox fx:id="cmbCategoria" prefHeight="32.0" prefWidth="260.0" promptText="Sin categoría" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" />
+                                <Label minHeight="16.0" text="Categoría" styleClass="form-label"/>
+                                <ComboBox fx:id="cmbCategoria" prefHeight="32.0" prefWidth="260.0" promptText="Sin categoría" styleClass="form-field"/>
                             </children>
                         </VBox>
 
-                        <!-- PROVEEDOR -->
                         <VBox spacing="4.0">
                             <children>
-                                <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Proveedor">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Label>
-                                <ComboBox fx:id="cmbProveedor" prefHeight="32.0" prefWidth="260.0" promptText="Sin proveedor" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" />
+                                <Label minHeight="16.0" text="Proveedor" styleClass="form-label"/>
+                                <ComboBox fx:id="cmbProveedor" prefHeight="32.0" prefWidth="260.0" promptText="Sin proveedor" styleClass="form-field"/>
                             </children>
                         </VBox>
 
-                        <!-- ESTADO DEL PRODUCTO -->
                         <VBox spacing="4.0">
                             <children>
-                                <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Estado">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Label>
-                                <ComboBox fx:id="cmbEstado" prefHeight="32.0" prefWidth="260.0" promptText="Seleccione Estado" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" />
+                                <Label minHeight="16.0" text="Estado" styleClass="form-label"/>
+                                <ComboBox fx:id="cmbEstado" prefHeight="32.0" prefWidth="260.0" promptText="Seleccione Estado" styleClass="form-field"/>
                             </children>
                         </VBox>
 
@@ -214,21 +137,16 @@
             </content>
         </ScrollPane>
 
-        <!-- TABLA PRINCIPAL Y BOTONES CRUD -->
         <VBox fx:id="contenedorPrincipal" spacing="15.0" HBox.hgrow="ALWAYS">
             <children>
                 <HBox alignment="CENTER_LEFT" prefHeight="40.0" spacing="15.0">
                     <children>
-                        <Label text="Gestión de Productos" textFill="#0f172a">
-                            <font>
-                                <Font name="System Bold" size="24.0" />
-                            </font>
-                        </Label>
-                        <TextField fx:id="txtBuscar" prefHeight="35.0" prefWidth="220.0" promptText="🔍 Buscar por nombre o código... (Ctrl+F)" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" HBox.hgrow="ALWAYS" />
+                        <Label text="Gestión de Productos" styleClass="page-title"/>
+                        <TextField fx:id="txtBuscar" prefHeight="35.0" prefWidth="220.0" promptText="🔍 Buscar por nombre o código... (Ctrl+F)" styleClass="form-field" HBox.hgrow="ALWAYS"/>
                     </children>
                 </HBox>
 
-                <TableView fx:id="tblProductos" prefHeight="410.0" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0;" VBox.vgrow="ALWAYS">
+                <TableView fx:id="tblProductos" prefHeight="410.0" styleClass="table-shell" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colId" prefWidth="50.0" text="ID" />
                         <TableColumn fx:id="colCodigo" prefWidth="110.0" text="Código" />
@@ -242,25 +160,11 @@
                     </columnResizePolicy>
                 </TableView>
 
-                <!-- BOTONES DE ACCIÓN -->
                 <HBox alignment="CENTER_RIGHT" spacing="10.0">
                     <children>
-
-                        <Button fx:id="btnAgregar" mnemonicParsing="false" onAction="#onAgregar" prefHeight="38.0" prefWidth="130.0" style="-fx-background-color: #10b981; -fx-background-radius: 6; -fx-cursor: hand;" text="Agregar (Ctrl+S)" textFill="WHITE">
-                            <font>
-                                <Font name="System Bold" size="12.0" />
-                            </font>
-                        </Button>
-                        <Button fx:id="btnActualizar" mnemonicParsing="false" onAction="#onActualizar" prefHeight="38.0" prefWidth="135.0" style="-fx-background-color: #3b82f6; -fx-background-radius: 6; -fx-cursor: hand;" text="Actualizar (Ctrl+U)" textFill="WHITE">
-                            <font>
-                                <Font name="System Bold" size="12.0" />
-                            </font>
-                        </Button>
-                        <Button fx:id="btnEliminar" mnemonicParsing="false" onAction="#onEliminar" prefHeight="38.0" prefWidth="125.0" style="-fx-background-color: #ef4444; -fx-background-radius: 6; -fx-cursor: hand;" text="Eliminar (Supr)" textFill="WHITE">
-                            <font>
-                                <Font name="System Bold" size="12.0" />
-                            </font>
-                        </Button>
+                        <Button fx:id="btnAgregar" mnemonicParsing="false" onAction="#onAgregar" prefHeight="38.0" prefWidth="130.0" text="Agregar (Ctrl+S)" styleClass="action-button, action-primary"/>
+                        <Button fx:id="btnActualizar" mnemonicParsing="false" onAction="#onActualizar" prefHeight="38.0" prefWidth="135.0" text="Actualizar (Ctrl+U)" styleClass="action-button, action-secondary"/>
+                        <Button fx:id="btnEliminar" mnemonicParsing="false" onAction="#onEliminar" prefHeight="38.0" prefWidth="125.0" text="Eliminar (Supr)" styleClass="action-button, action-danger"/>
                     </children>
                 </HBox>
             </children>

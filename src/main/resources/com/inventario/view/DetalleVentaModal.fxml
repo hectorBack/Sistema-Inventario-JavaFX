@@ -9,26 +9,17 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="500.0" prefWidth="650.0" spacing="15.0" style="-fx-background-color: #ffffff; -fx-padding: 25;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.DetalleVentaModalController">
+<VBox prefHeight="500.0" prefWidth="650.0" spacing="15.0" styleClass="modal-surface" stylesheets="@../styles/theme.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.DetalleVentaModalController">
     <children>
-        <!-- ENCABEZADO Y DATOS DE LA VENTA -->
         <HBox alignment="CENTER_LEFT">
             <children>
                 <VBox HBox.hgrow="ALWAYS">
                     <children>
-                        <Label fx:id="lblTituloVenta" text="Detalle de Venta #0" textFill="#0f172a">
-                            <font>
-                                <Font name="System Bold" size="20.0" />
-                            </font>
-                        </Label>
-                        <Label fx:id="lblInfoClienteFecha" text="Cliente: N/A | Fecha: --/--/---- --:--" textFill="#64748b">
-                            <font>
-                                <Font name="System Bold" size="13.0" />
-                            </font>
-                        </Label>
+                        <Label fx:id="lblTituloVenta" text="Detalle de Venta #0" styleClass="modal-header"/>
+                        <Label fx:id="lblInfoClienteFecha" text="Cliente: N/A | Fecha: --/--/---- --:--" styleClass="modal-subtitle"/>
                     </children>
                 </VBox>
-                <Label fx:id="lblEstadoVenta" style="-fx-background-color: #dcfce7; -fx-padding: 4 12; -fx-background-radius: 12;" text="COMPLETADA" textFill="#15803d">
+                <Label fx:id="lblEstadoVenta" text="COMPLETADA" styleClass="info-chip, success-text">
                     <font>
                         <Font name="System Bold" size="12.0" />
                     </font>
@@ -37,7 +28,7 @@
         </HBox>
 
         <!-- TABLA DE ARTÍCULOS VENDIDOS -->
-        <TableView fx:id="tblDetalles" prefHeight="300.0" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0;" VBox.vgrow="ALWAYS">
+        <TableView fx:id="tblDetalles" prefHeight="300.0" styleClass="table-shell" VBox.vgrow="ALWAYS">
             <columns>
                 <TableColumn fx:id="colProducto" prefWidth="240.0" text="Producto" />
                 <TableColumn fx:id="colCantidad" prefWidth="90.0" text="Cantidad" />
@@ -54,7 +45,7 @@
             <children>
                 <HBox alignment="CENTER_LEFT" spacing="10.0" HBox.hgrow="ALWAYS">
                     <children>
-                        <Button fx:id="btnAnularVenta" mnemonicParsing="false" onAction="#onAnularVenta" prefHeight="38.0" style="-fx-background-color: transparent; -fx-border-color: #ef4444; -fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand;" text="❌ Anular Venta" textFill="#ef4444">
+                        <Button fx:id="btnAnularVenta" mnemonicParsing="false" onAction="#onAnularVenta" prefHeight="38.0" text="❌ Anular Venta" styleClass="action-button, action-ghost">
                             <font>
                                 <Font name="System Bold" size="12.0" />
                             </font>
@@ -64,12 +55,12 @@
                 
                 <VBox alignment="CENTER_RIGHT">
                     <children>
-                        <Label text="TOTAL VENTA" textFill="#64748b">
+                        <Label text="TOTAL VENTA" styleClass="muted-text">
                             <font>
                                 <Font name="System Bold" size="11.0" />
                             </font>
                         </Label>
-                        <Label fx:id="lblTotalVenta" text="\$0.00" textFill="#0f172a">
+                        <Label fx:id="lblTotalVenta" text="\$0.00" styleClass="primary-text">
                             <font>
                                 <Font name="System Bold" size="22.0" />
                             </font>
@@ -80,7 +71,7 @@
                     </HBox.margin>
                 </VBox>
 
-                <Button mnemonicParsing="false" onAction="#onCerrar" prefHeight="38.0" prefWidth="100.0" style="-fx-background-color: #3b82f6; -fx-background-radius: 6; -fx-cursor: hand;" text="Cerrar" textFill="WHITE">
+                <Button mnemonicParsing="false" onAction="#onCerrar" prefHeight="38.0" prefWidth="100.0" text="Cerrar" styleClass="action-button, action-secondary">
                     <font>
                         <Font name="System Bold" size="13.0" />
                     </font>

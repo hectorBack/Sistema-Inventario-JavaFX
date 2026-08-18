@@ -13,31 +13,22 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox spacing="25.0" style="-fx-background-color: #f8fafc; -fx-padding: 25;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.InventarioController">
+<HBox spacing="25.0" styleClass="page-shell" stylesheets="@../styles/theme.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.InventarioController">
     <children>
-        <!-- FORMULARIO LATERAL: AGREGAR INVENTARIO -->
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="300.0" prefWidth="300.0" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="300.0" prefWidth="300.0" styleClass="scroll-pane">
             <content>
-                <VBox spacing="14.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-padding: 20;">
+                <VBox spacing="14.0" styleClass="form-panel">
                     <children>
-                        <Label minHeight="25.0" style="-fx-text-fill: #0f172a;" text="Agregar Inventario">
-                            <font>
-                                <Font name="System Bold" size="18.0" />
-                            </font>
+                        <Label minHeight="25.0" text="Agregar Inventario" styleClass="section-title">
                             <VBox.margin>
                                 <Insets bottom="5.0" />
                             </VBox.margin>
                         </Label>
 
-                        <!-- CÓDIGO DE BARRAS -->
                         <VBox spacing="4.0">
                             <children>
-                                <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Código de barras del producto (Ctrl+F)">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Label>
-                                <TextField fx:id="txtCodigoBarras" onAction="#onBuscarProductoPorCodigo" prefHeight="35.0" promptText="Escanea o escribe el código..." style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;">
+                                <Label minHeight="16.0" text="Código de barras del producto (Ctrl+F)" styleClass="form-label"/>
+                                <TextField fx:id="txtCodigoBarras" onAction="#onBuscarProductoPorCodigo" prefHeight="35.0" promptText="Escanea o escribe el código..." styleClass="form-field">
                                     <tooltip>
                                         <Tooltip text="Presiona Ctrl + F para enfocar este campo" />
                                     </tooltip>
@@ -45,55 +36,28 @@
                             </children>
                         </VBox>
 
-                        <!-- NOMBRE DEL PRODUCTO -->
                         <VBox spacing="4.0">
                             <children>
-                                <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Nombre del producto">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Label>
-                                <Label fx:id="lblNombreProducto" prefHeight="32.0" style="-fx-background-color: #f1f5f9; -fx-background-radius: 6; -fx-padding: 5 10; -fx-text-fill: #0f172a;" text="-" textOverrun="ELLIPSIS">
-                                    <font>
-                                        <Font name="System Bold" size="13.0" />
-                                    </font>
-                                </Label>
+                                <Label minHeight="16.0" text="Nombre del producto" styleClass="form-label"/>
+                                <Label fx:id="lblNombreProducto" prefHeight="32.0" text="-" textOverrun="ELLIPSIS" styleClass="summary-card"/>
                             </children>
                         </VBox>
 
-                        <!-- CANTIDAD ACTUAL -->
                         <VBox spacing="4.0">
                             <children>
-                                <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Cantidad actual">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Label>
-                                <Label fx:id="lblCantidadActual" prefHeight="32.0" style="-fx-background-color: #e2e8f0; -fx-background-radius: 6; -fx-padding: 5 10; -fx-text-fill: #0284c7;" text="0.00">
-                                    <font>
-                                        <Font name="System Bold" size="14.0" />
-                                    </font>
-                                </Label>
+                                <Label minHeight="16.0" text="Cantidad actual" styleClass="form-label"/>
+                                <Label fx:id="lblCantidadActual" prefHeight="32.0" text="0.00" styleClass="summary-card"/>
                             </children>
                         </VBox>
 
-                        <!-- CANTIDAD A AGREGAR -->
                         <VBox spacing="4.0">
                             <children>
-                                <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Cantidad">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Label>
-                                <TextField fx:id="txtCantidadAgregar" prefHeight="35.0" promptText="0.0000" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" text="0.0000" />
+                                <Label minHeight="16.0" text="Cantidad" styleClass="form-label"/>
+                                <TextField fx:id="txtCantidadAgregar" prefHeight="35.0" promptText="0.0000" text="0.0000" styleClass="form-field"/>
                             </children>
                         </VBox>
 
-                        <!-- BOTÓN AGREGAR -->
-                        <Button fx:id="btnAgregarStock" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onAgregarCantidadInventario" prefHeight="38.0" style="-fx-background-color: #10b981; -fx-background-radius: 6; -fx-cursor: hand;" text="➕ Agregar cantidad (Ctrl+G)" textFill="WHITE">
-                            <font>
-                                <Font name="System Bold" size="12.0" />
-                            </font>
+                        <Button fx:id="btnAgregarStock" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onAgregarCantidadInventario" prefHeight="38.0" text="➕ Agregar cantidad (Ctrl+G)" styleClass="action-button, action-primary">
                             <VBox.margin>
                                 <Insets top="10.0" />
                             </VBox.margin>
@@ -106,30 +70,18 @@
             </content>
         </ScrollPane>
 
-        <!-- TABLA Y ACCIONES DE REPORTES -->
         <VBox spacing="15.0" HBox.hgrow="ALWAYS">
             <children>
-                <!-- BARRA SUPERIOR CON BOTONES DE REPORTE -->
                 <HBox alignment="CENTER_LEFT" prefHeight="40.0" spacing="12.0">
                     <children>
-                        <Label text="Control de Inventario" textFill="#0f172a">
-                            <font>
-                                <Font name="System Bold" size="24.0" />
-                            </font>
-                        </Label>
+                        <Label text="Control de Inventario" styleClass="page-title"/>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button fx:id="btnProductosStockBajo" mnemonicParsing="false" onAction="#onVerProductosBajosInventario" prefHeight="35.0" style="-fx-background-color: #f59e0b; -fx-background-radius: 6; -fx-cursor: hand;" text="⚠️ Stock bajo (Ctrl+B)" textFill="WHITE">
-                            <font>
-                                <Font name="System Bold" size="12.0" />
-                            </font>
+                        <Button fx:id="btnProductosStockBajo" mnemonicParsing="false" onAction="#onVerProductosBajosInventario" prefHeight="35.0" text="⚠️ Stock bajo (Ctrl+B)" styleClass="action-button, action-warning">
                             <tooltip>
                                 <Tooltip text="Atajo: Ctrl + B" />
                             </tooltip>
                         </Button>
-                        <Button fx:id="btnReporteInventario" mnemonicParsing="false" onAction="#onGenerarReporteInventario" prefHeight="35.0" style="-fx-background-color: #6366f1; -fx-background-radius: 6; -fx-cursor: hand;" text="📊 Reporte (Ctrl+P)" textFill="WHITE">
-                            <font>
-                                <Font name="System Bold" size="12.0" />
-                            </font>
+                        <Button fx:id="btnReporteInventario" mnemonicParsing="false" onAction="#onGenerarReporteInventario" prefHeight="35.0" text="📊 Reporte (Ctrl+P)" styleClass="action-button, action-secondary">
                             <tooltip>
                                 <Tooltip text="Atajo: Ctrl + P" />
                             </tooltip>
@@ -137,8 +89,7 @@
                     </children>
                 </HBox>
 
-                <!-- TABLA DE MOVIMIENTOS / KARDEX -->
-                <TableView fx:id="tblInventario" prefHeight="410.0" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0;" VBox.vgrow="ALWAYS">
+                <TableView fx:id="tblInventario" prefHeight="410.0" styleClass="table-shell" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colId" prefWidth="60.0" text="ID" />
                         <TableColumn fx:id="colCodigo" prefWidth="120.0" text="Código" />
