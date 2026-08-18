@@ -10,6 +10,7 @@ import com.inventario.repository.Impl.VentaRepositoryImpl;
 import com.inventario.util.HistorialVentas.ExcelExporter;
 import com.inventario.util.HistorialVentas.FiltroPeriodo;
 import com.inventario.util.HistorialVentas.ReportePrinterManager;
+import com.inventario.util.Productos.KeyboardShortcutUtil;
 import java.io.File;
 import java.net.URL;
 import java.time.LocalDate;
@@ -103,6 +104,18 @@ public class HistorialVentasController implements Initializable {
         cmbPeriodo.getSelectionModel().select(FiltroPeriodo.HOY);
         aplicarRangoPorPeriodo(FiltroPeriodo.HOY);
         onBuscarVentas(null);
+        configurarAtajosTeclado();
+    }
+
+    private void configurarAtajosTeclado() {
+        KeyboardShortcutUtil.registrarAtajosHistorialVentas(
+                tblVentas,
+                () -> onBuscarVentas(null), // Ctrl + L: Aplicar filtros
+                () -> onExportarExcel(null), // Ctrl + E: Exportar
+                () -> onImprimir(null), // Ctrl + P: Imprimir
+                () -> cmbFiltroCliente.requestFocus(),// Ctrl + F: Enfocar combo de cliente
+                () -> onLimpiarFiltros(null) // ESC: Limpiar filtros
+        );
     }
 
     private void configurarFiltroPeriodo() {

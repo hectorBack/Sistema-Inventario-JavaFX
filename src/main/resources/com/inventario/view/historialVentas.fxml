@@ -7,6 +7,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -61,11 +62,21 @@
                 <!-- FILTRO POR CLIENTE -->
                 <VBox spacing="5.0">
                     <children>
-                        <Label text="Filtrar por Cliente" textFill="#64748b">
-                            <font>
-                                <Font name="System Bold" size="12.0" />
-                            </font>
-                        </Label>
+                        <HBox alignment="CENTER_LEFT">
+                            <children>
+                                <Label text="Filtrar por Cliente" textFill="#64748b">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Label>
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Label text="(Ctrl + F)" textFill="#94a3b8">
+                                    <font>
+                                        <Font name="System Italic" size="10.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
                         <ComboBox fx:id="cmbFiltroCliente" prefHeight="35.0" prefWidth="260.0" promptText="Todos los clientes" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1;" />
                     </children>
                 </VBox>
@@ -73,15 +84,21 @@
                 <!-- BOTONES DE ACCIÓN DE FILTRO -->
                 <VBox spacing="10.0">
                     <children>
-                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onBuscarVentas" prefHeight="38.0" style="-fx-background-color: #3b82f6; -fx-background-radius: 6; -fx-cursor: hand;" text="🔍 Filtrar" textFill="WHITE">
+                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onBuscarVentas" prefHeight="38.0" style="-fx-background-color: #3b82f6; -fx-background-radius: 6; -fx-cursor: hand;" text="🔍 Filtrar (Ctrl + L)" textFill="WHITE">
                             <font>
                                 <Font name="System Bold" size="13.0" />
                             </font>
+                            <tooltip>
+                                <Tooltip text="Aplicar Filtro (Ctrl + L)" />
+                            </tooltip>
                         </Button>
-                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onLimpiarFiltros" prefHeight="35.0" style="-fx-background-color: #e2e8f0; -fx-background-radius: 6; -fx-cursor: hand;" text="Limpiar Filtros" textFill="#334155">
+                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onLimpiarFiltros" prefHeight="35.0" style="-fx-background-color: #e2e8f0; -fx-background-radius: 6; -fx-cursor: hand;" text="Limpiar Filtros (ESC)" textFill="#334155">
                             <font>
                                 <Font name="System Bold" size="12.0" />
                             </font>
+                            <tooltip>
+                                <Tooltip text="Limpiar Filtros (ESC)" />
+                            </tooltip>
                         </Button>
                     </children>
                     <VBox.margin>
@@ -106,11 +123,17 @@
                             <font>
                                 <Font name="System Bold" size="12.0" />
                             </font>
+                            <tooltip>
+                                <Tooltip text="Exportar a CSV / Excel (Ctrl + E)" />
+                            </tooltip>
                         </Button>
                         <Button mnemonicParsing="false" onAction="#onImprimir" prefHeight="35.0" style="-fx-background-color: #6366f1; -fx-background-radius: 6; -fx-cursor: hand;" text="🖨 Imprimir" textFill="WHITE">
                             <font>
                                 <Font name="System Bold" size="12.0" />
                             </font>
+                            <tooltip>
+                                <Tooltip text="Imprimir Tabla (Ctrl + P)" />
+                            </tooltip>
                         </Button>
                     </children>
                 </HBox>
