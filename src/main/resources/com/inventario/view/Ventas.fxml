@@ -21,14 +21,14 @@
                     </VBox.margin>
                 </Label>
                 
-                <VBox spacing="5.0" styleClass="surface-card">
+                <VBox spacing="5.0">
                     <children>
                         <Label text="Lector de Código (Ctrl + F)" styleClass="form-label"/>
                         <TextField fx:id="txtCodigoBarras" onAction="#onEscanearCodigoBarras" prefHeight="40.0" promptText="Escanea o escribe código x cantidad" styleClass="form-field"/>
                     </children>
                 </VBox>
             
-                <VBox spacing="5.0" styleClass="surface-card">
+                <VBox spacing="5.0">
                     <children>
                         <Label text="Seleccionar Cliente (Opcional)" styleClass="form-label"/>
                         <ComboBox fx:id="cmbCliente" prefHeight="35.0" prefWidth="260.0" promptText="Público General / Seleccionar" styleClass="form-field"/>
