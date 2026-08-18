@@ -7,6 +7,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -31,12 +32,16 @@
                         <!-- CÓDIGO DE BARRAS -->
                         <VBox spacing="4.0">
                             <children>
-                                <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Código de barras del producto">
+                                <Label minHeight="16.0" style="-fx-text-fill: #334155;" text="Código de barras del producto (Ctrl+F)">
                                     <font>
                                         <Font name="System Bold" size="12.0" />
                                     </font>
                                 </Label>
-                                <TextField fx:id="txtCodigoBarras" onAction="#onBuscarProductoPorCodigo" prefHeight="35.0" promptText="Escanea o escribe el código..." style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;" />
+                                <TextField fx:id="txtCodigoBarras" onAction="#onBuscarProductoPorCodigo" prefHeight="35.0" promptText="Escanea o escribe el código..." style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-background-color: #ffffff;">
+                                    <tooltip>
+                                        <Tooltip text="Presiona Ctrl + F para enfocar este campo" />
+                                    </tooltip>
+                                </TextField>
                             </children>
                         </VBox>
 
@@ -85,13 +90,16 @@
                         </VBox>
 
                         <!-- BOTÓN AGREGAR -->
-                        <Button fx:id="btnAgregarStock" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onAgregarCantidadInventario" prefHeight="38.0" style="-fx-background-color: #10b981; -fx-background-radius: 6; -fx-cursor: hand;" text="➕ Agregar cantidad a inventario" textFill="WHITE">
+                        <Button fx:id="btnAgregarStock" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onAgregarCantidadInventario" prefHeight="38.0" style="-fx-background-color: #10b981; -fx-background-radius: 6; -fx-cursor: hand;" text="➕ Agregar cantidad (Ctrl+G)" textFill="WHITE">
                             <font>
                                 <Font name="System Bold" size="12.0" />
                             </font>
                             <VBox.margin>
                                 <Insets top="10.0" />
                             </VBox.margin>
+                            <tooltip>
+                                <Tooltip text="Atajo: Ctrl + G" />
+                            </tooltip>
                         </Button>
                     </children>
                 </VBox>
@@ -110,15 +118,21 @@
                             </font>
                         </Label>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button fx:id="btnProductosStockBajo" mnemonicParsing="false" onAction="#onVerProductosBajosInventario" prefHeight="35.0" style="-fx-background-color: #f59e0b; -fx-background-radius: 6; -fx-cursor: hand;" text="⚠️ Productos bajos en inventario" textFill="WHITE">
+                        <Button fx:id="btnProductosStockBajo" mnemonicParsing="false" onAction="#onVerProductosBajosInventario" prefHeight="35.0" style="-fx-background-color: #f59e0b; -fx-background-radius: 6; -fx-cursor: hand;" text="⚠️ Stock bajo (Ctrl+B)" textFill="WHITE">
                             <font>
                                 <Font name="System Bold" size="12.0" />
                             </font>
+                            <tooltip>
+                                <Tooltip text="Atajo: Ctrl + B" />
+                            </tooltip>
                         </Button>
-                        <Button fx:id="btnReporteInventario" mnemonicParsing="false" onAction="#onGenerarReporteInventario" prefHeight="35.0" style="-fx-background-color: #6366f1; -fx-background-radius: 6; -fx-cursor: hand;" text="📊 Reporte de inventario" textFill="WHITE">
+                        <Button fx:id="btnReporteInventario" mnemonicParsing="false" onAction="#onGenerarReporteInventario" prefHeight="35.0" style="-fx-background-color: #6366f1; -fx-background-radius: 6; -fx-cursor: hand;" text="📊 Reporte (Ctrl+P)" textFill="WHITE">
                             <font>
                                 <Font name="System Bold" size="12.0" />
                             </font>
+                            <tooltip>
+                                <Tooltip text="Atajo: Ctrl + P" />
+                            </tooltip>
                         </Button>
                     </children>
                 </HBox>

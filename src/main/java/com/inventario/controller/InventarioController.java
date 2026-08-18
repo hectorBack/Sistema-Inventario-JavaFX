@@ -7,6 +7,7 @@ import com.inventario.repository.Impl.ProductoRepositoryImpl;
 import com.inventario.repository.InventarioRepository;
 import com.inventario.repository.ProductoRepository;
 import com.inventario.util.Inventario.InventarioUIUtil;
+import com.inventario.util.Productos.KeyboardShortcutUtil;
 import com.inventario.util.audio.SoundUtil;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -66,6 +67,22 @@ public class InventarioController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         configurarTablaMovimientos();
         cargarHistorialMovimientos();
+        configurarAtajosTeclado();
+    }
+
+    private void configurarAtajosTeclado() {
+        // Configuración de atajos de teclado utilizando cualquier nodo de la vista como referencia
+        KeyboardShortcutUtil.registrarAtajosInventario(
+                txtCodigoBarras,
+                () -> onAgregarCantidadInventario(null), // Ctrl + G
+                () -> onVerProductosBajosInventario(null), // Ctrl + B
+                () -> onGenerarReporteInventario(null), // Ctrl + P
+                () -> {                                        // Ctrl + F
+                    txtCodigoBarras.requestFocus();
+                    txtCodigoBarras.selectAll();
+                },
+                this::limpiarFormularioCarga // ESC
+        );
     }
 
     @FXML
