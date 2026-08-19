@@ -7,8 +7,10 @@ import com.inventario.model.Venta;
 import com.inventario.repository.ClienteRepository;
 import com.inventario.repository.Impl.ClienteRepositoryImpl;
 import com.inventario.repository.Impl.ProductoRepositoryImpl;
+import com.inventario.repository.Impl.PromocionRepositoryImpl;
 import com.inventario.repository.Impl.VentaRepositoryImpl;
 import com.inventario.repository.ProductoRepository;
+import com.inventario.repository.PromocionRepository;
 import com.inventario.repository.VentaRepository;
 import com.inventario.util.Productos.KeyboardShortcutUtil;
 import com.inventario.util.Ventas.CarritoService;
@@ -77,16 +79,18 @@ public class VentasController implements Initializable {
     private final VentaRepository ventaRepository;
     private final ClienteRepository clienteRepository;
     private final ProductoRepository productoRepository;
+    private final PromocionRepository promocionRepository;
     private final CarritoService carritoService;
 
     public VentasController() {
-        this(new VentaRepositoryImpl(), new ClienteRepositoryImpl(), new ProductoRepositoryImpl(), new CarritoService());
+        this(new VentaRepositoryImpl(), new ClienteRepositoryImpl(), new ProductoRepositoryImpl(), new PromocionRepositoryImpl(), new CarritoService());
     }
 
-    public VentasController(VentaRepository ventaRepository, ClienteRepository clienteRepository, ProductoRepository productoRepository, CarritoService carritoService) {
+    public VentasController(VentaRepository ventaRepository, ClienteRepository clienteRepository, ProductoRepository productoRepository, PromocionRepository promocionRepository, CarritoService carritoService) {
         this.ventaRepository = ventaRepository;
         this.clienteRepository = clienteRepository;
         this.productoRepository = productoRepository;
+        this.promocionRepository = promocionRepository;
         this.carritoService = carritoService;
     }
 
@@ -326,6 +330,7 @@ public class VentasController implements Initializable {
                 "/com/inventario/view/CantidadGranelModal.fxml",
                 "Cantidad de Producto",
                 modalController -> {
+                    modalController.setPromocionRepository(promocionRepository);
                     modalController.initData(producto, cantidadInicial);
                     modalCtrlRef[0] = modalController; // Guardamos la referencia
                 }
@@ -336,7 +341,8 @@ public class VentasController implements Initializable {
             // Evaluamos si el usuario presionó 'Aceptar' o dio Enter
             if (modalCtrl.isAceptado()) {
                 double cantidadFinal = modalCtrl.getCantidadIngresada();
-                procesarAgregadoACarrito(producto, cantidadFinal);
+                double precioConPromocion = modalCtrl.getPrecioUnitarioAplicado();
+                procesarAgregadoACarritoConPrecio(producto, cantidadFinal, precioConPromocion);
             }
         } else {
             mostrarAlerta("Error", "No se pudo cargar la ventana para venta a granel.", Alert.AlertType.ERROR);
@@ -449,6 +455,26 @@ public class VentasController implements Initializable {
         tblCarrito.refresh();
         actualizarEtiquetaTotal();
         return true;
+    }
+
+    private boolean procesarAgregadoACarritoConPrecio(Producto producto, double cantidadAñadir, double precioConPromocion) {
+        Producto productoModificado = new Producto(
+                producto.getId(),
+                producto.getCodigoBarras(),
+                producto.getNombre(),
+                producto.getDescripcion(),
+                precioConPromocion,
+                producto.getPrecioMayoreo(),
+                producto.getPrecioCompra(),
+                producto.getPorcentajeGanancia(),
+                producto.getStock(),
+                producto.getStockMinimo(),
+                producto.getTipoVenta(),
+                producto.getEstado(),
+                producto.getCategoria(),
+                producto.getProveedor()
+        );
+        return procesarAgregadoACarrito(productoModificado, cantidadAñadir);
     }
 
     @FXML

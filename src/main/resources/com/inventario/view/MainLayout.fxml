@@ -65,6 +65,12 @@
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
+
+                <Button fx:id="btnPromociones" mnemonicParsing="false" onAction="#mostrarPromociones" prefWidth="200.0" text=" 🎯  Promociones" styleClass="nav-button">
+                    <font>
+                        <Font name="System Bold" size="14.0" />
+                    </font>
+                </Button>
             </children>
         </VBox>
     </left>

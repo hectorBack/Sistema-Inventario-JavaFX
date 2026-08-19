@@ -32,6 +32,8 @@ public class MainLayoutController implements Initializable {
     private Button btnVentas;
     @FXML
     private Button btnHistorialVentas;
+    @FXML
+    private Button btnPromociones;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -88,6 +90,12 @@ public class MainLayoutController implements Initializable {
         actualizarEstiloMenu(btnHistorialVentas);
     }
 
+    @FXML
+    void mostrarPromociones(ActionEvent event) {
+        cargarVista("view/PromocionesView");
+        actualizarEstiloMenu(btnPromociones);
+    }
+
     private void cargarVista(String fxmlPath) {
         try {
             // Cargamos el archivo FXML correspondiente de manera dinámica
@@ -104,7 +112,7 @@ public class MainLayoutController implements Initializable {
     private void actualizarEstiloMenu(Button seleccionado) {
         List<Button> todosLosBotones = List.of(
             btnProductos, btnInventario, btnCategorias, btnMovimientos, 
-            btnProveedores, btnClientes, btnVentas, btnHistorialVentas
+            btnProveedores, btnClientes, btnVentas, btnHistorialVentas, btnPromociones
         );
         
         for (Button boton : todosLosBotones) {
