@@ -13,6 +13,7 @@ import com.inventario.repository.ProductoRepository;
 import com.inventario.repository.PromocionRepository;
 import com.inventario.repository.VentaRepository;
 import com.inventario.util.Productos.KeyboardShortcutUtil;
+import com.inventario.util.Ventas.BusquedaProductoUtil;
 import com.inventario.util.Ventas.CarritoService;
 import com.inventario.util.Ventas.ClienteHelper;
 import com.inventario.util.Ventas.CodigoBarrasParser;
@@ -33,6 +34,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -119,6 +121,40 @@ public class VentasController implements Initializable {
         });
     }
 
+    @FXML
+    void onBuscarProductoModal(ActionEvent event) {
+        Stage stageActual = null;
+
+        // Compatible con Java 11 (Casting tradicional)
+        if (event != null && event.getSource() instanceof Node) {
+            Node node = (Node) event.getSource();
+            stageActual = (Stage) node.getScene().getWindow();
+        } // Si la llamada proviene del atajo de teclado (event es null)
+        else if (txtCodigoBarras != null && txtCodigoBarras.getScene() != null) {
+            stageActual = (Stage) txtCodigoBarras.getScene().getWindow();
+        } else if (tblCarrito != null && tblCarrito.getScene() != null) {
+            stageActual = (Stage) tblCarrito.getScene().getWindow();
+        }
+
+        if (stageActual != null) {
+            List<Producto> productos = productoRepository.listarTodos();
+            BusquedaProductoUtil.abrirModalBusqueda(stageActual, productos)
+                    .ifPresent(this::agregarProductoAVenta);
+        }
+    }
+
+    private void agregarProductoAVenta(Producto producto) {
+        if (producto != null) {
+            if ("GRANEL".equalsIgnoreCase(producto.getTipoVenta())) {
+                abrirModalGranel(producto, 1.0);
+            } else {
+                if (procesarAgregadoACarrito(producto, 1.0)) {
+                    SoundUtil.emitirBeep(900, 120);
+                }
+            }
+        }
+    }
+
     private void configurarEventosTeclado() {
         tblCarrito.setOnKeyPressed(event -> {
             switch (event.getCode()) {
@@ -150,6 +186,7 @@ public class VentasController implements Initializable {
                         cmbProducto.requestFocus();
                     }
                 },
+                () -> onBuscarProductoModal(null),
                 this::limpiarPantallaCompleta
         );
 

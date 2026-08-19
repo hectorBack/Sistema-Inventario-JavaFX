@@ -86,6 +86,7 @@ public class KeyboardShortcutUtil {
             Runnable accionQuitarItem,
             Runnable accionCobrar,
             Runnable accionBuscarFocus,
+            Runnable accionAbrirModalBuscar,
             Runnable accionLimpiar) {
 
         Platform.runLater(() -> {
@@ -99,6 +100,11 @@ public class KeyboardShortcutUtil {
             KeyCombination ctrlF = new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN);
 
             scene.setOnKeyPressed((KeyEvent event) -> {
+                // F10: Abrir modal buscar 
+                if (event.getCode() == KeyCode.F10 && accionAbrirModalBuscar != null){
+                    accionAbrirModalBuscar.run();
+                    event.consume();
+                }
                 // F12: Cobrar
                 if (event.getCode() == KeyCode.F12 && accionCobrar != null) {
                     accionCobrar.run();
