@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<ScrollPane fitToWidth="true" styleClass="scroll-pane" stylesheets="@../styles/theme.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.ConfiguracionController">
+    <content>
+        <VBox spacing="20.0" styleClass="page-shell">
+            <children>
+
+                <!-- Sección: General -->
+                <VBox spacing="12.0" styleClass="content-panel">
+                    <children>
+                        <Label styleClass="section-title" text="General" />
+                        <FlowPane hgap="15.0" vgap="15.0">
+                            <children>
+                                <Button contentDisplay="TOP" onAction="#onOpcionesHabilitadas" text="Opciones habilitadas">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-sliders-h" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onCajeros" text="Cajeros">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-user-tie" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onBaseDatos" text="Base de Datos">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-database" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onArticulosPrecargados" text="Artículos Precargados">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-box-open" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onFacturacion" text="Facturación">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-file-invoice-dollar" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onModificarFolios" text="Modificar Folios">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-hashtag" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onAdministrarCajas" text="Administrar Cajas">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-cash-register" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                            </children>
+                        </FlowPane>
+                    </children>
+                </VBox>
+
+                <!-- Sección: Personalización -->
+                <VBox spacing="12.0" styleClass="content-panel">
+                    <children>
+                        <Label styleClass="section-title" text="Personalización" />
+                        <FlowPane hgap="15.0" vgap="15.0">
+                            <children>
+                                <Button contentDisplay="TOP" onAction="#onLogotipo" text="Logotipo del Programa">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-image" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onTicket" text="Ticket">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-receipt" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onFormasPago" text="Formas de Pago">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-credit-card" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onImpuestos" text="Impuestos">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-percent" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onCorte" text="Corte">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-cut" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onSimboloMoneda" text="Símbolo de Moneda">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-dollar-sign" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onUnidadesMedida" text="Unidades de Medida">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-balance-scale" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                            </children>
+                        </FlowPane>
+                    </children>
+                </VBox>
+
+                <!-- Sección: Dispositivos -->
+                <VBox spacing="12.0" styleClass="content-panel">
+                    <children>
+                        <Label styleClass="section-title" text="Dispositivos" />
+                        <FlowPane hgap="15.0" vgap="15.0">
+                            <children>
+                                <Button contentDisplay="TOP" onAction="#onImpresoraTickets" text="Impresora de Tickets">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-print" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onLectorCodigos" text="Lector de Códigos">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-barcode" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onCajonDinero" text="Cajón de Dinero">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-money-bill-wave" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onBascula" text="Báscula">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-weight" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                            </children>
+                        </FlowPane>
+                    </children>
+                </VBox>
+
+                <!-- Sección: Servicios -->
+                <VBox spacing="12.0" styleClass="content-panel">
+                    <children>
+                        <Label styleClass="section-title" text="Servicios" />
+                        <FlowPane hgap="15.0" vgap="15.0">
+                            <children>
+                                <Button contentDisplay="TOP" onAction="#onRecargasElectronicas" text="Recargas Electrónicas">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-mobile-alt" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onPagoServicios" text="Pago de Servicios">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-concierge-bell" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onNotificacionesCorreo" text="Notificaciones por Correo">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-envelope" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                            </children>
+                        </FlowPane>
+                    </children>
+                </VBox>
+
+                <!-- Sección: Mantenimiento -->
+                <VBox spacing="12.0" styleClass="content-panel">
+                    <children>
+                        <Label styleClass="section-title" text="Mantenimiento" />
+                        <FlowPane hgap="15.0" vgap="15.0">
+                            <children>
+                                <Button contentDisplay="TOP" onAction="#onRespaldoAutomatico" text="Respaldo Automático">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-hdd" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                                <Button contentDisplay="TOP" onAction="#onActualizacionesAutomaticas" text="Actualizaciones Automáticas">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-sync-alt" iconSize="32" />
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="action-button" />
+                                        <String fx:value="action-config" />
+                                    </styleClass>
+                                </Button>
+                            </children>
+                        </FlowPane>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </content>
+</ScrollPane>

@@ -15,7 +15,7 @@ import javafx.scene.layout.BorderPane;
 public class MainLayoutController implements Initializable {
 
     @FXML
-    private BorderPane mainContainer;
+    private BorderPane mainLayout;
     @FXML
     private Button btnProductos;
     @FXML
@@ -34,6 +34,8 @@ public class MainLayoutController implements Initializable {
     private Button btnHistorialVentas;
     @FXML
     private Button btnPromociones;
+    @FXML
+    private Button btnConfiguracion;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -95,6 +97,12 @@ public class MainLayoutController implements Initializable {
         cargarVista("view/PromocionesView");
         actualizarEstiloMenu(btnPromociones);
     }
+    
+    @FXML
+    void mostrarConfiguraciones(ActionEvent event){
+        cargarVista("view/configuracion");
+        actualizarEstiloMenu(btnConfiguracion);
+    }
 
     private void cargarVista(String fxmlPath) {
         try {
@@ -102,7 +110,7 @@ public class MainLayoutController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/inventario/" + fxmlPath + ".fxml"));
             Parent vista = loader.load();
             // Lo incrustamos en la región central del BorderPane
-            mainContainer.setCenter(vista);
+            mainLayout.setCenter(vista);
         } catch (IOException e) {
             System.out.println("Error al cargar la vista interna: " + e.getMessage());
             e.printStackTrace();

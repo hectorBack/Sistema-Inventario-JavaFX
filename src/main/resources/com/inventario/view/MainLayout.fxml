@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="mainContainer" prefHeight="600.0" prefWidth="1100.0" styleClass="app-shell" stylesheets="@../styles/theme.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.MainLayoutController">
+<BorderPane fx:id="mainLayout" prefHeight="600.0" prefWidth="1100.0" styleClass="app-shell" stylesheets="@../styles/theme.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.MainLayoutController">
    
     <left>
         <VBox prefHeight="600.0" prefWidth="240.0" spacing="10.0" styleClass="sidebar">
@@ -67,6 +67,12 @@
                 </Button>
 
                 <Button fx:id="btnPromociones" mnemonicParsing="false" onAction="#mostrarPromociones" prefWidth="200.0" text=" 🎯  Promociones" styleClass="nav-button">
+                    <font>
+                        <Font name="System Bold" size="14.0" />
+                    </font>
+                </Button>
+                
+                <Button fx:id="btnConfiguracion" mnemonicParsing="false" onAction="#mostrarConfiguraciones" prefWidth="200.0" text=" ⚙️  Configuración" styleClass="nav-button">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>

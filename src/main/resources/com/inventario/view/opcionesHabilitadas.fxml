@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" styleClass="scroll-pane" stylesheets="@/com/inventario/styles/theme.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.OpcionesHabilitadasController">
+    <content>
+        <VBox spacing="20.0" styleClass="page-shell">
+            <children>
+                
+                <!-- Encabezado de la pantalla -->
+                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                    <children>
+                        <Button onAction="#onVolver" styleClass="action-config" text="Volver">
+                            <graphic>
+                                
+                            </graphic>
+                        </Button>
+                        <Label styleClass="page-title" text="Opciones Habilitadas" />
+                    </children>
+                </HBox>
+
+                <!-- Panel principal de opciones -->
+                <VBox styleClass="content-panel">
+                    <children>
+                        <VBox spacing="20.0">
+                            <children>
+                                
+                                <!-- Opción 1: Inventarios -->
+                                <VBox spacing="4.0">
+                                    <children>
+                                        <CheckBox fx:id="chkUsarInventario" styleClass="primary-text" text="Utilizar inventarios para mis productos" />
+                                        <Label styleClass="muted-text" text="Si usas inventario, tus productos tendrán cantidades limitadas en venta y podrá llevar un control de cuánto tienes, cuándo y cuánto se vende. Si actualmente no usas inventario, puedes no usarlo y posteriormente activarlo." wrapText="true">
+                                            <VBox.margin>
+                                                <Insets left="24.0" />
+                                            </VBox.margin>
+                                        </Label>
+                                    </children>
+                                </VBox>
+
+                                <!-- Opción 2: Crédito -->
+                                <VBox spacing="4.0">
+                                    <children>
+                                        <CheckBox fx:id="chkOfrecerCredito" styleClass="primary-text" text="Deseo ofrecer crédito a mis clientes" />
+                                        <Label styleClass="muted-text" text="Activa esta opción para dar de alta clientes y poder ofrecer ventas a crédito, recibir abonos y liquidar adeudos." wrapText="true">
+                                            <VBox.margin>
+                                                <Insets left="24.0" />
+                                            </VBox.margin>
+                                        </Label>
+                                    </children>
+                                </VBox>
+
+                                <!-- Opción 3: Producto Común -->
+                                <VBox spacing="4.0">
+                                    <children>
+                                        <CheckBox fx:id="chkProductoComun" styleClass="primary-text" text="Habilitar venta de producto común" />
+                                        <Label styleClass="muted-text" text="Desea activar la opción de venta de producto en común, con la cual puedes vender artículos que NO estén en la base de datos al momento de hacer una venta, por ejemplo: chicles, dulces, artículos esporádicos, etc." wrapText="true">
+                                            <VBox.margin>
+                                                <Insets left="24.0" />
+                                            </VBox.margin>
+                                        </Label>
+                                    </children>
+                                </VBox>
+
+                                <!-- Opción 4: Margen de Ganancia con TextField -->
+                                <VBox spacing="4.0">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                            <children>
+                                                <CheckBox fx:id="chkCalcularPrecio" styleClass="primary-text" text="Calcular automáticamente precio de venta con el margen de ganancia del" />
+                                                <TextField fx:id="txtMargenGanancia" prefWidth="60.0" promptText="0" styleClass="form-field" />
+                                                <Label styleClass="primary-text" text="/%" />
+                                            </children>
+                                        </HBox>
+                                        <Label styleClass="muted-text" text="Al crear, modificar o ingresar inventario a los productos." wrapText="true">
+                                            <VBox.margin>
+                                                <Insets left="24.0" />
+                                            </VBox.margin>
+                                        </Label>
+                                    </children>
+                                </VBox>
+
+                                <!-- Opción 5: Redondeo con ComboBox -->
+                                <VBox spacing="4.0">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <CheckBox fx:id="chkHabilitarRedondeo" styleClass="primary-text" text="Habilitar redondeo de centavos a cantidad cerrada" />
+                                                <ComboBox fx:id="cmbTipoRedondeo" prefWidth="180.0" promptText="Seleccionar opción" styleClass="combo-box" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+
+                                <!-- Botón Guardar -->
+                                <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                                    <children>
+                                        <Button onAction="#onGuardar" styleClass="action-button, action-primary" text="Guardar Cambios">
+                                           
+                                        </Button>
+                                    </children>
+                                    <VBox.margin>
+                                        <Insets top="15.0" />
+                                    </VBox.margin>
+                                </HBox>
+
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+
+            </children>
+        </VBox>
+    </content>
+</ScrollPane>

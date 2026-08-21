@@ -281,3 +281,26 @@
     -fx-background: transparent;
     -fx-border-color: transparent;
 }
+
+/* Botones específicos para la vista de Configuración */
+.action-config {
+    -fx-background-color: #e2e8f0;
+    -fx-border-color: #cbd5e1;
+    -fx-border-width: 1px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-cursor: hand;
+    -fx-font-size: 12px;
+    -fx-font-weight: normal;
+    -fx-padding: 8 14 8 14;
+    -fx-text-fill: #0f172a;
+}
+
+.action-config:hover {
+    -fx-background-color: #cbd5e1;
+}
+
+/* Aplica el color oscuro al icono FontIcon dentro de estos botones */
+.action-config .ikonli-font-icon {
+    -fx-icon-color: #0f172a;
+}
