@@ -156,7 +156,7 @@
 }
 
 .action-primary {
-    -fx-background-color: linear-gradient(to bottom, #10b981, #059669);
+    -fx-background-color: linear-gradient(to bottom, #22c55e, #16a34a);
 }
 
 .action-secondary {
@@ -164,7 +164,7 @@
 }
 
 .action-warning {
-    -fx-background-color: linear-gradient(to bottom, #f59e0b, #d97706);
+    -fx-background-color: linear-gradient(to bottom, #ef4444, #dc2626);
 }
 
 .action-danger {
@@ -173,15 +173,15 @@
 
 .action-ghost {
     -fx-background-color: transparent;
-    -fx-text-fill: #64748b;
-    -fx-border-color: #94a3b8;
+    -fx-text-fill: #dc2626;
+    -fx-border-color: #f87171;
     -fx-border-width: 1px;
 }
 
 .action-soft {
-    -fx-background-color: #f1f5f9;
-    -fx-text-fill: #334155;
-    -fx-border-color: #cbd5e1;
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #b91c1c;
+    -fx-border-color: #fca5a5;
     -fx-border-width: 1px;
 }
 

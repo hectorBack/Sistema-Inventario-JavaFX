@@ -1,12 +1,16 @@
 package com.inventario.controller;
 
+import com.inventario.model.Categoria;
 import com.inventario.model.MovimientoInventario;
 import com.inventario.model.Producto;
+import com.inventario.repository.CategoriaRepository;
+import com.inventario.repository.Impl.CategoriaRepositoryImpl;
 import com.inventario.repository.Impl.InventarioRepositoryImpl;
 import com.inventario.repository.Impl.ProductoRepositoryImpl;
 import com.inventario.repository.InventarioRepository;
 import com.inventario.repository.ProductoRepository;
 import com.inventario.util.Inventario.InventarioUIUtil;
+import com.inventario.util.Inventario.ReporteInventarioModal;
 import com.inventario.util.Productos.KeyboardShortcutUtil;
 import com.inventario.util.audio.SoundUtil;
 import java.net.URL;
@@ -19,12 +23,15 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
 
 public class InventarioController implements Initializable {
 
@@ -36,6 +43,8 @@ public class InventarioController implements Initializable {
     private Label lblCantidadActual;
     @FXML
     private TextField txtCantidadAgregar;
+    @FXML
+    private Button btnGenerarReporte;
 
     @FXML
     private TableView<MovimientoInventario> tblInventario;
@@ -50,14 +59,16 @@ public class InventarioController implements Initializable {
 
     private final InventarioRepository invRepository;
     private final ProductoRepository prodRepository;
+    private final CategoriaRepository catRepository;
 
     public InventarioController() {
-        this(new InventarioRepositoryImpl(), new ProductoRepositoryImpl());
+        this(new InventarioRepositoryImpl(), new ProductoRepositoryImpl(), new CategoriaRepositoryImpl());
     }
 
-    public InventarioController(InventarioRepository invRepository, ProductoRepository prodRepository) {
+    public InventarioController(InventarioRepository invRepository, ProductoRepository prodRepository, CategoriaRepository catRepository) {
         this.invRepository = invRepository;
         this.prodRepository = prodRepository;
+        this.catRepository = catRepository;
     }
 
     private final ObservableList<MovimientoInventario> listaMovimientos = FXCollections.observableArrayList();
@@ -150,7 +161,22 @@ public class InventarioController implements Initializable {
 
     @FXML
     void onGenerarReporteInventario(ActionEvent event) {
-        InventarioUIUtil.mostrarAlerta("Reporte", "Generando reporte de inventario...", Alert.AlertType.INFORMATION);
+        Stage parentStage = null;
+
+        // 1. Intentar obtener el Stage desde el evento (si proviene de un clic de botón)
+        if (event != null && event.getSource() instanceof Node) {
+            parentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        } // 2. Si viene de un atajo de teclado (event es null), obtener el Stage desde cualquier componente FXML del controlador
+        else if (btnGenerarReporte != null && btnGenerarReporte.getScene() != null) { // Cambia 'btnGenerarReporte' por cualquier @FXML Node que tengas (ej. tblProductos, rootPane, etc.)
+            parentStage = (Stage) btnGenerarReporte.getScene().getWindow();
+        }
+
+        // 3. Obtener los datos necesarios
+        List<Producto> productos = prodRepository.listarTodos(); // Adapta según tus servicios
+        List<Categoria> categorias = catRepository.listarTodas(); // Adapta según tus servicios
+
+        // 4. Abrir el modal estático
+        ReporteInventarioModal.abrirModalReporte(parentStage, productos, categorias);
     }
 
     @SuppressWarnings("unchecked")

@@ -92,9 +92,7 @@
                     <children>
                         
                         <Button mnemonicParsing="false" fx:id="btnBuscar" onAction="#onBuscarProductoModal" prefHeight="50.0" prefWidth="110.0" styleClass="action-button, action-soft" text="Buscar (F10)">
-                            <font>
-                                <Font name="System Bold" size="12.0" />
-                            </font>
+                          
                         </Button>
                     
                         <HBox alignment="CENTER_LEFT" spacing="6.0">

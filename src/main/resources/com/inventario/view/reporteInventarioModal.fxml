@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="620.0" prefWidth="880.0" spacing="15.0" styleClass="modal-surface" stylesheets="@../styles/theme.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.ReporteInventarioModalController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <children>
+        <!-- Título del Modal -->
+        <Label styleClass="modal-header" text="Reporte de Inventario" />
+
+        <!-- Tarjetas Resumen de Métricas -->
+        <HBox spacing="15.0">
+            <children>
+                <VBox styleClass="summary-card" HBox.hgrow="ALWAYS">
+                    <children>
+                        <Label styleClass="muted-text" text="Costo del Inventario" />
+                        <Label fx:id="lblCostoTotal" text="\$0.00">
+                            <styleClass>
+                                <String fx:value="primary-text" />
+                                <String fx:value="modal-header" />
+                            </styleClass>
+                        </Label>
+                    </children>
+                </VBox>
+                <VBox styleClass="summary-card" HBox.hgrow="ALWAYS">
+                    <children>
+                        <Label styleClass="muted-text" text="Cantidad de Productos en Inventario" />
+                        <Label fx:id="lblCantidadProductos" text="0">
+                            <styleClass>
+                                <String fx:value="primary-text" />
+                                <String fx:value="modal-header" />
+                            </styleClass>
+                        </Label>
+                    </children>
+                </VBox>
+                <!-- Métrica extra: Valor Comercial Total -->
+                <VBox styleClass="summary-card" HBox.hgrow="ALWAYS">
+                    <children>
+                        <Label styleClass="muted-text" text="Valor Comercial Total (Venta)" />
+                        <Label fx:id="lblValorVentaTotal" text="\$0.00">
+                            <styleClass>
+                                <String fx:value="primary-text" />
+                                <String fx:value="modal-header" />
+                            </styleClass>
+                        </Label>
+                    </children>
+                </VBox>
+            </children>
+        </HBox>
+
+        <!-- Sección de Filtros -->
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <children>
+                <Label styleClass="form-label" text="Categoría:" />
+                <ComboBox fx:id="cmbCategoria" prefWidth="220.0" promptText="Todas" styleClass="combo-box" />
+            </children>
+        </HBox>
+
+        <!-- Tabla del Reporte -->
+        <TableView fx:id="tblReporte" styleClass="table-view" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colCodigo" prefWidth="130.0" text="Código" />
+                <TableColumn fx:id="colProducto" prefWidth="250.0" text="Producto" />
+                <TableColumn fx:id="colCosto" prefWidth="110.0" text="Costo" />
+                <TableColumn fx:id="colPrecioVenta" prefWidth="110.0" text="Precio Venta" />
+                <TableColumn fx:id="colStock" prefWidth="90.0" text="Stock" />
+                <TableColumn fx:id="colStockMinimo" prefWidth="110.0" text="Stock Mínimo" />
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
+        </TableView>
+
+        <!-- Botones de Acción -->
+        <HBox alignment="CENTER_RIGHT" spacing="12.0">
+            <children>
+                <Button fx:id="btnExportar" mnemonicParsing="false" onAction="#onExportar" prefHeight="36.0" prefWidth="150.0" text="Exportar a Excel">
+                    <styleClass>
+                        <String fx:value="action-button" />
+                        <String fx:value="action-primary" />
+                    </styleClass>
+                </Button>
+                <Button fx:id="btnImprimir" mnemonicParsing="false" onAction="#onImprimir" prefHeight="36.0" prefWidth="110.0" text="Imprimir">
+                    <styleClass>
+                        <String fx:value="action-button" />
+                        <String fx:value="action-secondary" />
+                    </styleClass>
+                </Button>
+                <Button fx:id="btnCerrar" mnemonicParsing="false" onAction="#onCerrar" prefHeight="36.0" prefWidth="100.0" text="Cerrar">
+                    <styleClass>
+                        <String fx:value="action-button" />
+                        <String fx:value="action-soft" />
+                    </styleClass>
+                </Button>
+            </children>
+        </HBox>
+    </children>
+</VBox>
