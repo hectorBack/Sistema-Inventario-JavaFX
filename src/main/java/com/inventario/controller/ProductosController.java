@@ -1,5 +1,6 @@
 package com.inventario.controller;
 
+import com.inventario.config.ConfiguracionSistema;
 import com.inventario.model.Categoria;
 import com.inventario.model.DetallePaquete;
 import com.inventario.model.Producto;
@@ -41,6 +42,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -67,6 +69,11 @@ public class ProductosController implements Initializable {
     @FXML
     private TableView<Producto> tblProductos;
 
+    @FXML
+    private HBox contenedorStock;
+    @FXML
+    private TableColumn<Producto, Double> colStock;
+
     private final ProductoRepository repository;
     private final CategoriaRepository catRepository;
     private final ProveedorRepository provRepository;
@@ -91,11 +98,28 @@ public class ProductosController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+
         inicializarCombos();
         configurarListeners();
         configurarTabla();
         cargarDatos();
         configurarAtajosTeclado();
+        aplicarConfiguracionInventario();
+    }
+
+    private void aplicarConfiguracionInventario() {
+        boolean usarInventario = ConfiguracionSistema.getInstancia().getOpciones().isUsarInventario();
+
+        // Visibilidad del formulario (HBox contenedor de Stock y Stock Mínimo)
+        if (contenedorStock != null) {
+            contenedorStock.setVisible(usarInventario);
+            contenedorStock.setManaged(usarInventario);
+        }
+
+        // Visibilidad de la columna en la TableView
+        if (colStock != null) {
+            colStock.setVisible(usarInventario);
+        }
     }
 
     private void inicializarCombos() {
@@ -273,7 +297,20 @@ public class ProductosController implements Initializable {
             return;
         }
 
-        Producto nuevoProducto = InventarioUIUtil.extraerProductoDeFormulario(null, txtCodigoBarras, txtNombre, txtDescripcion, txtPrecio, txtPrecioCompra, txtPorcentajeGanancia, txtPrecioMayoreo, txtStock, txtStockMinimo, cmbEstado, cmbTipoVenta, cmbCategoria, cmbProveedor);
+        // Evaluamos la bandera de configuración
+        boolean usarInventario = ConfiguracionSistema.getInstancia().getOpciones().isUsarInventario();
+
+        // Si inventario está desactivado, nos aseguramos de asignar 0 a los campos antes de extraer
+        if (!usarInventario) {
+            txtStock.setText("0");
+            txtStockMinimo.setText("0");
+        }
+
+        Producto nuevoProducto = InventarioUIUtil.extraerProductoDeFormulario(
+                null, txtCodigoBarras, txtNombre, txtDescripcion, txtPrecio,
+                txtPrecioCompra, txtPorcentajeGanancia, txtPrecioMayoreo,
+                txtStock, txtStockMinimo, cmbEstado, cmbTipoVenta, cmbCategoria, cmbProveedor
+        );
 
         if (repository.guardar(nuevoProducto)) {
             if ("PAQUETE".equalsIgnoreCase(nuevoProducto.getTipoVenta())) {
@@ -309,7 +346,20 @@ public class ProductosController implements Initializable {
             return;
         }
 
-        InventarioUIUtil.extraerProductoDeFormulario(productoSeleccionado, txtCodigoBarras, txtNombre, txtDescripcion, txtPrecio, txtPrecioCompra, txtPorcentajeGanancia, txtPrecioMayoreo, txtStock, txtStockMinimo, cmbEstado, cmbTipoVenta, cmbCategoria, cmbProveedor);
+        // Evaluamos la bandera de configuración
+        boolean usarInventario = ConfiguracionSistema.getInstancia().getOpciones().isUsarInventario();
+
+        // Si no se usa inventario, aseguramos valores por defecto antes de extraer los datos
+        if (!usarInventario) {
+            txtStock.setText("0");
+            txtStockMinimo.setText("0");
+        }
+
+        InventarioUIUtil.extraerProductoDeFormulario(
+                productoSeleccionado, txtCodigoBarras, txtNombre, txtDescripcion, txtPrecio,
+                txtPrecioCompra, txtPorcentajeGanancia, txtPrecioMayoreo,
+                txtStock, txtStockMinimo, cmbEstado, cmbTipoVenta, cmbCategoria, cmbProveedor
+        );
 
         if (repository.actualizar(productoSeleccionado)) {
             List<DetallePaquete> detallesAActualizar = "PAQUETE".equalsIgnoreCase(productoSeleccionado.getTipoVenta()) ? listaDetallePaquete : null;
@@ -402,6 +452,8 @@ public class ProductosController implements Initializable {
     }
 
     private void listarProductos() {
+        aplicarConfiguracionInventario();
+        
         listaProductos.clear();
         listaProductos.addAll(repository.listarTodos());
         tblProductos.setItems(listaProductos);
@@ -448,22 +500,35 @@ public class ProductosController implements Initializable {
     }
 
     private boolean validarCampos() {
-        if (txtNombre.getText().trim().isEmpty() || txtPrecio.getText().trim().isEmpty() || txtStock.getText().trim().isEmpty()) {
-            InventarioUIUtil.mostrarAlerta("Campos vacíos", "Por favor rellena los campos obligatorios (Nombre, Precio Venta y Stock)", Alert.AlertType.WARNING);
+        boolean usarInventario = ConfiguracionSistema.getInstancia().getOpciones().isUsarInventario();
+
+        // 1. Validar campos obligatorios generales (se remueve txtStock de aquí)
+        if (txtNombre.getText() == null || txtNombre.getText().trim().isEmpty()
+                || txtPrecio.getText() == null || txtPrecio.getText().trim().isEmpty()) {
+            InventarioUIUtil.mostrarAlerta("Campos vacíos", "Por favor rellena los campos obligatorios (Nombre y Precio Venta)", Alert.AlertType.WARNING);
             return false;
         }
+
+        // 2. Validar stock únicamente si el inventario está activado
+        if (usarInventario && (txtStock.getText() == null || txtStock.getText().trim().isEmpty())) {
+            InventarioUIUtil.mostrarAlerta("Campos vacíos", "Por favor ingresa el Stock inicial", Alert.AlertType.WARNING);
+            return false;
+        }
+
         if (cmbCategoria.getValue() == null) {
             InventarioUIUtil.mostrarAlerta("Categoría requerida", "Por favor selecciona una categoría", Alert.AlertType.WARNING);
             return false;
         }
+
         if (cmbProveedor.getValue() == null) {
             InventarioUIUtil.mostrarAlerta("Proveedor requerido", "Por favor selecciona un proveedor", Alert.AlertType.WARNING);
             return false;
         }
 
+        // 3. Validaciones numéricas (Parsing)
         try {
             Double.parseDouble(txtPrecio.getText().trim());
-            Double.parseDouble(txtStock.getText().trim());
+
             if (txtPrecioCompra != null && !txtPrecioCompra.getText().trim().isEmpty()) {
                 Double.parseDouble(txtPrecioCompra.getText().trim());
             }
@@ -473,13 +538,21 @@ public class ProductosController implements Initializable {
             if (txtPrecioMayoreo != null && !txtPrecioMayoreo.getText().trim().isEmpty()) {
                 Double.parseDouble(txtPrecioMayoreo.getText().trim());
             }
-            if (txtStockMinimo != null && !txtStockMinimo.getText().trim().isEmpty()) {
-                Double.parseDouble(txtStockMinimo.getText().trim());
+
+            // Solo validar casteo de Stock y Stock Mínimo si el inventario está activo
+            if (usarInventario) {
+                if (txtStock != null && !txtStock.getText().trim().isEmpty()) {
+                    Double.parseDouble(txtStock.getText().trim());
+                }
+                if (txtStockMinimo != null && !txtStockMinimo.getText().trim().isEmpty()) {
+                    Double.parseDouble(txtStockMinimo.getText().trim());
+                }
             }
         } catch (NumberFormatException e) {
             InventarioUIUtil.mostrarAlerta("Datos inválidos", "Los campos numéricos deben contener valores válidos", Alert.AlertType.ERROR);
             return false;
         }
+
         return true;
     }
 

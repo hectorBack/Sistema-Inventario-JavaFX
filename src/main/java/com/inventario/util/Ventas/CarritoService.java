@@ -75,4 +75,21 @@ public class CarritoService {
     public void removerItem(DetalleVenta item) {
         items.remove(item);
     }
+
+    public void agregarSinValidarStock(Producto producto, double cantidadAñadir) {
+        Optional<DetalleVenta> itemExistente = items.stream()
+                .filter(item -> item.getProducto() != null && item.getProducto().getId() == producto.getId())
+                .findFirst();
+
+        if (itemExistente.isPresent()) {
+            DetalleVenta detalle = itemExistente.get();
+            double nuevaCantidadTotal = "GRANEL".equalsIgnoreCase(producto.getTipoVenta())
+                    ? cantidadAñadir
+                    : detalle.getCantidad() + cantidadAñadir;
+
+            detalle.setCantidad(nuevaCantidadTotal);
+        } else {
+            items.add(new DetalleVenta(producto, cantidadAñadir, producto.getPrecio()));
+        }
+    }
 }

@@ -87,18 +87,19 @@
                             </children>
                         </HBox>
 
-                        <HBox spacing="10.0">
+                        <!-- Agregamos fx:id="contenedorStock" al HBox de los stocks -->
+                        <HBox fx:id="contenedorStock" spacing="10.0">
                             <children>
                                 <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label minHeight="16.0" text="Stock Actual" styleClass="form-label"/>
-                                        <TextField fx:id="txtStock" prefHeight="32.0" text="0" styleClass="form-field"/>
+                                        <Label minHeight="16.0" styleClass="form-label" text="Stock Actual" />
+                                        <TextField fx:id="txtStock" prefHeight="32.0" styleClass="form-field" text="0" />
                                     </children>
                                 </VBox>
                                 <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label minHeight="16.0" text="Stock Mínimo" styleClass="form-label"/>
-                                        <TextField fx:id="txtStockMinimo" prefHeight="32.0" text="5" styleClass="form-field"/>
+                                        <Label minHeight="16.0" styleClass="form-label" text="Stock Mínimo" />
+                                        <TextField fx:id="txtStockMinimo" prefHeight="32.0" styleClass="form-field" text="5" />
                                     </children>
                                 </VBox>
                             </children>

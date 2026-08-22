@@ -1,5 +1,6 @@
 package com.inventario.controller;
 
+import com.inventario.config.ConfiguracionSistema;
 import com.inventario.model.Cliente;
 import com.inventario.model.DetalleVenta;
 import com.inventario.model.Producto;
@@ -258,6 +259,7 @@ public class VentasController implements Initializable {
      */
     private void procesarPersistenciaVenta(Cliente cliente, double pagoCon, boolean imprimirTicket) {
         try {
+
             Venta nuevaVenta = new Venta();
             nuevaVenta.setCliente(cliente);
             nuevaVenta.setTotal(carritoService.calcularTotal());
@@ -266,6 +268,7 @@ public class VentasController implements Initializable {
             boolean guardadoExitoso = ventaRepository.registrarVenta(nuevaVenta, detalles);
 
             if (guardadoExitoso) {
+
                 if (imprimirTicket) {
                     // TicketService.imprimirTicket(nuevaVenta, detalles, pagoCon);
                     mostrarAlerta("Venta Exitosa", "La venta se registró e imprimió correctamente.", Alert.AlertType.INFORMATION);
@@ -423,6 +426,8 @@ public class VentasController implements Initializable {
     }
 
     private void cargarCombosIniciales() {
+        boolean usarInventario = ConfiguracionSistema.getInstancia().getOpciones().isUsarInventario();
+
         ObservableList<Cliente> clientes = FXCollections.observableArrayList(clienteRepository.listarActivos());
         cmbCliente.setItems(clientes);
         cmbCliente.setCellFactory(lv -> new ListCell<Cliente>() {
@@ -434,17 +439,27 @@ public class VentasController implements Initializable {
         });
         cmbCliente.setButtonCell(cmbCliente.getCellFactory().call(null));
 
-        ObservableList<Producto> productos = FXCollections.observableArrayList(
-                productoRepository.listarTodos().stream()
-                        .filter(p -> p.getStock() > 0)
-                        .collect(Collectors.toList())
-        );
+        List<Producto> listaProductos = productoRepository.listarTodos();
+
+        // Si usarInventario es true, filtramos solo con stock > 0
+        if (usarInventario) {
+            listaProductos = listaProductos.stream()
+                    .filter(p -> p.getStock() > 0)
+                    .collect(Collectors.toList());
+        }
+
+        ObservableList<Producto> productos = FXCollections.observableArrayList(listaProductos);
         cmbProducto.setItems(productos);
         cmbProducto.setCellFactory(lv -> new ListCell<Producto>() {
             @Override
             protected void updateItem(Producto item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.getNombre() + " (Stock: " + item.getStock() + ")");
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    // Ocultamos la etiqueta de Stock si la bandera está desactivada
+                    setText(usarInventario ? item.getNombre() + " (Stock: " + item.getStock() + ")" : item.getNombre());
+                }
             }
         });
         cmbProducto.setButtonCell(cmbProducto.getCellFactory().call(null));
@@ -484,11 +499,20 @@ public class VentasController implements Initializable {
      * agregar/incrementar renglones.
      */
     private boolean procesarAgregadoACarrito(Producto producto, double cantidadAñadir) {
-        String errorStock = carritoService.agregarOActualizarProducto(producto, cantidadAñadir);
-        if (errorStock != null) {
-            mostrarAlerta("Stock", errorStock, Alert.AlertType.WARNING);
-            return false;
+        boolean usarInventario = ConfiguracionSistema.getInstancia().getOpciones().isUsarInventario();
+
+        // Validar límite de stock únicamente si usarInventario es TRUE
+        if (usarInventario) {
+            String errorStock = carritoService.agregarOActualizarProducto(producto, cantidadAñadir);
+            if (errorStock != null) {
+                mostrarAlerta("Stock Insuficiente", errorStock, Alert.AlertType.WARNING);
+                return false;
+            }
+        } else {
+            // Si inventario está desactivado, añadimos directamente sin validar existencias
+            carritoService.agregarSinValidarStock(producto, cantidadAñadir);
         }
+
         tblCarrito.refresh();
         actualizarEtiquetaTotal();
         return true;
