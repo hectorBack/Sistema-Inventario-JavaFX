@@ -1,6 +1,7 @@
 package com.inventario.repository.Impl;
 
 import com.inventario.config.ConexionDB;
+import com.inventario.config.ConfiguracionSistema;
 import com.inventario.model.MovimientoInventario;
 import com.inventario.model.Producto;
 import com.inventario.repository.InventarioRepository;
@@ -10,12 +11,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class InventarioRepositoryImpl implements InventarioRepository {
 
     @Override
     public boolean agregarStock(int idProducto, double cantidad) {
+        boolean usarInventario = ConfiguracionSistema.getInstancia().getOpciones().isUsarInventario();
+
+        // Si el inventario está desactivado, se interrumpe el registro manual de entradas
+        if (!usarInventario) {
+            return false;
+        }
+
         String sqlUpdate = "UPDATE productos SET stock = stock + ? WHERE id = ?";
         String sqlMovimiento = "INSERT INTO movimientos_inventario (producto_id, tipo_movimiento, cantidad, fecha_movimiento) "
                 + "VALUES (?, 'ENTRADA', ?, NOW())";
@@ -40,7 +49,9 @@ public class InventarioRepositoryImpl implements InventarioRepository {
                 conn.commit();
                 return true;
             } catch (SQLException e) {
-                conn.rollback();
+                if (conn != null) {
+                    conn.rollback();
+                }
                 e.printStackTrace();
             }
         } catch (SQLException e) {
@@ -49,6 +60,7 @@ public class InventarioRepositoryImpl implements InventarioRepository {
             if (conn != null) {
                 try {
                     conn.setAutoCommit(true);
+                    conn.close();
                 } catch (SQLException ignored) {
                 }
             }
@@ -58,6 +70,13 @@ public class InventarioRepositoryImpl implements InventarioRepository {
 
     @Override
     public List<Producto> obtenerProductosStockBajo() {
+        boolean usarInventario = ConfiguracionSistema.getInstancia().getOpciones().isUsarInventario();
+
+        // Si el módulo está apagado, no se reportan alertas de reabastecimiento
+        if (!usarInventario) {
+            return Collections.emptyList();
+        }
+
         List<Producto> lista = new ArrayList<>();
         String sql = "SELECT * FROM productos WHERE stock <= stock_minimo AND estado = 'Activo' ORDER BY stock ASC";
         try (Connection conn = ConexionDB.getConexion(); Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {

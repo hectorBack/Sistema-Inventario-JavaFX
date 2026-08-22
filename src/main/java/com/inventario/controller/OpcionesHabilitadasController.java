@@ -70,7 +70,6 @@ public class OpcionesHabilitadasController {
 
     @FXML
     private void onGuardar() {
-        // Parsing seguro del margen de ganancia
         double margenGanancia = 0.0;
         try {
             if (!txtMargenGanancia.getText().trim().isEmpty()) {
@@ -81,7 +80,6 @@ public class OpcionesHabilitadasController {
             return;
         }
 
-        // Construir el modelo con las elecciones seleccionadas
         OpcionesHabilitadas opciones = new OpcionesHabilitadas(
                 chkUsarInventario.isSelected(),
                 chkOfrecerCredito.isSelected(),
@@ -92,11 +90,16 @@ public class OpcionesHabilitadasController {
                 cmbTipoRedondeo.getValue() != null ? cmbTipoRedondeo.getValue() : ""
         );
 
-        // Guardar o actualizar en PostgreSQL
         boolean exito = opcionesRepository.guardarOActualizar(opciones);
 
         if (exito) {
             ConfiguracionSistema.getInstancia().cargarOpciones();
+
+            // 1. REFRESCO INMEDIATO EN EL SIDEBAR AL GUARDAR
+            if (MainLayoutController.getInstancia() != null) {
+                MainLayoutController.getInstancia().actualizarEstadoModulos();
+            }
+
             mostrarAlerta("Éxito", "Configuración guardada correctamente en la base de datos.", Alert.AlertType.INFORMATION);
         } else {
             mostrarAlerta("Error", "No se pudo guardar la configuración.", Alert.AlertType.ERROR);
@@ -105,6 +108,11 @@ public class OpcionesHabilitadasController {
 
     @FXML
     private void onVolver(ActionEvent event) {
+        // 2. ASEGURA QUE AL REGRESAR EL SIDEBAR TENGA EL ESTADO FRESCO
+        if (MainLayoutController.getInstancia() != null) {
+            MainLayoutController.getInstancia().actualizarEstadoModulos();
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/inventario/view/configuracion.fxml"));
             Parent vistaConfiguracion = loader.load();

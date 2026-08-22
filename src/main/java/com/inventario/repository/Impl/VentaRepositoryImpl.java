@@ -1,6 +1,7 @@
 package com.inventario.repository.Impl;
 
 import com.inventario.config.ConexionDB;
+import com.inventario.config.ConfiguracionSistema;
 import com.inventario.model.Cliente;
 import com.inventario.model.DetalleVenta;
 import com.inventario.model.Producto;
@@ -21,8 +22,10 @@ public class VentaRepositoryImpl implements VentaRepository {
     public boolean registrarVenta(Venta venta, List<DetalleVenta> detalles) {
         String sqlVenta = "INSERT INTO ventas (cliente_id, total, estado) VALUES (?, ?, ?) RETURNING id";
         String sqlDetalle = "INSERT INTO detalle_ventas (venta_id, producto_id, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?)";
-        // Validación estricta de stock disponible en la misma consulta
         String sqlActualizarStock = "UPDATE productos SET stock = stock - ? WHERE id = ? AND stock >= ?";
+
+        // 1. Obtener la configuración del sistema
+        boolean usarInventario = ConfiguracionSistema.getInstancia().getOpciones().isUsarInventario();
 
         Connection conn = null;
         PreparedStatement stmtVenta = null;
@@ -48,9 +51,13 @@ public class VentaRepositoryImpl implements VentaRepository {
             }
 
             stmtDetalle = conn.prepareStatement(sqlDetalle);
-            stmtStock = conn.prepareStatement(sqlActualizarStock);
 
-            // 2. Procesar detalles e inspeccionar disponibilidad física
+            // Solo instanciar la consulta de stock si el control de inventario está ACTIVO
+            if (usarInventario) {
+                stmtStock = conn.prepareStatement(sqlActualizarStock);
+            }
+
+            // 2. Procesar detalles
             for (DetalleVenta detalle : detalles) {
                 stmtDetalle.setInt(1, idVentaGenerado);
                 stmtDetalle.setInt(2, detalle.getProducto().getId());
@@ -59,14 +66,16 @@ public class VentaRepositoryImpl implements VentaRepository {
                 stmtDetalle.setDouble(5, detalle.getSubtotal());
                 stmtDetalle.executeUpdate();
 
-                // 3. Descontar stock evaluando disponibilidad
-                stmtStock.setDouble(1, detalle.getCantidad());
-                stmtStock.setInt(2, detalle.getProducto().getId());
-                stmtStock.setDouble(3, detalle.getCantidad()); // Condición stock >= cantidad
+                // 3. Descontar stock ÚNICAMENTE si usarInventario es true
+                if (usarInventario) {
+                    stmtStock.setDouble(1, detalle.getCantidad());
+                    stmtStock.setInt(2, detalle.getProducto().getId());
+                    stmtStock.setDouble(3, detalle.getCantidad());
 
-                int filasAfectadasStock = stmtStock.executeUpdate();
-                if (filasAfectadasStock == 0) {
-                    throw new SQLException("Stock insuficiente o no disponible para el producto: " + detalle.getProducto().getNombre());
+                    int filasAfectadasStock = stmtStock.executeUpdate();
+                    if (filasAfectadasStock == 0) {
+                        throw new SQLException("Stock insuficiente para el producto: " + detalle.getProducto().getNombre());
+                    }
                 }
             }
 
@@ -144,6 +153,8 @@ public class VentaRepositoryImpl implements VentaRepository {
         String sqlCancelarVenta = "UPDATE ventas SET estado = 'CANCELADA' WHERE id = ?";
         String sqlReintegrarStock = "UPDATE productos SET stock = stock + ? WHERE id = ?";
 
+        boolean usarInventario = ConfiguracionSistema.getInstancia().getOpciones().isUsarInventario();
+
         Connection conn = null;
         PreparedStatement stmtEstado = null;
         PreparedStatement stmtCancelar = null;
@@ -166,14 +177,15 @@ public class VentaRepositoryImpl implements VentaRepository {
                 }
             }
 
-            // 1. Obtener los detalles para devolver stock a productos
-            List<DetalleVenta> detalles = listarDetallesPorVenta(ventaId);
-
-            stmtReintegrar = conn.prepareStatement(sqlReintegrarStock);
-            for (DetalleVenta detalle : detalles) {
-                stmtReintegrar.setDouble(1, detalle.getCantidad());
-                stmtReintegrar.setInt(2, detalle.getProducto().getId());
-                stmtReintegrar.executeUpdate();
+            // 1. Devolver stock SOLO SI usarInventario es true
+            if (usarInventario) {
+                List<DetalleVenta> detalles = listarDetallesPorVenta(ventaId);
+                stmtReintegrar = conn.prepareStatement(sqlReintegrarStock);
+                for (DetalleVenta detalle : detalles) {
+                    stmtReintegrar.setDouble(1, detalle.getCantidad());
+                    stmtReintegrar.setInt(2, detalle.getProducto().getId());
+                    stmtReintegrar.executeUpdate();
+                }
             }
 
             // 2. Marcar la venta como CANCELADA
