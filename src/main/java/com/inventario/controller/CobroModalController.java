@@ -1,8 +1,10 @@
 package com.inventario.controller;
 
+import com.inventario.config.ConfiguracionSistema;
 import java.util.function.BiConsumer;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -46,8 +48,29 @@ public class CobroModalController {
         this.lblTotalPagar.setText(String.format("$%.2f", total));
         this.lblTotalArticulos.setText(String.valueOf(cantidadArticulos));
 
-        cmbFormaPago.setItems(FXCollections.observableArrayList("Efectivo"));
+        // 1. CARGAR FORMAS DE PAGO SEGÚN CONFIGURACIÓN
+        ObservableList<String> formasPago = FXCollections.observableArrayList("Efectivo");
+        boolean ofrecerCredito = ConfiguracionSistema.getInstancia().getOpciones().isOfrecerCredito();
+
+        if (ofrecerCredito) {
+            formasPago.add("A Crédito");
+        }
+
+        cmbFormaPago.setItems(formasPago);
         cmbFormaPago.getSelectionModel().selectFirst();
+
+        // Escuchar cambios de forma de pago para ajustar el campo Pago Con
+        cmbFormaPago.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if ("A Crédito".equalsIgnoreCase(newVal)) {
+                txtPagoCon.setText("0.00");
+                txtPagoCon.setDisable(true);
+                txtCambio.setText("$0.00");
+            } else {
+                txtPagoCon.setDisable(false);
+                txtPagoCon.setText(String.format(java.util.Locale.US, "%.2f", totalAPagar));
+                onCalcularCambio(null);
+            }
+        });
 
         txtPagoCon.setText(String.format(java.util.Locale.US, "%.2f", total));
         onCalcularCambio(null);
@@ -102,10 +125,9 @@ public class CobroModalController {
             this.ventaConfirmada = true;
             this.imprimirTicket = true;
 
-            double montoPago = Double.parseDouble(txtPagoCon.getText().trim());
+            double montoPago = "A Crédito".equalsIgnoreCase(cmbFormaPago.getValue()) ? 0.0 : Double.parseDouble(txtPagoCon.getText().trim());
             cerrarModal();
 
-            // Ejecutar el callback
             if (onPagoConfirmado != null) {
                 onPagoConfirmado.accept(montoPago, true);
             }
@@ -118,10 +140,9 @@ public class CobroModalController {
             this.ventaConfirmada = true;
             this.imprimirTicket = false;
 
-            double montoPago = Double.parseDouble(txtPagoCon.getText().trim());
+            double montoPago = "A Crédito".equalsIgnoreCase(cmbFormaPago.getValue()) ? 0.0 : Double.parseDouble(txtPagoCon.getText().trim());
             cerrarModal();
 
-            // Ejecutar el callback
             if (onPagoConfirmado != null) {
                 onPagoConfirmado.accept(montoPago, false);
             }
@@ -135,6 +156,13 @@ public class CobroModalController {
     }
 
     private boolean validarPago() {
+        String formaPago = cmbFormaPago.getValue();
+
+        // Si la venta es A Crédito no se requiere ingresar pago inmediato
+        if ("A Crédito".equalsIgnoreCase(formaPago)) {
+            return true;
+        }
+
         try {
             double pago = Double.parseDouble(txtPagoCon.getText().trim());
             if (pago < totalAPagar) {

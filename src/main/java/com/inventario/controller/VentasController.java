@@ -221,14 +221,12 @@ public class VentasController implements Initializable {
             return;
         }
 
+        boolean ofrecerCredito = ConfiguracionSistema.getInstancia().getOpciones().isOfrecerCredito();
         Cliente cliente = cmbCliente.getValue();
+
+        // Si ofrece crédito pero no seleccionaron cliente, o si no ofrece crédito, se asigna el cliente general por defecto
         if (cliente == null) {
             cliente = obtenerOCrearClienteGeneral();
-        }
-
-        if (cliente == null) {
-            mostrarAlerta("Error de Cliente", "No se pudo obtener ni registrar al cliente genérico.", Alert.AlertType.ERROR);
-            return;
         }
 
         final Cliente clienteFinal = cliente;
@@ -242,7 +240,11 @@ public class VentasController implements Initializable {
                         total,
                         carritoService.calcularTotalArticulos(),
                         (montoPago, debeImprimirTicket) -> {
-                            // Callback ejecutado cuando el usuario presiona [F1] o [F2]
+                            // Si el pago es 0 y el cliente es público en general, se rechaza la venta a crédito
+                            if (montoPago == 0.0 && "Público en General".equalsIgnoreCase(clienteFinal.getNombre())) {
+                                mostrarAlerta("Cliente Requerido", "Debes seleccionar un cliente registrado para realizar una venta a crédito.", Alert.AlertType.WARNING);
+                                return;
+                            }
                             procesarPersistenciaVenta(clienteFinal, montoPago, debeImprimirTicket);
                         }
                 )
