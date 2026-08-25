@@ -92,4 +92,24 @@ public class CarritoService {
             items.add(new DetalleVenta(producto, cantidadAñadir, producto.getPrecio()));
         }
     }
+
+    public void agregarProductoComun(String nombre, double cantidad, double precio) {
+        Producto prodComun = new Producto(
+                0,
+                "ART-COMUN",
+                nombre,
+                "Artículo común no grabado",
+                precio,
+                precio,
+                0.0,
+                0.0,
+                9999.0,
+                0.0,
+                "UNIDAD",
+                "ACTIVO",
+                null,
+                null
+        );
+        agregarSinValidarStock(prodComun, cantidad);
+    }
 }

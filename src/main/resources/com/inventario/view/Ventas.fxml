@@ -94,6 +94,8 @@
                         <Button mnemonicParsing="false" fx:id="btnBuscar" onAction="#onBuscarProductoModal" prefHeight="50.0" prefWidth="110.0" styleClass="action-button, action-soft" text="Buscar (F10)">
                           
                         </Button>
+                        
+                        <Button fx:id="btnProductoComun" mnemonicParsing="false" onAction="#onAbrirProductoComunModal" prefHeight="50.0" prefWidth="130.0" styleClass="action-button, action-soft" text="Art. Común (Ctrl+P)" />
                     
                         <HBox alignment="CENTER_LEFT" spacing="6.0">
                             <children>

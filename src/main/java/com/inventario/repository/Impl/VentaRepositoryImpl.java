@@ -21,7 +21,7 @@ public class VentaRepositoryImpl implements VentaRepository {
     @Override
     public boolean registrarVenta(Venta venta, List<DetalleVenta> detalles) {
         String sqlVenta = "INSERT INTO ventas (cliente_id, total, estado) VALUES (?, ?, ?) RETURNING id";
-        String sqlDetalle = "INSERT INTO detalle_ventas (venta_id, producto_id, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?)";
+        String sqlDetalle = "INSERT INTO detalle_ventas (venta_id, producto_id, cantidad, precio_unitario, subtotal, descripcion) VALUES (?, ?, ?, ?, ?, ?)";
         String sqlActualizarStock = "UPDATE productos SET stock = stock - ? WHERE id = ? AND stock >= ?";
 
         // 1. Obtener la configuración del sistema
@@ -38,7 +38,13 @@ public class VentaRepositoryImpl implements VentaRepository {
 
             // 1. Insertar Cabecera de la Venta
             stmtVenta = conn.prepareStatement(sqlVenta);
-            stmtVenta.setInt(1, venta.getCliente().getId());
+
+            if (venta.getCliente() != null && venta.getCliente().getId() > 0) {
+                stmtVenta.setInt(1, venta.getCliente().getId());
+            } else {
+                stmtVenta.setNull(1, java.sql.Types.INTEGER);
+            }
+
             stmtVenta.setDouble(2, venta.getTotal());
             stmtVenta.setString(3, venta.getEstado());
 
@@ -60,14 +66,27 @@ public class VentaRepositoryImpl implements VentaRepository {
             // 2. Procesar detalles
             for (DetalleVenta detalle : detalles) {
                 stmtDetalle.setInt(1, idVentaGenerado);
-                stmtDetalle.setInt(2, detalle.getProducto().getId());
+
+                // EVALUACIÓN DE PRODUCTO COMÚN / GENÉRICO (ID = 0 o NULL)
+                boolean esProductoComun = (detalle.getProducto() == null || detalle.getProducto().getId() <= 0);
+
+                if (esProductoComun) {
+                    stmtDetalle.setNull(2, java.sql.Types.INTEGER);
+                } else {
+                    stmtDetalle.setInt(2, detalle.getProducto().getId());
+                }
+
                 stmtDetalle.setDouble(3, detalle.getCantidad());
                 stmtDetalle.setDouble(4, detalle.getPrecioUnitario());
                 stmtDetalle.setDouble(5, detalle.getSubtotal());
+
+                String nombreDesc = (detalle.getProducto() != null) ? detalle.getProducto().getNombre() : "Artículo Común";
+                stmtDetalle.setString(6, nombreDesc);
+
                 stmtDetalle.executeUpdate();
 
                 // 3. Descontar stock ÚNICAMENTE si usarInventario es true
-                if (usarInventario) {
+                if (usarInventario && !esProductoComun) {
                     stmtStock.setDouble(1, detalle.getCantidad());
                     stmtStock.setInt(2, detalle.getProducto().getId());
                     stmtStock.setDouble(3, detalle.getCantidad());
@@ -118,9 +137,9 @@ public class VentaRepositoryImpl implements VentaRepository {
     @Override
     public List<DetalleVenta> listarDetallesPorVenta(int ventaId) {
         List<DetalleVenta> detalles = new ArrayList<>();
-        String sql = "SELECT dv.id, dv.venta_id, dv.cantidad, dv.precio_unitario, dv.subtotal, "
+        String sql = "SELECT dv.id, dv.venta_id, dv.cantidad, dv.precio_unitario, dv.subtotal, dv.descripcion, "
                 + "p.id as producto_id, p.nombre as producto_nombre "
-                + "FROM detalle_ventas dv INNER JOIN productos p ON dv.producto_id = p.id "
+                + "FROM detalle_ventas dv LEFT JOIN productos p ON dv.producto_id = p.id "
                 + "WHERE dv.venta_id = ?";
 
         try (Connection conn = ConexionDB.getConexion(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -129,8 +148,19 @@ public class VentaRepositoryImpl implements VentaRepository {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Producto p = new Producto();
-                    p.setId(rs.getInt("producto_id"));
-                    p.setNombre(rs.getString("producto_nombre"));
+                    int prodId = rs.getInt("producto_id");
+                    String descripcionGuardada = rs.getString("descripcion");
+
+                    if (!rs.wasNull() && prodId > 0) {
+                        p.setId(prodId);
+                        p.setNombre(rs.getString("producto_nombre"));
+                    } else {
+                        p.setId(0);
+                        // Si es común, se asigna la descripción guardada en el detalle
+                        p.setNombre((descripcionGuardada != null && !descripcionGuardada.isBlank())
+                                ? descripcionGuardada
+                                : "Artículo Común");
+                    }
 
                     detalles.add(new DetalleVenta(
                             rs.getInt("id"),

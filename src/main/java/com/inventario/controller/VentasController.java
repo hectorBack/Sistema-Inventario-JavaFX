@@ -156,6 +156,59 @@ public class VentasController implements Initializable {
         }
     }
 
+    @FXML
+    void onAbrirProductoComunModal(ActionEvent event) {
+        boolean productoComunHabilitado = ConfiguracionSistema.getInstancia().getOpciones().isProductoComun();
+        if (!productoComunHabilitado) {
+            mostrarAlerta("Opción Desactivada", "La venta de Producto Común está desactivada en la configuración del sistema.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        final ProductoComunModalController[] modalCtrlRef = new ProductoComunModalController[1];
+
+        boolean modalCargado = ModalNavigationUtil.<ProductoComunModalController>abrirModal(
+                getClass(),
+                "/com/inventario/view/ProductoComunModal.fxml",
+                "Artículo Común",
+                modalController -> {
+                    modalCtrlRef[0] = modalController;
+                }
+        );
+
+        if (modalCargado && modalCtrlRef[0] != null) {
+            ProductoComunModalController modalCtrl = modalCtrlRef[0];
+            if (modalCtrl.isAceptado()) {
+                String nombre = modalCtrl.getNombreProducto();
+                double cantidad = modalCtrl.getCantidad();
+                double precio = modalCtrl.getPrecio();
+
+                // Creamos un producto genérico temporal
+                Producto prodComun = new Producto(
+                        0,
+                        "ART-COMUN",
+                        nombre,
+                        "Producto común no grabado",
+                        precio,
+                        precio,
+                        0.0,
+                        0.0,
+                        999.0,
+                        0.0,
+                        "UNIDAD",
+                        "ACTIVO",
+                        null,
+                        null
+                );
+
+                if (procesarAgregadoACarritoConPrecio(prodComun, cantidad, precio)) {
+                    SoundUtil.emitirBeep(900, 120);
+                }
+            }
+        } else {
+            mostrarAlerta("Error", "No se pudo cargar la ventana de Producto Común.", Alert.AlertType.ERROR);
+        }
+    }
+
     private void configurarEventosTeclado() {
         tblCarrito.setOnKeyPressed(event -> {
             switch (event.getCode()) {
@@ -188,8 +241,20 @@ public class VentasController implements Initializable {
                     }
                 },
                 () -> onBuscarProductoModal(null),
+                () -> onAbrirProductoComunModal(null),
                 this::limpiarPantallaCompleta
         );
+
+        // Registro adicional de la tecla Ctrl + P para Producto Común
+        Node targetNode = txtCodigoBarras != null ? txtCodigoBarras : tblCarrito;
+        if (targetNode != null && targetNode.getScene() != null) {
+            targetNode.getScene().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+                if (event.isControlDown() && event.getCode() == KeyCode.P) {
+                    onAbrirProductoComunModal(null);
+                    event.consume();
+                }
+            });
+        }
 
         if (txtCodigoBarras != null) {
             txtCodigoBarras.setOnKeyPressed(event -> {

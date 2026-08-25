@@ -87,6 +87,7 @@ public class KeyboardShortcutUtil {
             Runnable accionCobrar,
             Runnable accionBuscarFocus,
             Runnable accionAbrirModalBuscar,
+            Runnable accionProductoComun,
             Runnable accionLimpiar) {
 
         Platform.runLater(() -> {
@@ -98,10 +99,11 @@ public class KeyboardShortcutUtil {
 
             KeyCombination ctrlA = new KeyCodeCombination(KeyCode.A, KeyCombination.CONTROL_DOWN);
             KeyCombination ctrlF = new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN);
+            KeyCombination ctrlP = new KeyCodeCombination(KeyCode.P, KeyCombination.CONTROL_DOWN);
 
             scene.setOnKeyPressed((KeyEvent event) -> {
                 // F10: Abrir modal buscar 
-                if (event.getCode() == KeyCode.F10 && accionAbrirModalBuscar != null){
+                if (event.getCode() == KeyCode.F10 && accionAbrirModalBuscar != null) {
                     accionAbrirModalBuscar.run();
                     event.consume();
                 }
@@ -116,6 +118,10 @@ public class KeyboardShortcutUtil {
                 } // Ctrl + F: Buscar producto
                 else if (ctrlF.match(event) && accionBuscarFocus != null) {
                     accionBuscarFocus.run();
+                    event.consume();
+                } // Ctrl + P: Abrir modal Producto Común
+                else if (ctrlP.match(event) && accionProductoComun != null) {
+                    accionProductoComun.run();
                     event.consume();
                 } // SUPR: Quitar elemento del carrito (si no está escribiendo en un campo de texto)
                 else if (event.getCode() == KeyCode.DELETE && accionQuitarItem != null) {
