@@ -3,6 +3,7 @@ package com.inventario.controller;
 import com.inventario.config.ConfiguracionSistema;
 import com.inventario.model.Categoria;
 import com.inventario.model.DetallePaquete;
+import com.inventario.model.OpcionesHabilitadas;
 import com.inventario.model.Producto;
 import com.inventario.model.Proveedor;
 import com.inventario.repository.CategoriaRepository;
@@ -105,10 +106,12 @@ public class ProductosController implements Initializable {
         cargarDatos();
         configurarAtajosTeclado();
         aplicarConfiguracionInventario();
+        limpiarFormulario();
     }
 
     private void aplicarConfiguracionInventario() {
-        boolean usarInventario = ConfiguracionSistema.getInstancia().getOpciones().isUsarInventario();
+        OpcionesHabilitadas opciones = ConfiguracionSistema.getInstancia().getOpciones();
+        boolean usarInventario = opciones.isUsarInventario();
 
         // Visibilidad del formulario (HBox contenedor de Stock y Stock Mínimo)
         if (contenedorStock != null) {
@@ -119,6 +122,11 @@ public class ProductosController implements Initializable {
         // Visibilidad de la columna en la TableView
         if (colStock != null) {
             colStock.setVisible(usarInventario);
+        }
+
+        // Configurar estado del campo Porcentaje Ganancia según el interruptor
+        if (txtPorcentajeGanancia != null) {
+            txtPorcentajeGanancia.setDisable(!opciones.isCalcularPrecio());
         }
     }
 
@@ -411,12 +419,21 @@ public class ProductosController implements Initializable {
 
     // --- MÉTODOS PRIVADOS DE APOYO ---
     private void calcularPrecioVenta() {
+        OpcionesHabilitadas opciones = ConfiguracionSistema.getInstancia().getOpciones();
+
+        // Solo recalcular si la opción global está activa
+        if (!opciones.isCalcularPrecio()) {
+            return;
+        }
+
         try {
             double costo = Double.parseDouble(txtPrecioCompra.getText().trim());
             double porcentaje = Double.parseDouble(txtPorcentajeGanancia.getText().trim());
             double precioVenta = InventarioCalculosUtil.calcularPrecioVenta(costo, porcentaje);
+
             txtPrecio.setText(String.format(Locale.US, "%.2f", precioVenta));
         } catch (NumberFormatException ignored) {
+            // Omite si hay formato inválido mientras el usuario tipea
         }
     }
 
@@ -453,7 +470,7 @@ public class ProductosController implements Initializable {
 
     private void listarProductos() {
         aplicarConfiguracionInventario();
-        
+
         listaProductos.clear();
         listaProductos.addAll(repository.listarTodos());
         tblProductos.setItems(listaProductos);
@@ -469,12 +486,22 @@ public class ProductosController implements Initializable {
             txtDescripcion.clear();
         }
 
+        // Obtener opciones de configuración global
+        OpcionesHabilitadas opciones = ConfiguracionSistema.getInstancia().getOpciones();
+
         // Valores numéricos por defecto (coincidentes con la interfaz)
         if (txtPrecioCompra != null) {
             txtPrecioCompra.setText("0.00");
         }
+        // Configurar el porcentaje de ganancia según las opciones del sistema
         if (txtPorcentajeGanancia != null) {
-            txtPorcentajeGanancia.setText("20.00");
+            if (opciones.isCalcularPrecio()) {
+                txtPorcentajeGanancia.setText(String.format(Locale.US, "%.2f", opciones.getMargenGanancia()));
+                txtPorcentajeGanancia.setDisable(false);
+            } else {
+                txtPorcentajeGanancia.setText("0.00");
+                txtPorcentajeGanancia.setDisable(true);
+            }
         }
         txtPrecio.setText("0.00");
         if (txtPrecioMayoreo != null) {
