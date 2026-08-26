@@ -29,6 +29,11 @@ public class ConfiguracionSistema {
         }
     }
 
+    // Método para refrescar el objeto en memoria tras guardar en la pantalla de Configuración
+    public void actualizarOpciones(OpcionesHabilitadas nuevasOpciones) {
+        this.opciones = nuevasOpciones;
+    }
+
     public OpcionesHabilitadas getOpciones() {
         return opciones;
     }

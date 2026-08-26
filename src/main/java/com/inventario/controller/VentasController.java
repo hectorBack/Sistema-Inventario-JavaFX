@@ -3,6 +3,7 @@ package com.inventario.controller;
 import com.inventario.config.ConfiguracionSistema;
 import com.inventario.model.Cliente;
 import com.inventario.model.DetalleVenta;
+import com.inventario.model.OpcionesHabilitadas;
 import com.inventario.model.Producto;
 import com.inventario.model.Venta;
 import com.inventario.repository.ClienteRepository;
@@ -13,6 +14,7 @@ import com.inventario.repository.Impl.VentaRepositoryImpl;
 import com.inventario.repository.ProductoRepository;
 import com.inventario.repository.PromocionRepository;
 import com.inventario.repository.VentaRepository;
+import com.inventario.util.Inventario.InventarioCalculosUtil;
 import com.inventario.util.Productos.KeyboardShortcutUtil;
 import com.inventario.util.Ventas.BusquedaProductoUtil;
 import com.inventario.util.Ventas.CarritoService;
@@ -25,6 +27,7 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -289,28 +292,34 @@ public class VentasController implements Initializable {
         boolean ofrecerCredito = ConfiguracionSistema.getInstancia().getOpciones().isOfrecerCredito();
         Cliente cliente = cmbCliente.getValue();
 
-        // Si ofrece crédito pero no seleccionaron cliente, o si no ofrece crédito, se asigna el cliente general por defecto
         if (cliente == null) {
             cliente = obtenerOCrearClienteGeneral();
         }
 
         final Cliente clienteFinal = cliente;
-        final double total = carritoService.calcularTotal();
+
+        // Obtener total exacto y aplicar redondeo configurado
+        double totalSinRedondear = carritoService.calcularTotal();
+        OpcionesHabilitadas opciones = ConfiguracionSistema.getInstancia().getOpciones();
+        final double totalFinal = InventarioCalculosUtil.aplicarRedondeo(
+                totalSinRedondear,
+                opciones.isHabilitarRedondeo(),
+                opciones.getTipoRedondeo()
+        );
 
         boolean modalCargado = ModalNavigationUtil.<CobroModalController>abrirModal(
                 getClass(),
                 "/com/inventario/view/CobroModal.fxml",
                 "Procesar Pago",
                 modalCtrl -> modalCtrl.initData(
-                        total,
+                        totalFinal, // Total redondeado para el cobro
                         carritoService.calcularTotalArticulos(),
                         (montoPago, debeImprimirTicket) -> {
-                            // Si el pago es 0 y el cliente es público en general, se rechaza la venta a crédito
                             if (montoPago == 0.0 && "Público en General".equalsIgnoreCase(clienteFinal.getNombre())) {
                                 mostrarAlerta("Cliente Requerido", "Debes seleccionar un cliente registrado para realizar una venta a crédito.", Alert.AlertType.WARNING);
                                 return;
                             }
-                            procesarPersistenciaVenta(clienteFinal, montoPago, debeImprimirTicket);
+                            procesarPersistenciaVenta(clienteFinal, totalFinal, montoPago, debeImprimirTicket);
                         }
                 )
         );
@@ -324,26 +333,22 @@ public class VentasController implements Initializable {
      * Persiste la venta en la base de datos, manda a imprimir si corresponde y
      * reinicia el estado del carrito/pantalla.
      */
-    private void procesarPersistenciaVenta(Cliente cliente, double pagoCon, boolean imprimirTicket) {
+    private void procesarPersistenciaVenta(Cliente cliente, double totalVenta, double pagoCon, boolean imprimirTicket) {
         try {
-
             Venta nuevaVenta = new Venta();
             nuevaVenta.setCliente(cliente);
-            nuevaVenta.setTotal(carritoService.calcularTotal());
+            nuevaVenta.setTotal(totalVenta); // Se persiste el valor redondeado final
 
             List<DetalleVenta> detalles = new ArrayList<>(carritoService.getItems());
             boolean guardadoExitoso = ventaRepository.registrarVenta(nuevaVenta, detalles);
 
             if (guardadoExitoso) {
-
                 if (imprimirTicket) {
                     // TicketService.imprimirTicket(nuevaVenta, detalles, pagoCon);
                     mostrarAlerta("Venta Exitosa", "La venta se registró e imprimió correctamente.", Alert.AlertType.INFORMATION);
                 }
 
-                // Limpia pantalla y carrito inmediatamente sin frenar el flujo
                 limpiarPantallaCompleta();
-
             } else {
                 mostrarAlerta("Error de Guardado", "No se pudo completar el registro de la venta en la base de datos.", Alert.AlertType.ERROR);
             }
@@ -484,7 +489,7 @@ public class VentasController implements Initializable {
 
         double nuevaCantidad = seleccionado.getCantidad() - 1.0;
         if (nuevaCantidad <= 0) {
-            carritoItems.remove(seleccionado);
+            carritoService.removerItem(seleccionado);
         } else {
             seleccionado.setCantidad(nuevaCantidad);
             tblCarrito.refresh();
@@ -621,7 +626,20 @@ public class VentasController implements Initializable {
     }
 
     private void actualizarEtiquetaTotal() {
-        lblTotal.setText(String.format("$%.2f", carritoService.calcularTotal()));
+        double totalSinRedondear = carritoService.calcularTotal();
+
+        // 1. Forzar la recarga/obtención actualizada del Singleton
+        ConfiguracionSistema.getInstancia().cargarOpciones();// O el método equivalente de tu Singleton para refrescar desde BD
+        OpcionesHabilitadas opciones = ConfiguracionSistema.getInstancia().getOpciones();
+
+        // 2. Aplicar redondeo
+        double totalFinal = InventarioCalculosUtil.aplicarRedondeo(
+                totalSinRedondear,
+                opciones.isHabilitarRedondeo(),
+                opciones.getTipoRedondeo()
+        );
+
+        lblTotal.setText(String.format(Locale.US, "$%.2f", totalFinal));
     }
 
     private void limpiarPantallaCompleta() {

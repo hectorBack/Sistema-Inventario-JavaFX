@@ -1,6 +1,8 @@
 package com.inventario.controller;
 
 import com.inventario.config.ConfiguracionSistema;
+import com.inventario.model.OpcionesHabilitadas;
+import com.inventario.util.Inventario.InventarioCalculosUtil;
 import java.util.function.BiConsumer;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -42,7 +44,16 @@ public class CobroModalController {
     private BiConsumer<Double, Boolean> onPagoConfirmado;
 
     public void initData(double total, int cantidadArticulos, BiConsumer<Double, Boolean> onPagoConfirmado) {
-        this.totalAPagar = total;
+        // Obtener configuración de redondeo activa
+        OpcionesHabilitadas opciones = ConfiguracionSistema.getInstancia().getOpciones();
+
+        // Aplicar la regla de redondeo antes de fijar el total a pagar definitivo
+        this.totalAPagar = InventarioCalculosUtil.aplicarRedondeo(
+                total,
+                opciones.isHabilitarRedondeo(),
+                opciones.getTipoRedondeo()
+        );
+
         this.onPagoConfirmado = onPagoConfirmado;
 
         this.lblTotalPagar.setText(String.format("$%.2f", total));
