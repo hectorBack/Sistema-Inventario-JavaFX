@@ -62,7 +62,7 @@ public class ConfiguracionController {
 
     @FXML
     void onCajeros(ActionEvent e) {
-        cambiarVista(e, "/com/inventario/view/config/cajerosModal.fxml");
+        cargarEnContenidoCentral(e, "/com/inventario/view/CajerosView.fxml");
     }
 
     @FXML

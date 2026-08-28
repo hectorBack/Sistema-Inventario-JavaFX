@@ -304,3 +304,13 @@
 .action-config .ikonli-font-icon {
     -fx-icon-color: #0f172a;
 }
+
+/* Forzar que el texto del CheckBox dentro del TabPane sea visible */
+.tab-pane .check-box {
+    -fx-text-fill: #2c3e50; /* O el color principal de texto de tu tema */
+    -fx-font-size: 13px;
+}
+
+.tab-pane .check-box .text {
+    -fx-fill: #2c3e50;
+}
