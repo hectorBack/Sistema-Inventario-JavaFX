@@ -67,7 +67,7 @@ public class ConfiguracionController {
 
     @FXML
     void onBaseDatos(ActionEvent e) {
-        cambiarVista(e, "/com/inventario/view/config/baseDatosModal.fxml");
+        cargarEnContenidoCentral(e, "/com/inventario/view/ConfiguracionBaseDatosView.fxml");
     }
 
     @FXML

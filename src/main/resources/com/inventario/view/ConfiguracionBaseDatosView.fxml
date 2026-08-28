@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" styleClass="scroll-pane" stylesheets="@../styles/theme.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.ConfiguracionBaseDatosController">
+   <content>
+      <VBox spacing="20.0" styleClass="page-shell">
+         <children>
+            
+            <!-- ENCABEZADO DE LA PÁGINA -->
+            <HBox alignment="CENTER_LEFT" spacing="15.0">
+               <children>
+                  <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label styleClass="page-title" text="Configuración de Base de Datos" />
+                        <Label styleClass="muted-text" text="Administra los parámetros de conexión, copias de seguridad y diagnóstico del servidor PostgreSQL." />
+                     </children>
+                  </VBox>
+                  <Button mnemonicParsing="false" onAction="#accionRefrescarDiagnostico" prefHeight="38.0" styleClass="action-config" text="Refrescar Estado" />
+               </children>
+            </HBox>
+
+            <!-- SECCIÓN 1: PARÁMETROS DE CONEXIÓN -->
+            <VBox styleClass="form-panel">
+               <children>
+                  <Label styleClass="section-title" text="Parámetros de Conexión" />
+                  <Label styleClass="muted-text" text="Configura las credenciales de acceso a la base de datos PostgreSQL." />
+                  
+                  <GridPane hgap="15.0" vgap="12.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <VBox spacing="4.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                           <children>
+                              <Label styleClass="form-label" text="Servidor / Host" />
+                              <TextField fx:id="txtHost" promptText="ej. localhost o IP" styleClass="form-field" />
+                           </children>
+                        </VBox>
+                        <VBox spacing="4.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                           <children>
+                              <Label styleClass="form-label" text="Puerto" />
+                              <TextField fx:id="txtPuerto" promptText="ej. 5432" styleClass="form-field" />
+                           </children>
+                        </VBox>
+                        <VBox spacing="4.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                           <children>
+                              <Label styleClass="form-label" text="Nombre de Base de Datos" />
+                              <TextField fx:id="txtBaseDatos" promptText="ej. Inventario" styleClass="form-field" />
+                           </children>
+                        </VBox>
+                        <VBox spacing="4.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <children>
+                              <Label styleClass="form-label" text="Usuario" />
+                              <TextField fx:id="txtUsuario" promptText="ej. postgres" styleClass="form-field" />
+                           </children>
+                        </VBox>
+                        <VBox spacing="4.0" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                           <children>
+                              <Label styleClass="form-label" text="Contraseña" />
+                              <PasswordField fx:id="txtContrasena" promptText="********" styleClass="form-field" />
+                           </children>
+                        </VBox>
+                        <VBox spacing="4.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                           <children>
+                              <Label styleClass="form-label" text="Ruta Binarios PostgreSQL (pg_dump)" />
+                              <HBox spacing="8.0">
+                                 <children>
+                                    <TextField fx:id="txtRutaPgDump" promptText="C:\Program Files\PostgreSQL\15\bin" styleClass="form-field" HBox.hgrow="ALWAYS" />
+                                    <Button mnemonicParsing="false" onAction="#accionExaminarPgDump" prefHeight="38.0" styleClass="action-config" text="Examinar" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </children>
+                     <VBox.margin>
+                        <Insets top="8.0" />
+                     </VBox.margin>
+                  </GridPane>
+
+                  <HBox alignment="CENTER_RIGHT" spacing="12.0">
+                     <children>
+                        <Button mnemonicParsing="false" onAction="#accionProbarConexion" prefHeight="38.0" styleClass="action-config" text="Probar Conexión" />
+                        <Button mnemonicParsing="false" onAction="#accionGuardarConfiguracion" prefHeight="38.0" styleClass="action-button, action-primary" text="Guardar Cambios" />
+                     </children>
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </HBox>
+               </children>
+            </VBox>
+
+            <!-- SECCIÓN 2: RESPALDOS Y RESTAURACIÓN -->
+            <VBox styleClass="form-panel">
+               <children>
+                  <Label styleClass="section-title" text="Respaldos y Restauración" />
+                  <Label styleClass="muted-text" text="Genera copias de seguridad de la base de datos o restaura información desde un archivo .backup." />
+                  
+                  <HBox spacing="15.0">
+                     <children>
+                        <VBox styleClass="surface-card" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label styleClass="form-label" text="Generar Copia de Seguridad" />
+                              <Label styleClass="muted-text" text="Exporta toda la base de datos a un archivo en formato nativo comprimido (.backup)." wrapText="true" />
+                              <Button mnemonicParsing="false" onAction="#accionGenerarRespaldo" prefHeight="38.0" styleClass="action-button, action-secondary" text="Crear Respaldo Ahora">
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </Button>
+                           </children>
+                        </VBox>
+                        
+                        <VBox styleClass="surface-card" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label styleClass="form-label" text="Restaurar Base de Datos" />
+                              <Label styleClass="muted-text" text="Importa una copia previa. Atención: esta acción sobrescribirá la información actual." wrapText="true" />
+                              <Button mnemonicParsing="false" onAction="#accionRestaurarRespaldo" prefHeight="38.0" styleClass="action-button, action-warning" text="Restaurar Desde Archivo">
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </Button>
+                           </children>
+                        </VBox>
+                     </children>
+                     <VBox.margin>
+                        <Insets top="8.0" />
+                     </VBox.margin>
+                  </HBox>
+               </children>
+            </VBox>
+
+            <!-- SECCIÓN 3: DIAGNÓSTICO Y MANTENIMIENTO -->
+            <VBox styleClass="form-panel">
+               <children>
+                  <Label styleClass="section-title" text="Diagnóstico y Mantenimiento" />
+                  <Label styleClass="muted-text" text="Estado en tiempo real del motor y herramientas de optimización." />
+
+                  <GridPane hgap="12.0" vgap="12.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <VBox styleClass="summary-card" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                           <children>
+                              <Label styleClass="muted-text" text="Estado de Conexión" />
+                              <Label fx:id="lblEstadoConexion" styleClass="primary-text" text="COMPROBANDO..." />
+                           </children>
+                        </VBox>
+                        <VBox styleClass="summary-card" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                           <children>
+                              <Label styleClass="muted-text" text="Versión del Motor" />
+                              <Label fx:id="lblMotorVersion" styleClass="primary-text" text="-" />
+                           </children>
+                        </VBox>
+                        <VBox styleClass="summary-card" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                           <children>
+                              <Label styleClass="muted-text" text="Tamaño de BD" />
+                              <Label fx:id="lblTamanioBD" styleClass="primary-text" text="0 MB" />
+                           </children>
+                        </VBox>
+                        <VBox styleClass="summary-card" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                           <children>
+                              <Label styleClass="muted-text" text="Total Productos" />
+                              <Label fx:id="lblTotalProductos" styleClass="primary-text" text="0" />
+                           </children>
+                        </VBox>
+                        <VBox styleClass="summary-card" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <children>
+                              <Label styleClass="muted-text" text="Total Ventas" />
+                              <Label fx:id="lblTotalVentas" styleClass="primary-text" text="0" />
+                           </children>
+                        </VBox>
+                        <VBox styleClass="summary-card" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                           <children>
+                              <Label styleClass="muted-text" text="Total Cajeros" />
+                              <Label fx:id="lblTotalCajeros" styleClass="primary-text" text="0" />
+                           </children>
+                        </VBox>
+                     </children>
+                     <VBox.margin>
+                        <Insets top="8.0" />
+                     </VBox.margin>
+                  </GridPane>
+
+                  <HBox alignment="CENTER_LEFT" spacing="12.0">
+                     <children>
+                        <Button mnemonicParsing="false" onAction="#accionOptimizarBD" prefHeight="38.0" styleClass="action-config" text="Optimizar BD (VACUUM ANALYZE)" />
+                     </children>
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </HBox>
+               </children>
+            </VBox>
+
+         </children>
+      </VBox>
+   </content>
+</ScrollPane>
