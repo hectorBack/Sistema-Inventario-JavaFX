@@ -95,3 +95,19 @@ CREATE TABLE public.detalle_ventas (
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 );
+
+CREATE TABLE IF NOT EXISTS folios (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    modulo VARCHAR(50) NOT NULL UNIQUE,
+    serie VARCHAR(10) DEFAULT 'TCK',
+    folio_actual INT NOT NULL DEFAULT 1,
+    longitud_ceros INT DEFAULT 6,
+    estado VARCHAR(20) DEFAULT 'ACTIVO',
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Inserción inicial por defecto para el módulo de Ventas (PostgreSQL UPSERT)
+INSERT INTO folios (nombre, modulo, serie, folio_actual, longitud_ceros, estado) 
+VALUES ('Folio Principal de Tickets', 'VENTAS', 'TCK', 1, 6, 'ACTIVO')
+ON CONFLICT (modulo) DO NOTHING;

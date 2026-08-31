@@ -82,7 +82,7 @@ public class ConfiguracionController {
 
     @FXML
     void onModificarFolios(ActionEvent e) {
-        cambiarVista(e, "/com/inventario/view/config/foliosModal.fxml");
+        cargarEnContenidoCentral(e, "/com/inventario/view/FoliosView.fxml");
     }
 
     @FXML

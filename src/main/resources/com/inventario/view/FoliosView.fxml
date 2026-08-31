@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" styleClass="scroll-pane" stylesheets="@../styles/theme.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.FoliosController">
+   <content>
+      <VBox spacing="18.0" styleClass="page-shell">
+         <children>
+            
+            <!-- ENCABEZADO DE PÁGINA -->
+            <VBox spacing="4.0">
+               <children>
+                  <Label styleClass="page-title" text="Folio de Tickets" />
+                  <Label styleClass="muted-text" text="Puedes configurar aquí el manejo de los folios de las ventas del programa." />
+               </children>
+            </VBox>
+
+            <!-- TARJETA DE CONFIGURACIÓN DE FOLIO -->
+            <VBox spacing="16.0" styleClass="surface-card" prefWidth="500.0">
+               <children>
+                  <Label styleClass="section-title" text="Configuración de Serie y Folios" />
+
+                  <!-- CAMPO NOMBRE/DESCRIPCIÓN DE LA SERIE -->
+                  <VBox spacing="6.0">
+                     <children>
+                        <Label styleClass="form-label" text="Nombre:" />
+                        <TextField fx:id="txtNombreFolio" promptText="Ej. Folio Principal de Ventas, Ticket Caja 1..." styleClass="form-field" />
+                     </children>
+                  </VBox>
+
+                  <!-- CAMPO SERIE Y FOLIO ACTUAL -->
+                  <HBox spacing="16.0">
+                     <children>
+                        <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label styleClass="form-label" text="Serie / Prefijo:" />
+                              <TextField fx:id="txtSerie" promptText="Ej. TCK, SUC1" styleClass="form-field" />
+                           </children>
+                        </VBox>
+
+                        <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label styleClass="form-label" text="Folio Siguiente / Actual:" />
+                              <TextField fx:id="txtFolioActual" promptText="Ej. 1" styleClass="form-field" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+
+                  <!-- PREVISUALIZACIÓN -->
+                  <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="summary-card">
+                     <children>
+                        <Label styleClass="muted-text" text="Previsualización del Ticket:" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lblPrevisualizacion" styleClass="section-title" text="TCK-000001" />
+                     </children>
+                  </HBox>
+
+                  <!-- ACCIONES -->
+                  <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                     <children>
+                        <Button onAction="#accionGuardarFolio" prefHeight="38.0" styleClass="action-button, action-primary" text="Guardar Configuración" />
+                     </children>
+                  </HBox>
+
+               </children>
+            </VBox>
+
+         </children>
+      </VBox>
+   </content>
+</ScrollPane>
