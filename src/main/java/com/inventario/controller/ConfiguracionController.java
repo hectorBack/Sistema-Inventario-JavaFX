@@ -72,7 +72,7 @@ public class ConfiguracionController {
 
     @FXML
     void onArticulosPrecargados(ActionEvent e) {
-        cambiarVista(e, "/com/inventario/view/config/articulosPrecargadosModal.fxml");
+        cargarEnContenidoCentral(e, "/com/inventario/view/ArticulosPrecargadosView.fxml");
     }
 
     @FXML
