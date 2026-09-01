@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" styleClass="scroll-pane" stylesheets="@../styles/theme.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.CajasController">
+    <content>
+        <VBox spacing="18.0" styleClass="page-shell">
+            <children>
+            
+                <!-- ENCABEZADO -->
+                <VBox spacing="4.0">
+                    <children>
+                        <Label styleClass="page-title" text="Administración de Cajas" />
+                        <Label styleClass="muted-text" text="A continuación se muestran las cajas que has dado de alta en tu negocio:" />
+                    </children>
+                </VBox>
+
+                <HBox spacing="20.0">
+                    <children>
+                        <!-- LISTADO DE CAJAS Y BOTÓN CREAR -->
+                        <VBox spacing="10.0" prefWidth="320.0" styleClass="surface-card">
+                            <children>
+                                <HBox alignment="CENTER_LEFT">
+                                    <children>
+                                        <Label styleClass="section-title" text="Cajas Registradas" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Button onAction="#accionNuevaCaja" styleClass="action-button, action-primary" text="+ Nueva Caja" />
+                                    </children>
+                                </HBox>
+                                <ListView fx:id="lstCajas" prefHeight="300.0" />
+                            </children>
+                        </VBox>
+
+                        <!-- PANEL DE DETALLE / FORMULARIO -->
+                        <VBox fx:id="panelDetalle" spacing="16.0" HBox.hgrow="ALWAYS" styleClass="surface-card" disable="true">
+                            <children>
+                                <Label fx:id="lblTituloFormulario" styleClass="section-title" text="Detalle de la Caja" />
+
+                                <!-- NOMBRE DE LA CAJA -->
+                                <VBox spacing="6.0">
+                                    <children>
+                                        <Label styleClass="form-label" text="Nombre de la Caja:" />
+                                        <TextField fx:id="txtNombreCaja" promptText="Ej. Caja 1 - Frente, Caja 2 - Pasillo..." styleClass="form-field" />
+                                    </children>
+                                </VBox>
+
+                                <!-- TIPO DE CAJA Y VÍNCULO CON OTRA CAJA -->
+                                <HBox spacing="16.0">
+                                    <children>
+                                        <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <Label styleClass="form-label" text="Tipo de Caja:" />
+                                                <ComboBox fx:id="cmbTipoCaja" maxWidth="1.7976931348623157E308" styleClass="form-field" />
+                                            </children>
+                                        </VBox>
+
+                                        <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <Label styleClass="form-label" text="Vincular con Caja Principal:" />
+                                                <ComboBox fx:id="cmbCajaPadre" maxWidth="1.7976931348623157E308" styleClass="form-field" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+
+                                <!-- FECHA DEL ÚLTIMO ACCESO Y ESTADO -->
+                                <HBox spacing="20.0">
+                                    <children>
+                                        <VBox spacing="4.0">
+                                            <children>
+                                                <Label styleClass="form-label" text="Fecha del último acceso:" />
+                                                <Label fx:id="lblUltimoAcceso" styleClass="section-title" text="--/--/---- --:--" />
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="4.0">
+                                            <children>
+                                                <Label styleClass="form-label" text="Estado:" />
+                                                <Label fx:id="lblEstado" styleClass="muted-text" text="---" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+
+                                <!-- BOTONES DE ACCIÓN -->
+                                <HBox spacing="12.0">
+                                    <children>
+                                        <Button onAction="#accionGuardar" styleClass="action-button, action-primary" text="Guardar Cambios" />
+                                        <Button fx:id="btnEliminar" onAction="#accionEliminarCaja" styleClass="action-button, action-danger" text="Eliminar Caja" />
+                                    </children>
+                                </HBox>
+
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+
+            </children>
+        </VBox>
+    </content>
+</ScrollPane>

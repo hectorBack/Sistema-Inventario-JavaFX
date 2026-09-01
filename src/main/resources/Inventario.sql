@@ -111,3 +111,17 @@ CREATE TABLE IF NOT EXISTS folios (
 INSERT INTO folios (nombre, modulo, serie, folio_actual, longitud_ceros, estado) 
 VALUES ('Folio Principal de Tickets', 'VENTAS', 'TCK', 1, 6, 'ACTIVO')
 ON CONFLICT (modulo) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS cajas (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+    estado VARCHAR(20) DEFAULT 'ACTIVA', -- 'ACTIVA' / 'INACTIVA'
+    fecha_ultimo_acceso TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Registros de prueba
+INSERT INTO cajas (nombre, estado, fecha_ultimo_acceso)
+VALUES 
+    ('Caja Principal', 'ACTIVA', CURRENT_TIMESTAMP),
+    ('Caja Secundario', 'INACTIVA', CURRENT_TIMESTAMP - INTERVAL '7 days')
+ON CONFLICT (nombre) DO NOTHING;

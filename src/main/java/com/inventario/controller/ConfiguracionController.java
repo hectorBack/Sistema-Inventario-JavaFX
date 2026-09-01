@@ -87,7 +87,7 @@ public class ConfiguracionController {
 
     @FXML
     void onAdministrarCajas(ActionEvent e) {
-        cambiarVista(e, "/com/inventario/view/config/cajasModal.fxml");
+        cargarEnContenidoCentral(e, "/com/inventario/view/CajasView.fxml");
     }
 
     // --- ACCIONES SUBMÓDULO: PERSONALIZACIÓN ---
