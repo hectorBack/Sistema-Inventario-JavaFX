@@ -1,6 +1,10 @@
 package com.inventario.controller;
 
 import com.inventario.config.ConfiguracionSistema;
+import com.inventario.model.Empresa;
+import com.inventario.repository.EmpresaRepository;
+import com.inventario.repository.Impl.EmpresaRepositoryImpl;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -11,12 +15,17 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 
 public class MainLayoutController implements Initializable {
 
     @FXML
     private BorderPane mainLayout;
+    @FXML
+    private ImageView imgLogoSidebar;
     @FXML
     private Button btnProductos;
     @FXML
@@ -37,8 +46,11 @@ public class MainLayoutController implements Initializable {
     private Button btnPromociones;
     @FXML
     private Button btnConfiguracion;
+    @FXML
+    private StackPane logoContainer;
 
     private static MainLayoutController instancia;
+    private final EmpresaRepository empresaRepository = new EmpresaRepositoryImpl();
 
     public static MainLayoutController getInstancia() {
         return instancia;
@@ -47,12 +59,37 @@ public class MainLayoutController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         instancia = this;
+
+        // Carga inicial del logotipo en la barra lateral
+        cargarLogotipo();
+
         // Aplicar estado de los botones según la configuración
         actualizarEstadoModulos();
 
         // Al arrancar, cargamos por defecto el inventario en el centro y seleccionamos su botón
         cargarVista("view/ProductosView");
         actualizarEstiloMenu(btnProductos);
+    }
+
+    /**
+     * Consulta el logotipo actual desde la base de datos y lo actualiza en la
+     * interfaz.
+     */
+    public void cargarLogotipo() {
+        Empresa empresa = empresaRepository.obtenerConfiguracion();
+        if (empresa != null && empresa.getLogoPath() != null && !empresa.getLogoPath().trim().isEmpty()) {
+            File fileLogo = new File(empresa.getLogoPath());
+            if (fileLogo.exists()) {
+                imgLogoSidebar.setImage(new Image(fileLogo.toURI().toString()));
+                logoContainer.setVisible(true);
+                logoContainer.setManaged(true);
+                return;
+            }
+        }
+        // Ocultar recuadro si no existe un logo cargado
+        imgLogoSidebar.setImage(null);
+        logoContainer.setVisible(false);
+        logoContainer.setManaged(false);
     }
 
     /**

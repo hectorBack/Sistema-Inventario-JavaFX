@@ -93,7 +93,7 @@ public class ConfiguracionController {
     // --- ACCIONES SUBMÓDULO: PERSONALIZACIÓN ---
     @FXML
     void onLogotipo(ActionEvent e) {
-        cambiarVista(e, "/com/inventario/view/config/logotipoModal.fxml");
+        cargarEnContenidoCentral(e, "/com/inventario/view/LogotipoView.fxml");
     }
 
     @FXML

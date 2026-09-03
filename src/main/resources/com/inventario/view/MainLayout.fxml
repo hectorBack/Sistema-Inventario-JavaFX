@@ -3,76 +3,89 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.StackPane?>
 
 <BorderPane fx:id="mainLayout" prefHeight="600.0" prefWidth="1100.0" styleClass="app-shell" stylesheets="@../styles/theme.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.MainLayoutController">
    
     <left>
         <VBox prefHeight="600.0" prefWidth="240.0" spacing="10.0" styleClass="sidebar">
             <children>
-                <Label text="SISTEMA POS" styleClass="sidebar-header">
+                <!-- CABECERA DE MARCA CON LOGO Y TÍTULO CENTRADOS -->
+                <VBox alignment="CENTER" spacing="8.0">
+                    <children>
+                        <!-- Marco contenedor para dar un aspecto destacado al logo -->
+                        <StackPane fx:id="logoContainer" minHeight="108.0" minWidth="108.0" prefHeight="108.0" prefWidth="108.0">
+                            <children>
+                                <ImageView fx:id="imgLogoSidebar" fitHeight="96.0" fitWidth="96.0" preserveRatio="true" smooth="true" />
+                            </children>
+                        </StackPane>
+                        
+                        <Label styleClass="sidebar-header" text="SISTEMA POS" textAlignment="CENTER" style="-fx-padding: 4 0 0 0; -fx-font-size: 18px;" />
+                    </children>
                     <VBox.margin>
-                        <Insets bottom="25.0" top="10.0" />
+                        <Insets bottom="15.0" top="10.0" />
                     </VBox.margin>
-                </Label>
+                </VBox>
                 
-                <Button fx:id="btnProductos" mnemonicParsing="false" onAction="#mostrarProductos" prefWidth="200.0" text=" 🏷️  Productos" styleClass="nav-button, active">
+                <Button fx:id="btnProductos" mnemonicParsing="false" onAction="#mostrarProductos" prefWidth="200.0" styleClass="nav-button, active" text=" 🏷️  Productos">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
             
-                <Button fx:id="btnInventario" mnemonicParsing="false" onAction="#mostrarInventario" prefWidth="200.0" text=" 📦  Inventario" styleClass="nav-button">
+                <Button fx:id="btnInventario" mnemonicParsing="false" onAction="#mostrarInventario" prefWidth="200.0" styleClass="nav-button" text=" 📦  Inventario">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
             
-                <Button fx:id="btnCategorias" mnemonicParsing="false" onAction="#mostrarCategorias" prefWidth="200.0" text=" 🏷️  Categorías" styleClass="nav-button">
+                <Button fx:id="btnCategorias" mnemonicParsing="false" onAction="#mostrarCategorias" prefWidth="200.0" styleClass="nav-button" text=" 🏷️  Categorías">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
             
-                <Button fx:id="btnMovimientos" mnemonicParsing="false" onAction="#mostrarMovimientos" prefWidth="200.0" text=" 🔄  Movimientos" styleClass="nav-button">
+                <Button fx:id="btnMovimientos" mnemonicParsing="false" onAction="#mostrarMovimientos" prefWidth="200.0" styleClass="nav-button" text=" 🔄  Movimientos">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
                 
-                <Button fx:id="btnProveedores" mnemonicParsing="false" onAction="#mostrarProveedores" prefWidth="200.0" text=" 🚚  Proveedores" styleClass="nav-button">
+                <Button fx:id="btnProveedores" mnemonicParsing="false" onAction="#mostrarProveedores" prefWidth="200.0" styleClass="nav-button" text=" 🚚  Proveedores">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
                 
-                <Button fx:id="btnClientes" mnemonicParsing="false" onAction="#mostrarClientes" prefWidth="200.0" text=" 👥  Clientes" styleClass="nav-button">
+                <Button fx:id="btnClientes" mnemonicParsing="false" onAction="#mostrarClientes" prefWidth="200.0" styleClass="nav-button" text=" 👥  Clientes">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
                 
-                <Button fx:id="btnVentas" mnemonicParsing="false" onAction="#mostrarVentas" prefWidth="200.0" text=" 🛒  Caja / Ventas" styleClass="nav-button">
+                <Button fx:id="btnVentas" mnemonicParsing="false" onAction="#mostrarVentas" prefWidth="200.0" styleClass="nav-button" text=" 🛒  Caja / Ventas">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
                 
-                <Button fx:id="btnHistorialVentas" mnemonicParsing="false" onAction="#mostrarHistorialVentas" prefWidth="200.0" text=" 📜  Historial Ventas" styleClass="nav-button">
+                <Button fx:id="btnHistorialVentas" mnemonicParsing="false" onAction="#mostrarHistorialVentas" prefWidth="200.0" styleClass="nav-button" text=" 📜  Historial Ventas">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
 
-                <Button fx:id="btnPromociones" mnemonicParsing="false" onAction="#mostrarPromociones" prefWidth="200.0" text=" 🎯  Promociones" styleClass="nav-button">
+                <Button fx:id="btnPromociones" mnemonicParsing="false" onAction="#mostrarPromociones" prefWidth="200.0" styleClass="nav-button" text=" 🎯  Promociones">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
                 
-                <Button fx:id="btnConfiguracion" mnemonicParsing="false" onAction="#mostrarConfiguraciones" prefWidth="200.0" text=" ⚙️  Configuración" styleClass="nav-button">
+                <Button fx:id="btnConfiguracion" mnemonicParsing="false" onAction="#mostrarConfiguraciones" prefWidth="200.0" styleClass="nav-button" text=" ⚙️  Configuración">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>

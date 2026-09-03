@@ -125,3 +125,18 @@ VALUES
     ('Caja Principal', 'ACTIVA', CURRENT_TIMESTAMP),
     ('Caja Secundario', 'INACTIVA', CURRENT_TIMESTAMP - INTERVAL '7 days')
 ON CONFLICT (nombre) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS configuracion_empresa (
+    id SERIAL PRIMARY KEY,
+    nombre_empresa VARCHAR(150) NOT NULL DEFAULT 'Mi Negocio',
+    rfc VARCHAR(15) DEFAULT '',
+    telefono VARCHAR(20) DEFAULT '',
+    direccion VARCHAR(255) DEFAULT '',
+    logo_path VARCHAR(255) DEFAULT '',
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Inserción única inicial
+INSERT INTO configuracion_empresa (id, nombre_empresa, logo_path)
+VALUES (1, 'Mi Negocio', '')
+ON CONFLICT (id) DO NOTHING;
