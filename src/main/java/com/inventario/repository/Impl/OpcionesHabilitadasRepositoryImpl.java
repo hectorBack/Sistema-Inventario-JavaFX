@@ -2,6 +2,8 @@ package com.inventario.repository.Impl;
 
 import com.inventario.config.ConexionDB;
 import com.inventario.model.OpcionesHabilitadas;
+import com.inventario.model.DTOs.DTOMapper;
+import com.inventario.model.DTOs.OpcionesHabilitadasDTO;
 import com.inventario.repository.OpcionesHabilitadasRepository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,6 +11,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class OpcionesHabilitadasRepositoryImpl implements OpcionesHabilitadasRepository {
+
+    @Override
+    public OpcionesHabilitadasDTO obtenerOpcionesDTO() {
+        return DTOMapper.toDTO(obtenerOpciones());
+    }
+
+    @Override
+    public boolean guardarOActualizarDTO(OpcionesHabilitadasDTO opciones) {
+        return guardarOActualizar(DTOMapper.toModel(opciones));
+    }
 
     @Override
     public OpcionesHabilitadas obtenerOpciones() {

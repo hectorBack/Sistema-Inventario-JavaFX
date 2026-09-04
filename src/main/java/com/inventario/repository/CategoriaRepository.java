@@ -1,6 +1,7 @@
 package com.inventario.repository;
 
 import com.inventario.model.Categoria;
+import com.inventario.model.DTOs.CategoriaDTO;
 import java.util.List;
 
 public interface CategoriaRepository {
@@ -10,6 +11,16 @@ public interface CategoriaRepository {
     List<Categoria> listarActivas(); // Vital para los ComboBox del módulo Productos
 
     Categoria buscarPorId(int id);
+
+    List<CategoriaDTO> listarTodasDTO();
+
+    List<CategoriaDTO> listarActivasDTO();
+
+    CategoriaDTO buscarPorIdDTO(int id);
+
+    boolean guardarDTO(CategoriaDTO categoria);
+
+    boolean actualizarDTO(CategoriaDTO categoria);
 
     boolean guardar(Categoria categoria);
 

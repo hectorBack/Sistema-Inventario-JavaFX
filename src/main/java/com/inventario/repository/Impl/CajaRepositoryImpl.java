@@ -2,6 +2,8 @@ package com.inventario.repository.Impl;
 
 import com.inventario.config.ConexionDB;
 import com.inventario.model.Caja;
+import com.inventario.model.DTOs.CajaDTO;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.CajaRepository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,6 +16,30 @@ import java.util.List;
 import java.util.Optional;
 
 public class CajaRepositoryImpl implements CajaRepository {
+
+    @Override
+    public List<CajaDTO> obtenerTodasDTO() {
+        List<CajaDTO> resultado = new ArrayList<>();
+        for (Caja caja : obtenerTodas()) {
+            resultado.add(DTOMapper.toDTO(caja));
+        }
+        return resultado;
+    }
+
+    @Override
+    public Optional<CajaDTO> obtenerPorIdDTO(int id) {
+        return obtenerPorId(id).map(DTOMapper::toDTO);
+    }
+
+    @Override
+    public boolean guardarDTO(CajaDTO caja) {
+        return guardar(DTOMapper.toModel(caja));
+    }
+
+    @Override
+    public boolean actualizarDTO(CajaDTO caja) {
+        return actualizar(DTOMapper.toModel(caja));
+    }
 
     @Override
     public List<Caja> obtenerTodas() {

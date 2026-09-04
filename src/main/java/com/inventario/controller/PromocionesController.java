@@ -2,6 +2,7 @@ package com.inventario.controller;
 
 import com.inventario.model.Producto;
 import com.inventario.model.Promocion;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.Impl.ProductoRepositoryImpl;
 import com.inventario.repository.Impl.PromocionRepositoryImpl;
 import com.inventario.repository.ProductoRepository;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -94,7 +96,9 @@ public class PromocionesController implements Initializable {
 
     private void cargarPromociones() {
         promociones.clear();
-        List<Promocion> lista = repository.listarActivas();
+        List<Promocion> lista = repository.listarActivasDTO().stream()
+            .map(DTOMapper::toModel)
+            .collect(Collectors.toList());
         if (lista != null) {
             promociones.addAll(lista);
         }
@@ -111,7 +115,7 @@ public class PromocionesController implements Initializable {
             return;
         }
 
-        Producto producto = productoRepository.buscarPorCodigoBarras(codigo);
+        Producto producto = DTOMapper.toModel(productoRepository.buscarPorCodigoBarrasDTO(codigo));
         if (producto != null) {
             lblNombreProducto.setText(producto.getNombre());
             lblNombreProducto.setStyle("-fx-text-fill: #16a34a; -fx-font-weight: bold;");
@@ -163,14 +167,14 @@ public class PromocionesController implements Initializable {
             promo.setPrecioUnitario(precioUnitario);
             promo.setPrecioPromocion(promo.getPrecioUnitario());
 
-            Producto producto = productoRepository.buscarPorCodigoBarras(promo.getCodigoBarrasProducto());
+            Producto producto = DTOMapper.toModel(productoRepository.buscarPorCodigoBarrasDTO(promo.getCodigoBarrasProducto()));
             if (producto != null) {
                 promo.setPrecioNormal(producto.getPrecio());
                 promo.setPrecioCosto(producto.getPrecioCompra());
             }
             promo.setEstado("ACTIVA");
 
-            repository.guardar(promo);
+            repository.guardarDTO(DTOMapper.toDTO(promo));
             mostrarAlerta("Exito", "Promoción guardada correctamente.", Alert.AlertType.INFORMATION);
             limpiarFormulario();
             cargarPromociones();

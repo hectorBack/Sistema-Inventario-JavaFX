@@ -1,12 +1,14 @@
 package com.inventario.controller;
 
 import com.inventario.model.ArticulosPrecargados;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.ArticulosPrecargadosRepository;
 import com.inventario.repository.Impl.ArticulosPrecargadosRepositoryImpl;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -100,15 +102,15 @@ public class ArticulosPrecargadosController implements Initializable {
             txtRutaArchivo.setText(archivoSeleccionado.getAbsolutePath());
 
             // Cargar y previsualizar en segundo plano
-            Task<List<ArticulosPrecargados>> tarea = new Task<>() {
+            Task<List<com.inventario.model.DTOs.ArticulosPrecargadosDTO>> tarea = new Task<>() {
                 @Override
-                protected List<ArticulosPrecargados> call() {
-                    return repository.leerArticulosDesdeArchivo(archivoSeleccionado);
+                protected List<com.inventario.model.DTOs.ArticulosPrecargadosDTO> call() {
+                    return repository.leerArticulosDesdeArchivoDTO(archivoSeleccionado);
                 }
             };
 
             tarea.setOnSucceeded(e -> {
-                listaArticulos.setAll(tarea.getValue());
+                listaArticulos.setAll(tarea.getValue().stream().map(DTOMapper::toModel).collect(Collectors.toList()));
                 lblTotalCargados.setText(String.valueOf(listaArticulos.size()));
             });
 
@@ -148,7 +150,8 @@ public class ArticulosPrecargadosController implements Initializable {
         Task<Integer> tareaImportacion = new Task<>() {
             @Override
             protected Integer call() {
-                return repository.guardarArticulosEnLote(listaArticulos, modoDuplicados);
+                return repository.guardarArticulosEnLoteDTO(listaArticulos.stream()
+                    .map(DTOMapper::toDTO).collect(Collectors.toList()), modoDuplicados);
             }
         };
 
@@ -176,7 +179,9 @@ public class ArticulosPrecargadosController implements Initializable {
             return;
         }
 
-        List<ArticulosPrecargados> catalogoBase = repository.obtenerCatalogoBasePorGiro(giro);
+        List<ArticulosPrecargados> catalogoBase = repository.obtenerCatalogoBasePorGiroDTO(giro).stream()
+            .map(DTOMapper::toModel)
+            .collect(Collectors.toList());
         listaArticulos.setAll(catalogoBase);
         lblTotalCargados.setText(String.valueOf(listaArticulos.size()));
     }

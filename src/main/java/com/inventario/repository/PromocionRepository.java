@@ -1,6 +1,7 @@
 package com.inventario.repository;
 
 import com.inventario.model.Promocion;
+import com.inventario.model.DTOs.PromocionDTO;
 import java.util.List;
 
 public interface PromocionRepository {
@@ -18,6 +19,18 @@ public interface PromocionRepository {
     Promocion buscarPorId(int id);
 
     List<Promocion> buscarPorNombre(String nombre);
+
+    List<PromocionDTO> listarActivasDTO();
+
+    List<PromocionDTO> listarTodasDTO();
+
+    PromocionDTO buscarPorIdDTO(int id);
+
+    List<PromocionDTO> buscarPorNombreDTO(String nombre);
+
+    boolean guardarDTO(PromocionDTO promocion);
+
+    boolean actualizarDTO(PromocionDTO promocion);
 
     /**
      * Verifica si existe conflicto de rangos para un código de producto específico.

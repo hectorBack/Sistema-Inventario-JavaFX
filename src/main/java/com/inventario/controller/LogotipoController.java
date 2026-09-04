@@ -1,6 +1,7 @@
 package com.inventario.controller;
 
 import com.inventario.model.Empresa;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.EmpresaRepository;
 import com.inventario.repository.Impl.EmpresaRepositoryImpl;
 import com.inventario.util.ImageStorageService;
@@ -35,7 +36,7 @@ public class LogotipoController {
     }
 
     private void cargarLogotipoActual() {
-        empresaActual = empresaRepository.obtenerConfiguracion();
+        empresaActual = DTOMapper.toModel(empresaRepository.obtenerConfiguracionDTO());
         if (empresaActual != null && empresaActual.getLogoPath() != null && !empresaActual.getLogoPath().trim().isEmpty()) {
             File fileLogo = new File(empresaActual.getLogoPath());
             if (fileLogo.exists()) {

@@ -2,6 +2,8 @@ package com.inventario.repository.Impl;
 
 import com.inventario.config.ConexionDB;
 import com.inventario.model.MovimientoInventario;
+import com.inventario.model.DTOs.DTOMapper;
+import com.inventario.model.DTOs.MovimientoInventarioDTO;
 import com.inventario.repository.MovimientoRepository;
 import java.sql.Connection;
 import java.sql.Date;
@@ -14,6 +16,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MovimientoRepositoryImpl implements MovimientoRepository {
+
+    @Override
+    public List<MovimientoInventarioDTO> listarTodosDTO() {
+        return listarTodos().stream().map(DTOMapper::toDTO).collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    public List<MovimientoInventarioDTO> listarPorProductoDTO(int productoId) {
+        return listarPorProducto(productoId).stream().map(DTOMapper::toDTO).collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    public List<MovimientoInventarioDTO> listarPorTipoDTO(String tipoMovimiento) {
+        return listarPorTipo(tipoMovimiento).stream().map(DTOMapper::toDTO).collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    public List<MovimientoInventarioDTO> listarPorRangoFechasDTO(LocalDate inicio, LocalDate fin) {
+        return listarPorRangoFechas(inicio, fin).stream().map(DTOMapper::toDTO).collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    public List<MovimientoInventarioDTO> buscarConFiltrosDTO(String termino, String tipo, LocalDate fechaInicio, LocalDate fechaFin) {
+        return buscarConFiltros(termino, tipo, fechaInicio, fechaFin).stream()
+                .map(DTOMapper::toDTO).collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    public boolean registrarMovimientoDTO(MovimientoInventarioDTO movimiento) {
+        return registrarMovimiento(DTOMapper.toModel(movimiento));
+    }
 
     @Override
     public List<MovimientoInventario> listarTodos() {

@@ -2,6 +2,8 @@ package com.inventario.repository.Impl;
 
 import com.inventario.config.ConexionDB;
 import com.inventario.model.Proveedor;
+import com.inventario.model.DTOs.DTOMapper;
+import com.inventario.model.DTOs.ProveedorDTO;
 import com.inventario.repository.ProveedorRepository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,6 +13,48 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProveedorRepositoryImpl implements ProveedorRepository {
+
+    @Override
+    public List<ProveedorDTO> listarTodosDTO() {
+        List<ProveedorDTO> resultado = new ArrayList<>();
+        for (Proveedor proveedor : listarTodos()) {
+            resultado.add(DTOMapper.toDTO(proveedor));
+        }
+        return resultado;
+    }
+
+    @Override
+    public List<ProveedorDTO> listarActivosDTO() {
+        List<ProveedorDTO> resultado = new ArrayList<>();
+        for (Proveedor proveedor : listarActivos()) {
+            resultado.add(DTOMapper.toDTO(proveedor));
+        }
+        return resultado;
+    }
+
+    @Override
+    public ProveedorDTO buscarPorIdDTO(int id) {
+        return DTOMapper.toDTO(buscarPorId(id));
+    }
+
+    @Override
+    public List<ProveedorDTO> buscarConFiltroDTO(String criterio) {
+        List<ProveedorDTO> resultado = new ArrayList<>();
+        for (Proveedor proveedor : buscarConFiltro(criterio)) {
+            resultado.add(DTOMapper.toDTO(proveedor));
+        }
+        return resultado;
+    }
+
+    @Override
+    public boolean guardarDTO(ProveedorDTO proveedor) {
+        return guardar(DTOMapper.toModel(proveedor));
+    }
+
+    @Override
+    public boolean actualizarDTO(ProveedorDTO proveedor) {
+        return actualizar(DTOMapper.toModel(proveedor));
+    }
 
     @Override
     public List<Proveedor> listarTodos() {

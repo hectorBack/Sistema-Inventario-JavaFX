@@ -3,6 +3,7 @@ package com.inventario.controller;
 import com.inventario.model.Categoria;
 import com.inventario.model.MovimientoInventario;
 import com.inventario.model.Producto;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.CategoriaRepository;
 import com.inventario.repository.Impl.CategoriaRepositoryImpl;
 import com.inventario.repository.Impl.InventarioRepositoryImpl;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -103,7 +105,7 @@ public class InventarioController implements Initializable {
             return;
         }
 
-        Producto p = prodRepository.buscarPorCodigoBarras(codigo);
+        Producto p = DTOMapper.toModel(prodRepository.buscarPorCodigoBarrasDTO(codigo));
         if (p != null) {
             SoundUtil.emitirBeep(900, 120);
             productoEncontrado = p;
@@ -145,7 +147,8 @@ public class InventarioController implements Initializable {
 
     @FXML
     void onVerProductosBajosInventario(ActionEvent event) {
-        List<Producto> escasos = invRepository.obtenerProductosStockBajo();
+        List<Producto> escasos = invRepository.obtenerProductosStockBajoDTO().stream()
+            .map(DTOMapper::toModel).collect(Collectors.toList());
         if (escasos.isEmpty()) {
             InventarioUIUtil.mostrarAlerta("Inventario Correcto", "No hay productos con stock por debajo del mínimo.", Alert.AlertType.INFORMATION);
         } else {
@@ -172,8 +175,10 @@ public class InventarioController implements Initializable {
         }
 
         // 3. Obtener los datos necesarios
-        List<Producto> productos = prodRepository.listarTodos(); // Adapta según tus servicios
-        List<Categoria> categorias = catRepository.listarTodas(); // Adapta según tus servicios
+        List<Producto> productos = prodRepository.listarTodosDTO().stream()
+            .map(DTOMapper::toModel).collect(Collectors.toList());
+        List<Categoria> categorias = catRepository.listarTodasDTO().stream()
+            .map(DTOMapper::toModel).collect(Collectors.toList());
 
         // 4. Abrir el modal estático
         ReporteInventarioModal.abrirModalReporte(parentStage, productos, categorias);
@@ -198,7 +203,8 @@ public class InventarioController implements Initializable {
 
     private void cargarHistorialMovimientos() {
         listaMovimientos.clear();
-        listaMovimientos.addAll(invRepository.obtenerHistorialMovimientos());
+        listaMovimientos.addAll(invRepository.obtenerHistorialMovimientosDTO().stream()
+            .map(DTOMapper::toModel).collect(Collectors.toList()));
         tblInventario.setItems(listaMovimientos);
     }
 

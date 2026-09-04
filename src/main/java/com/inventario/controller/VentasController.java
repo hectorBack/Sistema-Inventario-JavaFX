@@ -6,6 +6,7 @@ import com.inventario.model.DetalleVenta;
 import com.inventario.model.OpcionesHabilitadas;
 import com.inventario.model.Producto;
 import com.inventario.model.Venta;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.ClienteRepository;
 import com.inventario.repository.Impl.ClienteRepositoryImpl;
 import com.inventario.repository.Impl.ProductoRepositoryImpl;
@@ -340,7 +341,8 @@ public class VentasController implements Initializable {
             nuevaVenta.setTotal(totalVenta); // Se persiste el valor redondeado final
 
             List<DetalleVenta> detalles = new ArrayList<>(carritoService.getItems());
-            boolean guardadoExitoso = ventaRepository.registrarVenta(nuevaVenta, detalles);
+                boolean guardadoExitoso = ventaRepository.registrarVentaDTO(
+                    DTOMapper.toDTO(nuevaVenta), detalles.stream().map(DTOMapper::toDTO).collect(java.util.stream.Collectors.toList()));
 
             if (guardadoExitoso) {
                 if (imprimirTicket) {

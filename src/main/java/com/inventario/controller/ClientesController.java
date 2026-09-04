@@ -1,11 +1,13 @@
 package com.inventario.controller;
 
 import com.inventario.model.Cliente;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.ClienteRepository;
 import com.inventario.repository.Impl.ClienteRepositoryImpl;
 import com.inventario.util.Productos.KeyboardShortcutUtil;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -122,7 +124,9 @@ public class ClientesController implements Initializable {
 
     private void listarClientes() {
         listaClientes.clear();
-        listaClientes.addAll(repository.listarTodos());
+        listaClientes.addAll(repository.listarTodosDTO().stream()
+            .map(DTOMapper::toModel)
+            .collect(Collectors.toList()));
         tblClientes.setItems(listaClientes);
     }
 
@@ -156,7 +160,9 @@ public class ClientesController implements Initializable {
             return;
         }
         listaClientes.clear();
-        listaClientes.addAll(repository.buscarConFiltro(criterio));
+        listaClientes.addAll(repository.buscarConFiltroDTO(criterio).stream()
+            .map(DTOMapper::toModel)
+            .collect(Collectors.toList()));
         tblClientes.setItems(listaClientes);
     }
 
@@ -175,7 +181,7 @@ public class ClientesController implements Initializable {
                 cmbEstado.getValue()
         );
 
-        if (repository.guardar(nuevoCliente)) {
+        if (repository.guardarDTO(DTOMapper.toDTO(nuevoCliente))) {
             mostrarAlerta("Éxito", "Cliente registrado correctamente.", Alert.AlertType.INFORMATION);
             limpiarFormulario();
             listarClientes();
@@ -204,7 +210,7 @@ public class ClientesController implements Initializable {
         clienteSeleccionado.setDireccion(txtDireccion.getText().trim());
         clienteSeleccionado.setEstado(cmbEstado.getValue());
 
-        if (repository.actualizar(clienteSeleccionado)) {
+        if (repository.actualizarDTO(DTOMapper.toDTO(clienteSeleccionado))) {
             mostrarAlerta("Éxito", "Datos del cliente actualizados con éxito.", Alert.AlertType.INFORMATION);
             limpiarFormulario();
             listarClientes();

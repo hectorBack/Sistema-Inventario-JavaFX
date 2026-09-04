@@ -2,6 +2,8 @@ package com.inventario.repository.Impl;
 
 import com.inventario.config.ConexionDB;
 import com.inventario.model.Cliente;
+import com.inventario.model.DTOs.ClienteDTO;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.ClienteRepository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,6 +13,48 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ClienteRepositoryImpl implements ClienteRepository {
+
+    @Override
+    public List<ClienteDTO> listarTodosDTO() {
+        List<ClienteDTO> resultado = new ArrayList<>();
+        for (Cliente cliente : listarTodos()) {
+            resultado.add(DTOMapper.toDTO(cliente));
+        }
+        return resultado;
+    }
+
+    @Override
+    public List<ClienteDTO> listarActivosDTO() {
+        List<ClienteDTO> resultado = new ArrayList<>();
+        for (Cliente cliente : listarActivos()) {
+            resultado.add(DTOMapper.toDTO(cliente));
+        }
+        return resultado;
+    }
+
+    @Override
+    public ClienteDTO buscarPorIdDTO(int id) {
+        return DTOMapper.toDTO(buscarPorId(id));
+    }
+
+    @Override
+    public List<ClienteDTO> buscarConFiltroDTO(String criterio) {
+        List<ClienteDTO> resultado = new ArrayList<>();
+        for (Cliente cliente : buscarConFiltro(criterio)) {
+            resultado.add(DTOMapper.toDTO(cliente));
+        }
+        return resultado;
+    }
+
+    @Override
+    public boolean guardarDTO(ClienteDTO cliente) {
+        return guardar(DTOMapper.toModel(cliente));
+    }
+
+    @Override
+    public boolean actualizarDTO(ClienteDTO cliente) {
+        return actualizar(DTOMapper.toModel(cliente));
+    }
 
     @Override
     public List<Cliente> listarTodos() {

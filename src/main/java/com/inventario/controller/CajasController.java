@@ -1,6 +1,7 @@
 package com.inventario.controller;
 
 import com.inventario.model.Caja;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.CajaRepository;
 import com.inventario.repository.Impl.CajaRepositoryImpl;
 import java.time.Duration;
@@ -81,7 +82,9 @@ public class CajasController {
 
     private void cargarCajas() {
         listaCajas.clear();
-        listaCajas.addAll(cajaRepository.obtenerTodas());
+        listaCajas.addAll(cajaRepository.obtenerTodasDTO().stream()
+            .map(DTOMapper::toModel)
+            .collect(Collectors.toList()));
         actualizarComboCajasPadre();
     }
 
@@ -160,9 +163,9 @@ public class CajasController {
 
         boolean exito;
         if (esNuevoRegistro) {
-            exito = cajaRepository.guardar(cajaSeleccionada);
+            exito = cajaRepository.guardarDTO(DTOMapper.toDTO(cajaSeleccionada));
         } else {
-            exito = cajaRepository.actualizar(cajaSeleccionada);
+            exito = cajaRepository.actualizarDTO(DTOMapper.toDTO(cajaSeleccionada));
         }
 
         if (exito) {

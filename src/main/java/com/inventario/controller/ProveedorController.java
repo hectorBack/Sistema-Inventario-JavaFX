@@ -1,11 +1,13 @@
 package com.inventario.controller;
 
 import com.inventario.model.Proveedor;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.Impl.ProveedorRepositoryImpl;
 import com.inventario.repository.ProveedorRepository;
 import com.inventario.util.Productos.KeyboardShortcutUtil;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -100,7 +102,9 @@ public class ProveedorController implements Initializable {
 
     private void listarProveedores() {
         listaProveedores.clear();
-        listaProveedores.addAll(repo.listarTodos());
+        listaProveedores.addAll(repo.listarTodosDTO().stream()
+            .map(DTOMapper::toModel)
+            .collect(Collectors.toList()));
         tblProveedores.setItems(listaProveedores);
     }
 
@@ -110,7 +114,9 @@ public class ProveedorController implements Initializable {
             return;
         }
         listaProveedores.clear();
-        listaProveedores.addAll(repo.buscarConFiltro(criterio));
+        listaProveedores.addAll(repo.buscarConFiltroDTO(criterio).stream()
+            .map(DTOMapper::toModel)
+            .collect(Collectors.toList()));
         tblProveedores.setItems(listaProveedores);
     }
 
@@ -164,7 +170,7 @@ public class ProveedorController implements Initializable {
 
         Proveedor p = new Proveedor(nombre, contacto, telefono, email, cmbEstado.getValue());
 
-        if (repo.guardar(p)) {
+        if (repo.guardarDTO(DTOMapper.toDTO(p))) {
             mostrarAlerta("Éxito", "Proveedor registrado correctamente.", Alert.AlertType.INFORMATION);
             listarProveedores();
             limpiarCampos();
@@ -208,7 +214,7 @@ public class ProveedorController implements Initializable {
         proveedorSeleccionado.setEmail(email);
         proveedorSeleccionado.setEstado(cmbEstado.getValue());
 
-        if (repo.actualizar(proveedorSeleccionado)) {
+        if (repo.actualizarDTO(DTOMapper.toDTO(proveedorSeleccionado))) {
             mostrarAlerta("Éxito", "Proveedor actualizado correctamente.", Alert.AlertType.INFORMATION);
             listarProveedores();
             limpiarCampos();

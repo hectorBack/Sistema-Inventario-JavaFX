@@ -1,11 +1,13 @@
 package com.inventario.controller;
 
 import com.inventario.model.Cajero;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.CajeroRepository;
 import com.inventario.repository.Impl.CajeroRepositoryImpl;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -168,7 +170,8 @@ public class CajeroController implements Initializable {
 
     private void cargarCajeros() {
         listaCajeros.clear();
-        listaCajeros.addAll(cajeroRepository.obtenerTodosActivos());
+        listaCajeros.addAll(cajeroRepository.obtenerTodosActivosDTO().stream()
+            .map(DTOMapper::toModel).collect(Collectors.toList()));
     }
 
     private void configurarBuscador() {
@@ -177,7 +180,8 @@ public class CajeroController implements Initializable {
                 cargarCajeros();
             } else {
                 listaCajeros.clear();
-                listaCajeros.addAll(cajeroRepository.buscarPorCriterio(newText.trim()));
+                listaCajeros.addAll(cajeroRepository.buscarPorCriterioDTO(newText.trim()).stream()
+                    .map(DTOMapper::toModel).collect(Collectors.toList()));
             }
         });
     }
@@ -202,7 +206,8 @@ public class CajeroController implements Initializable {
         // Asignar Permisos desde CheckBoxes
         extraerPermisosFormulario(c);
 
-        boolean exito = esNuevo ? cajeroRepository.guardar(c) : cajeroRepository.actualizar(c);
+        boolean exito = esNuevo ? cajeroRepository.guardarDTO(DTOMapper.toDTO(c))
+            : cajeroRepository.actualizarDTO(DTOMapper.toDTO(c));
 
         if (exito) {
             mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "El cajero fue guardado correctamente.");

@@ -1,6 +1,7 @@
 package com.inventario.controller;
 
 import com.inventario.model.DetalleVenta;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.model.Venta;
 import com.inventario.repository.Impl.VentaRepositoryImpl;
 import com.inventario.repository.VentaRepository;
@@ -132,7 +133,8 @@ public class DetalleVentaModalController implements Initializable {
             btnAnularVenta.setDisable(false);
         }
         
-        List<DetalleVenta> detalles = ventaRepository.listarDetallesPorVenta(venta.getId());
+        List<DetalleVenta> detalles = ventaRepository.listarDetallesPorVentaDTO(venta.getId()).stream()
+            .map(DTOMapper::toModel).collect(java.util.stream.Collectors.toList());
         tblDetalles.setItems(FXCollections.observableArrayList(detalles));
     }
     

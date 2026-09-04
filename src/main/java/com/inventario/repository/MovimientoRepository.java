@@ -1,6 +1,7 @@
 package com.inventario.repository;
 
 import com.inventario.model.MovimientoInventario;
+import com.inventario.model.DTOs.MovimientoInventarioDTO;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -36,5 +37,17 @@ public interface MovimientoRepository {
      * Búsqueda combinada para filtrado avanzado desde la interfaz gráfica.
      */
     List<MovimientoInventario> buscarConFiltros(String termino, String tipo, LocalDate fechaInicio, LocalDate fechaFin);
+
+    List<MovimientoInventarioDTO> listarTodosDTO();
+
+    List<MovimientoInventarioDTO> listarPorProductoDTO(int productoId);
+
+    List<MovimientoInventarioDTO> listarPorTipoDTO(String tipoMovimiento);
+
+    List<MovimientoInventarioDTO> listarPorRangoFechasDTO(LocalDate inicio, LocalDate fin);
+
+    List<MovimientoInventarioDTO> buscarConFiltrosDTO(String termino, String tipo, LocalDate fechaInicio, LocalDate fechaFin);
+
+    boolean registrarMovimientoDTO(MovimientoInventarioDTO movimiento);
 
 }

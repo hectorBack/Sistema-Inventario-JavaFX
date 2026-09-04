@@ -2,6 +2,8 @@ package com.inventario.repository.Impl;
 
 import com.inventario.config.ConexionDB;
 import com.inventario.model.ArticulosPrecargados;
+import com.inventario.model.DTOs.ArticulosPrecargadosDTO;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.ArticulosPrecargadosRepository;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -16,6 +18,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ArticulosPrecargadosRepositoryImpl implements ArticulosPrecargadosRepository {
+
+    @Override
+    public List<ArticulosPrecargadosDTO> leerArticulosDesdeArchivoDTO(File archivo) {
+        List<ArticulosPrecargadosDTO> resultado = new ArrayList<>();
+        for (ArticulosPrecargados articulo : leerArticulosDesdeArchivo(archivo)) {
+            resultado.add(DTOMapper.toDTO(articulo));
+        }
+        return resultado;
+    }
+
+    @Override
+    public int guardarArticulosEnLoteDTO(List<ArticulosPrecargadosDTO> articulos, int modoDuplicados) {
+        List<ArticulosPrecargados> modelos = new ArrayList<>();
+        for (ArticulosPrecargadosDTO articulo : articulos) {
+            modelos.add(DTOMapper.toModel(articulo));
+        }
+        return guardarArticulosEnLote(modelos, modoDuplicados);
+    }
+
+    @Override
+    public List<ArticulosPrecargadosDTO> obtenerCatalogoBasePorGiroDTO(String giro) {
+        List<ArticulosPrecargadosDTO> resultado = new ArrayList<>();
+        for (ArticulosPrecargados articulo : obtenerCatalogoBasePorGiro(giro)) {
+            resultado.add(DTOMapper.toDTO(articulo));
+        }
+        return resultado;
+    }
 
     @Override
     public List<ArticulosPrecargados> leerArticulosDesdeArchivo(File archivo) {

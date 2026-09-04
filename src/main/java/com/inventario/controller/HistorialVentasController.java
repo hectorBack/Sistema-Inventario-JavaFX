@@ -3,6 +3,7 @@ package com.inventario.controller;
 import com.inventario.model.Cliente;
 import com.inventario.model.DetalleVenta;
 import com.inventario.model.Venta;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.ClienteRepository;
 import com.inventario.repository.VentaRepository;
 import com.inventario.repository.Impl.ClienteRepositoryImpl;
@@ -273,7 +274,8 @@ public class HistorialVentasController implements Initializable {
         LocalDate fechaInicio = (inicio != null) ? inicio : LocalDate.now();
         LocalDate fechaFin = (fin != null) ? fin : LocalDate.now();
 
-        List<Venta> resultados = ventaRepository.buscarPorRangoFechas(fechaInicio, fechaFin);
+        List<Venta> resultados = ventaRepository.buscarPorRangoFechasDTO(fechaInicio, fechaFin).stream()
+            .map(DTOMapper::toModel).collect(java.util.stream.Collectors.toList());
 
         if (clienteId != null) {
             resultados = resultados.stream()

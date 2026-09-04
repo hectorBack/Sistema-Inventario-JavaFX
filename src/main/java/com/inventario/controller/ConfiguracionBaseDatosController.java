@@ -2,6 +2,7 @@ package com.inventario.controller;
 
 import com.inventario.model.ConexionConfig;
 import com.inventario.model.InformacionBD;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.DatabaseRepository;
 import com.inventario.repository.Impl.DatabaseRepositoryImpl;
 import java.io.File;
@@ -64,7 +65,7 @@ public class ConfiguracionBaseDatosController implements Initializable {
 
     // --- LÓGICA DE CARGA DE DATOS ---
     private void cargarConfiguracionUI() {
-        conexionConfig = databaseRepository.cargarConfiguracion();
+        conexionConfig = DTOMapper.toModel(databaseRepository.cargarConfiguracionDTO());
 
         txtHost.setText(conexionConfig.getHost());
         txtPuerto.setText(conexionConfig.getPuerto());
@@ -75,7 +76,7 @@ public class ConfiguracionBaseDatosController implements Initializable {
     }
 
     private void cargarDiagnosticoUI() {
-        InformacionBD info = databaseRepository.obtenerDiagnosticoBD();
+        InformacionBD info = DTOMapper.toModel(databaseRepository.obtenerDiagnosticoBDDTO());
 
         if (info.isEstadoConexion()) {
             lblEstadoConexion.setText("CONECTADO");
@@ -107,7 +108,7 @@ public class ConfiguracionBaseDatosController implements Initializable {
     @FXML
     private void accionProbarConexion() {
         ConexionConfig config = extraerConfiguracionFormulario();
-        boolean exitoso = databaseRepository.probarConexion(config);
+        boolean exitoso = databaseRepository.probarConexionDTO(DTOMapper.toDTO(config));
 
         if (exitoso) {
             mostrarAlerta(Alert.AlertType.INFORMATION, "Conexión Exitosa", "Se logró establecer comunicación con la base de datos de PostgreSQL.");
@@ -120,7 +121,7 @@ public class ConfiguracionBaseDatosController implements Initializable {
     private void accionGuardarConfiguracion() {
         ConexionConfig config = extraerConfiguracionFormulario();
 
-        if (databaseRepository.guardarConfiguracion(config)) {
+        if (databaseRepository.guardarConfiguracionDTO(DTOMapper.toDTO(config))) {
             conexionConfig = config;
             mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "La configuración fue guardada en 'config.properties'.");
             cargarDiagnosticoUI();
@@ -159,7 +160,7 @@ public class ConfiguracionBaseDatosController implements Initializable {
             Task<Boolean> tarea = new Task<>() {
                 @Override
                 protected Boolean call() {
-                    return databaseRepository.generarRespaldo(config, archivoDestino);
+                    return databaseRepository.generarRespaldoDTO(DTOMapper.toDTO(config), archivoDestino);
                 }
             };
 
@@ -197,7 +198,7 @@ public class ConfiguracionBaseDatosController implements Initializable {
                 Task<Boolean> tarea = new Task<>() {
                     @Override
                     protected Boolean call() {
-                        return databaseRepository.restaurarRespaldo(config, archivoOrigen);
+                        return databaseRepository.restaurarRespaldoDTO(DTOMapper.toDTO(config), archivoOrigen);
                     }
                 };
 

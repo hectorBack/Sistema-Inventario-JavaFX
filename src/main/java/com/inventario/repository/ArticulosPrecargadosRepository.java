@@ -1,6 +1,7 @@
 package com.inventario.repository;
 
 import com.inventario.model.ArticulosPrecargados;
+import com.inventario.model.DTOs.ArticulosPrecargadosDTO;
 import java.io.File;
 import java.util.List;
 
@@ -32,5 +33,11 @@ public interface ArticulosPrecargadosRepository {
      * comercial base (ej. Abarrotes).
      */
     List<ArticulosPrecargados> obtenerCatalogoBasePorGiro(String giro);
+
+    List<ArticulosPrecargadosDTO> leerArticulosDesdeArchivoDTO(File archivo);
+
+    int guardarArticulosEnLoteDTO(List<ArticulosPrecargadosDTO> articulos, int modoDuplicados);
+
+    List<ArticulosPrecargadosDTO> obtenerCatalogoBasePorGiroDTO(String giro);
 
 }

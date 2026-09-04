@@ -3,6 +3,9 @@ package com.inventario.repository.Impl;
 import com.inventario.config.ConexionDB;
 import com.inventario.model.ConexionConfig;
 import com.inventario.model.InformacionBD;
+import com.inventario.model.DTOs.ConexionConfigDTO;
+import com.inventario.model.DTOs.DTOMapper;
+import com.inventario.model.DTOs.InformacionBDDTO;
 import com.inventario.repository.DatabaseRepository;
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,6 +18,36 @@ import java.sql.Statement;
 import java.util.Properties;
 
 public class DatabaseRepositoryImpl implements DatabaseRepository {
+
+    @Override
+    public ConexionConfigDTO cargarConfiguracionDTO() {
+        return DTOMapper.toDTO(cargarConfiguracion());
+    }
+
+    @Override
+    public boolean guardarConfiguracionDTO(ConexionConfigDTO config) {
+        return guardarConfiguracion(DTOMapper.toModel(config));
+    }
+
+    @Override
+    public boolean probarConexionDTO(ConexionConfigDTO config) {
+        return probarConexion(DTOMapper.toModel(config));
+    }
+
+    @Override
+    public InformacionBDDTO obtenerDiagnosticoBDDTO() {
+        return DTOMapper.toDTO(obtenerDiagnosticoBD());
+    }
+
+    @Override
+    public boolean generarRespaldoDTO(ConexionConfigDTO config, File archivoDestino) {
+        return generarRespaldo(DTOMapper.toModel(config), archivoDestino);
+    }
+
+    @Override
+    public boolean restaurarRespaldoDTO(ConexionConfigDTO config, File archivoOrigen) {
+        return restaurarRespaldo(DTOMapper.toModel(config), archivoOrigen);
+    }
 
     private static final String ARCHIVO_CONFIG = "config.properties";
 

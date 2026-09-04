@@ -2,6 +2,8 @@ package com.inventario.repository.Impl;
 
 import com.inventario.config.ConexionDB;
 import com.inventario.model.Folio;
+import com.inventario.model.DTOs.DTOMapper;
+import com.inventario.model.DTOs.FolioDTO;
 import com.inventario.repository.FolioRepository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +15,35 @@ import java.util.List;
 import java.util.Optional;
 
 public class FolioRepositoryImpl implements FolioRepository {
+
+    @Override
+    public List<FolioDTO> obtenerTodosDTO() {
+        List<FolioDTO> resultado = new ArrayList<>();
+        for (Folio folio : obtenerTodos()) {
+            resultado.add(DTOMapper.toDTO(folio));
+        }
+        return resultado;
+    }
+
+    @Override
+    public Optional<FolioDTO> obtenerPorIdDTO(int id) {
+        return obtenerPorId(id).map(DTOMapper::toDTO);
+    }
+
+    @Override
+    public Optional<FolioDTO> obtenerPorModuloDTO(String modulo) {
+        return obtenerPorModulo(modulo).map(DTOMapper::toDTO);
+    }
+
+    @Override
+    public boolean guardarDTO(FolioDTO folio) {
+        return guardar(DTOMapper.toModel(folio));
+    }
+
+    @Override
+    public boolean actualizarDTO(FolioDTO folio) {
+        return actualizar(DTOMapper.toModel(folio));
+    }
 
     @Override
     public List<Folio> obtenerTodos() {

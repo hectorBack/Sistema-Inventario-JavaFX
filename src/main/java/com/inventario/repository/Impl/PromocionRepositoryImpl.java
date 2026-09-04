@@ -2,6 +2,8 @@ package com.inventario.repository.Impl;
 
 import com.inventario.config.ConexionDB;
 import com.inventario.model.Promocion;
+import com.inventario.model.DTOs.DTOMapper;
+import com.inventario.model.DTOs.PromocionDTO;
 import com.inventario.repository.PromocionRepository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,6 +14,48 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PromocionRepositoryImpl implements PromocionRepository {
+
+    @Override
+    public List<PromocionDTO> listarActivasDTO() {
+        List<PromocionDTO> resultado = new ArrayList<>();
+        for (Promocion promocion : listarActivas()) {
+            resultado.add(DTOMapper.toDTO(promocion));
+        }
+        return resultado;
+    }
+
+    @Override
+    public List<PromocionDTO> listarTodasDTO() {
+        List<PromocionDTO> resultado = new ArrayList<>();
+        for (Promocion promocion : listarTodas()) {
+            resultado.add(DTOMapper.toDTO(promocion));
+        }
+        return resultado;
+    }
+
+    @Override
+    public PromocionDTO buscarPorIdDTO(int id) {
+        return DTOMapper.toDTO(buscarPorId(id));
+    }
+
+    @Override
+    public List<PromocionDTO> buscarPorNombreDTO(String nombre) {
+        List<PromocionDTO> resultado = new ArrayList<>();
+        for (Promocion promocion : buscarPorNombre(nombre)) {
+            resultado.add(DTOMapper.toDTO(promocion));
+        }
+        return resultado;
+    }
+
+    @Override
+    public boolean guardarDTO(PromocionDTO promocion) {
+        return guardar(DTOMapper.toModel(promocion));
+    }
+
+    @Override
+    public boolean actualizarDTO(PromocionDTO promocion) {
+        return actualizar(DTOMapper.toModel(promocion));
+    }
 
     @Override
     public boolean guardar(Promocion promocion) {

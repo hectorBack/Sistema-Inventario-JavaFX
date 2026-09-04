@@ -2,6 +2,7 @@ package com.inventario.controller;
 
 import com.inventario.config.ConfiguracionSistema;
 import com.inventario.model.Empresa;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.EmpresaRepository;
 import com.inventario.repository.Impl.EmpresaRepositoryImpl;
 import java.io.File;
@@ -76,7 +77,7 @@ public class MainLayoutController implements Initializable {
      * interfaz.
      */
     public void cargarLogotipo() {
-        Empresa empresa = empresaRepository.obtenerConfiguracion();
+        Empresa empresa = DTOMapper.toModel(empresaRepository.obtenerConfiguracionDTO());
         if (empresa != null && empresa.getLogoPath() != null && !empresa.getLogoPath().trim().isEmpty()) {
             File fileLogo = new File(empresa.getLogoPath());
             if (fileLogo.exists()) {

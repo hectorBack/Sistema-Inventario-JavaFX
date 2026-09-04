@@ -2,6 +2,8 @@ package com.inventario.repository;
 
 import com.inventario.model.DetalleVenta;
 import com.inventario.model.Venta;
+import com.inventario.model.DTOs.DetalleVentaDTO;
+import com.inventario.model.DTOs.VentaDTO;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -17,6 +19,14 @@ public interface VentaRepository {
     List<Venta> buscarPorRangoFechas(LocalDate inicio, LocalDate fin);
 
     List<DetalleVenta> listarDetallesPorVenta(int ventaId);
+
+    boolean registrarVentaDTO(VentaDTO venta, List<DetalleVentaDTO> detalles);
+
+    List<VentaDTO> listarTodasDTO();
+
+    List<VentaDTO> buscarPorRangoFechasDTO(LocalDate inicio, LocalDate fin);
+
+    List<DetalleVentaDTO> listarDetallesPorVentaDTO(int ventaId);
 
     List buscarConFiltros(LocalDate inicio, LocalDate fin, Integer clienteId);
 }

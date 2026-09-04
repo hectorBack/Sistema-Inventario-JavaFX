@@ -3,7 +3,10 @@ package com.inventario.repository.Impl;
 import com.inventario.config.ConexionDB;
 import com.inventario.model.Categoria;
 import com.inventario.model.DetallePaquete;
+import com.inventario.model.DTOs.DTOMapper;
+import com.inventario.model.DTOs.DetallePaqueteDTO;
 import com.inventario.model.Producto;
+import com.inventario.model.DTOs.ProductoDTO;
 import com.inventario.model.Proveedor;
 import com.inventario.repository.ProductoRepository;
 import java.sql.Connection;
@@ -17,6 +20,36 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ProductoRepositoryImpl implements ProductoRepository {
+
+    @Override
+    public List<ProductoDTO> listarTodosDTO() {
+        return listarTodos().stream().map(DTOMapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductoDTO> listarActivosDTO() {
+        return listarActivos().stream().map(DTOMapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public ProductoDTO buscarPorCodigoBarrasDTO(String codigo) {
+        return DTOMapper.toDTO(buscarPorCodigoBarras(codigo));
+    }
+
+    @Override
+    public List<ProductoDTO> buscarPorNombreDTO(String nombre) {
+        return buscarPorNombre(nombre).stream().map(DTOMapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean guardarDTO(ProductoDTO producto) {
+        return guardar(DTOMapper.toModel(producto));
+    }
+
+    @Override
+    public boolean actualizarDTO(ProductoDTO producto) {
+        return actualizar(DTOMapper.toModel(producto));
+    }
 
     @Override
     public boolean guardar(Producto p) {
@@ -168,6 +201,17 @@ public class ProductoRepositoryImpl implements ProductoRepository {
             e.printStackTrace();
         }
         return detalles;
+    }
+
+    @Override
+    public List<DetallePaqueteDTO> obtenerDetallesPaqueteDTO(int idPaquete) {
+        List<DetallePaqueteDTO> resultado = new ArrayList<>();
+        for (DetallePaquete detalle : obtenerDetallesPaquete(idPaquete)) {
+            resultado.add(new DetallePaqueteDTO(
+                    detalle.getProducto() == null ? null : detalle.getProducto().getId(),
+                    java.math.BigDecimal.valueOf(detalle.getCantidad())));
+        }
+        return resultado;
     }
 
     @Override

@@ -2,6 +2,8 @@ package com.inventario.repository.Impl;
 
 import com.inventario.config.ConexionDB;
 import com.inventario.model.Cajero;
+import com.inventario.model.DTOs.CajeroDTO;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.CajeroRepository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +15,40 @@ import java.util.List;
 import java.util.Optional;
 
 public class CajeroRepositoryImpl implements CajeroRepository {
+
+    @Override
+    public Optional<CajeroDTO> buscarPorIdDTO(int id) {
+        return buscarPorId(id).map(DTOMapper::toDTO);
+    }
+
+    @Override
+    public Optional<CajeroDTO> buscarPorUsuarioDTO(String usuario) {
+        return buscarPorUsuario(usuario).map(DTOMapper::toDTO);
+    }
+
+    @Override
+    public List<CajeroDTO> obtenerTodosActivosDTO() {
+        List<CajeroDTO> resultado = new ArrayList<>();
+        for (Cajero cajero : obtenerTodosActivos()) resultado.add(DTOMapper.toDTO(cajero));
+        return resultado;
+    }
+
+    @Override
+    public List<CajeroDTO> buscarPorCriterioDTO(String textoBusqueda) {
+        List<CajeroDTO> resultado = new ArrayList<>();
+        for (Cajero cajero : buscarPorCriterio(textoBusqueda)) resultado.add(DTOMapper.toDTO(cajero));
+        return resultado;
+    }
+
+    @Override
+    public boolean guardarDTO(CajeroDTO cajero) {
+        return guardar(DTOMapper.toModel(cajero));
+    }
+
+    @Override
+    public boolean actualizarDTO(CajeroDTO cajero) {
+        return actualizar(DTOMapper.toModel(cajero));
+    }
 
     @Override
     public boolean guardar(Cajero cajero) {

@@ -2,11 +2,13 @@ package com.inventario.controller;
 
 import com.inventario.model.Producto;
 import com.inventario.model.Promocion;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.PromocionRepository;
 import java.net.URL;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -109,7 +111,9 @@ public class CantidadGranelModalController implements Initializable {
         }
 
         // Buscar promociones activas para este producto
-        List<Promocion> promociones = promocionRepository.listarActivas();
+        List<Promocion> promociones = promocionRepository.listarActivasDTO().stream()
+            .map(DTOMapper::toModel)
+            .collect(Collectors.toList());
         Promocion promoActiva = null;
 
         for (Promocion promo : promociones) {

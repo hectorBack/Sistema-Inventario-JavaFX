@@ -1,6 +1,7 @@
 package com.inventario.controller;
 
 import com.inventario.model.Folio;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.FolioRepository;
 import com.inventario.repository.Impl.FolioRepositoryImpl;
 import java.util.Optional;
@@ -49,7 +50,8 @@ public class FoliosController {
     }
 
     private void cargarFolioVentas() {
-        Optional<Folio> folioOpt = folioRepository.obtenerPorModulo(MODULO_VENTAS);
+        Optional<Folio> folioOpt = folioRepository.obtenerPorModuloDTO(MODULO_VENTAS)
+            .map(DTOMapper::toModel);
 
         if (folioOpt.isPresent()) {
             folioActual = folioOpt.get();
@@ -117,9 +119,9 @@ public class FoliosController {
 
         boolean exito;
         if (folioActual.getId() > 0) {
-            exito = folioRepository.actualizar(folioActual);
+            exito = folioRepository.actualizarDTO(DTOMapper.toDTO(folioActual));
         } else {
-            exito = folioRepository.guardar(folioActual);
+            exito = folioRepository.guardarDTO(DTOMapper.toDTO(folioActual));
         }
 
         if (exito) {

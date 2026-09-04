@@ -4,6 +4,9 @@ import com.inventario.config.ConexionDB;
 import com.inventario.config.ConfiguracionSistema;
 import com.inventario.model.MovimientoInventario;
 import com.inventario.model.Producto;
+import com.inventario.model.DTOs.DTOMapper;
+import com.inventario.model.DTOs.MovimientoInventarioDTO;
+import com.inventario.model.DTOs.ProductoDTO;
 import com.inventario.repository.InventarioRepository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,6 +18,24 @@ import java.util.Collections;
 import java.util.List;
 
 public class InventarioRepositoryImpl implements InventarioRepository {
+
+    @Override
+    public List<ProductoDTO> obtenerProductosStockBajoDTO() {
+        List<ProductoDTO> resultado = new ArrayList<>();
+        for (Producto producto : obtenerProductosStockBajo()) {
+            resultado.add(DTOMapper.toDTO(producto));
+        }
+        return resultado;
+    }
+
+    @Override
+    public List<MovimientoInventarioDTO> obtenerHistorialMovimientosDTO() {
+        List<MovimientoInventarioDTO> resultado = new ArrayList<>();
+        for (MovimientoInventario movimiento : obtenerHistorialMovimientos()) {
+            resultado.add(DTOMapper.toDTO(movimiento));
+        }
+        return resultado;
+    }
 
     @Override
     public boolean agregarStock(int idProducto, double cantidad) {

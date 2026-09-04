@@ -1,6 +1,7 @@
 package com.inventario.repository;
 
 import com.inventario.model.Cajero;
+import com.inventario.model.DTOs.CajeroDTO;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +14,18 @@ public interface CajeroRepository {
     Optional<Cajero> buscarPorId(int id);
 
     Optional<Cajero> buscarPorUsuario(String usuario);
+
+    Optional<CajeroDTO> buscarPorIdDTO(int id);
+
+    Optional<CajeroDTO> buscarPorUsuarioDTO(String usuario);
+
+    List<CajeroDTO> obtenerTodosActivosDTO();
+
+    List<CajeroDTO> buscarPorCriterioDTO(String textoBusqueda);
+
+    boolean guardarDTO(CajeroDTO cajero);
+
+    boolean actualizarDTO(CajeroDTO cajero);
 
     List<Cajero> obtenerTodosActivos();
 

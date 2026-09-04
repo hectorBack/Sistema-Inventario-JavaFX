@@ -5,6 +5,7 @@ import com.inventario.model.Categoria;
 import com.inventario.model.DetallePaquete;
 import com.inventario.model.OpcionesHabilitadas;
 import com.inventario.model.Producto;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.model.Proveedor;
 import com.inventario.repository.CategoriaRepository;
 import com.inventario.repository.Impl.CategoriaRepositoryImpl;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import java.util.stream.Collectors;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -277,7 +279,7 @@ public class ProductosController implements Initializable {
             return;
         }
 
-        Producto encontrado = repository.buscarPorCodigoBarras(codigo);
+        Producto encontrado = DTOMapper.toModel(repository.buscarPorCodigoBarrasDTO(codigo));
         if (encontrado != null) {
             SoundUtil.emitirBeep(900, 120);
             tblProductos.getSelectionModel().select(encontrado);
@@ -320,7 +322,7 @@ public class ProductosController implements Initializable {
                 txtStock, txtStockMinimo, cmbEstado, cmbTipoVenta, cmbCategoria, cmbProveedor
         );
 
-        if (repository.guardar(nuevoProducto)) {
+        if (repository.guardarDTO(DTOMapper.toDTO(nuevoProducto))) {
             if ("PAQUETE".equalsIgnoreCase(nuevoProducto.getTipoVenta())) {
                 repository.guardarDetallesPaquete(nuevoProducto.getId(), listaDetallePaquete);
             }
@@ -369,7 +371,7 @@ public class ProductosController implements Initializable {
                 txtStock, txtStockMinimo, cmbEstado, cmbTipoVenta, cmbCategoria, cmbProveedor
         );
 
-        if (repository.actualizar(productoSeleccionado)) {
+        if (repository.actualizarDTO(DTOMapper.toDTO(productoSeleccionado))) {
             List<DetallePaquete> detallesAActualizar = "PAQUETE".equalsIgnoreCase(productoSeleccionado.getTipoVenta()) ? listaDetallePaquete : null;
             repository.reemplazarDetallesPaquete(productoSeleccionado.getId(), detallesAActualizar);
 
@@ -445,11 +447,13 @@ public class ProductosController implements Initializable {
         String termino = criterio.trim();
         listaProductos.clear();
 
-        Producto pCodigo = repository.buscarPorCodigoBarras(termino);
+        Producto pCodigo = DTOMapper.toModel(repository.buscarPorCodigoBarrasDTO(termino));
         if (pCodigo != null) {
             listaProductos.add(pCodigo);
         } else {
-            listaProductos.addAll(repository.buscarPorNombre(termino));
+                listaProductos.addAll(repository.buscarPorNombreDTO(termino).stream()
+                    .map(DTOMapper::toModel)
+                    .collect(Collectors.toList()));
         }
         tblProductos.setItems(listaProductos);
     }
@@ -472,7 +476,9 @@ public class ProductosController implements Initializable {
         aplicarConfiguracionInventario();
 
         listaProductos.clear();
-        listaProductos.addAll(repository.listarTodos());
+        listaProductos.addAll(repository.listarTodosDTO().stream()
+            .map(DTOMapper::toModel)
+            .collect(Collectors.toList()));
         tblProductos.setItems(listaProductos);
     }
 

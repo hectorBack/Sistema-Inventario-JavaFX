@@ -2,6 +2,8 @@ package com.inventario.repository.Impl;
 
 import com.inventario.config.ConexionDB;
 import com.inventario.model.Empresa;
+import com.inventario.model.DTOs.DTOMapper;
+import com.inventario.model.DTOs.EmpresaDTO;
 import com.inventario.repository.EmpresaRepository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,6 +12,11 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 public class EmpresaRepositoryImpl implements EmpresaRepository {
+
+    @Override
+    public EmpresaDTO obtenerConfiguracionDTO() {
+        return DTOMapper.toDTO(obtenerConfiguracion());
+    }
 
     @Override
     public Empresa obtenerConfiguracion() {
@@ -62,6 +69,11 @@ public class EmpresaRepositoryImpl implements EmpresaRepository {
             e.printStackTrace();
             return false;
         }
+    }
+
+    @Override
+    public boolean guardarConfiguracionDTO(EmpresaDTO empresa) {
+        return guardarConfiguracion(DTOMapper.toModel(empresa));
     }
 
 }

@@ -1,6 +1,7 @@
 package com.inventario.repository;
 
 import com.inventario.model.Cliente;
+import com.inventario.model.DTOs.ClienteDTO;
 import java.util.List;
 
 public interface ClienteRepository {
@@ -10,6 +11,18 @@ public interface ClienteRepository {
     List<Cliente> listarActivos();
 
     Cliente buscarPorId(int id);
+
+    List<ClienteDTO> listarTodosDTO();
+
+    List<ClienteDTO> listarActivosDTO();
+
+    ClienteDTO buscarPorIdDTO(int id);
+
+    List<ClienteDTO> buscarConFiltroDTO(String criterio);
+
+    boolean guardarDTO(ClienteDTO cliente);
+
+    boolean actualizarDTO(ClienteDTO cliente);
 
     boolean guardar(Cliente cliente);
 

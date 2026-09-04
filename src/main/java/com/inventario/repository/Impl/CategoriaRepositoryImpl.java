@@ -2,6 +2,8 @@ package com.inventario.repository.Impl;
 
 import com.inventario.config.ConexionDB;
 import com.inventario.model.Categoria;
+import com.inventario.model.DTOs.CategoriaDTO;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.CategoriaRepository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,6 +13,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CategoriaRepositoryImpl implements CategoriaRepository {
+
+    @Override
+    public List<CategoriaDTO> listarTodasDTO() {
+        List<CategoriaDTO> resultado = new ArrayList<>();
+        for (Categoria categoria : listarTodas()) {
+            resultado.add(DTOMapper.toDTO(categoria));
+        }
+        return resultado;
+    }
+
+    @Override
+    public List<CategoriaDTO> listarActivasDTO() {
+        List<CategoriaDTO> resultado = new ArrayList<>();
+        for (Categoria categoria : listarActivas()) {
+            resultado.add(DTOMapper.toDTO(categoria));
+        }
+        return resultado;
+    }
+
+    @Override
+    public CategoriaDTO buscarPorIdDTO(int id) {
+        return DTOMapper.toDTO(buscarPorId(id));
+    }
+
+    @Override
+    public boolean guardarDTO(CategoriaDTO categoria) {
+        return guardar(DTOMapper.toModel(categoria));
+    }
+
+    @Override
+    public boolean actualizarDTO(CategoriaDTO categoria) {
+        return actualizar(DTOMapper.toModel(categoria));
+    }
 
     @Override
     public List<Categoria> listarTodas() {

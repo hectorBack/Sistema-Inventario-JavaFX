@@ -2,6 +2,7 @@ package com.inventario.controller;
 
 import com.inventario.config.ConfiguracionSistema;
 import com.inventario.model.OpcionesHabilitadas;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.Impl.OpcionesHabilitadasRepositoryImpl;
 import com.inventario.repository.OpcionesHabilitadasRepository;
 import java.io.IOException;
@@ -55,7 +56,7 @@ public class OpcionesHabilitadasController {
     }
 
     private void cargarDatosDesdeBD() {
-        OpcionesHabilitadas opciones = opcionesRepository.obtenerOpciones();
+        OpcionesHabilitadas opciones = DTOMapper.toModel(opcionesRepository.obtenerOpcionesDTO());
 
         if (opciones != null) {
             chkUsarInventario.setSelected(opciones.isUsarInventario());
@@ -90,7 +91,7 @@ public class OpcionesHabilitadasController {
                 cmbTipoRedondeo.getValue() != null ? cmbTipoRedondeo.getValue() : ""
         );
 
-        boolean exito = opcionesRepository.guardarOActualizar(opciones);
+        boolean exito = opcionesRepository.guardarOActualizarDTO(DTOMapper.toDTO(opciones));
 
         if (exito) {
             ConfiguracionSistema.getInstancia().cargarOpciones();

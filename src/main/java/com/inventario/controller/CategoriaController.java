@@ -1,11 +1,13 @@
 package com.inventario.controller;
 
 import com.inventario.model.Categoria;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.CategoriaRepository;
 import com.inventario.repository.Impl.CategoriaRepositoryImpl;
 import com.inventario.util.Productos.KeyboardShortcutUtil;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -110,7 +112,9 @@ public class CategoriaController implements Initializable {
 
     private void listarCategorias() {
         listaCategorias.clear();
-        listaCategorias.addAll(repository.listarTodas());
+        listaCategorias.addAll(repository.listarTodasDTO().stream()
+            .map(DTOMapper::toModel)
+            .collect(Collectors.toList()));
         tblCategorias.setItems(listaCategorias);
     }
 
@@ -121,7 +125,7 @@ public class CategoriaController implements Initializable {
         }
         String filtro = criterio.trim().toLowerCase();
         ObservableList<Categoria> filtradas = FXCollections.observableArrayList();
-        for (Categoria cat : repository.listarTodas()) {
+        for (Categoria cat : repository.listarTodasDTO().stream().map(DTOMapper::toModel).collect(Collectors.toList())) {
             if (cat.getNombre().toLowerCase().contains(filtro)) {
                 filtradas.add(cat);
             }
@@ -149,7 +153,7 @@ public class CategoriaController implements Initializable {
                 cmbEstado.getValue()
         );
 
-        if (repository.guardar(nuevaCategoria)) {
+        if (repository.guardarDTO(DTOMapper.toDTO(nuevaCategoria))) {
             mostrarAlerta("Éxito", "Categoría guardada correctamente", Alert.AlertType.INFORMATION);
             limpiarFormulario();
             listarCategorias();
@@ -181,7 +185,7 @@ public class CategoriaController implements Initializable {
         categoriaSeleccionada.setNombre(nombre);
         categoriaSeleccionada.setEstado(cmbEstado.getValue());
 
-        if (repository.actualizar(categoriaSeleccionada)) {
+        if (repository.actualizarDTO(DTOMapper.toDTO(categoriaSeleccionada))) {
             mostrarAlerta("Éxito", "Categoría actualizada correctamente", Alert.AlertType.INFORMATION);
             limpiarFormulario();
             listarCategorias();

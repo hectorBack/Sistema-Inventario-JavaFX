@@ -2,6 +2,7 @@ package com.inventario.controller;
 
 import com.inventario.model.DetallePaquete;
 import com.inventario.model.Producto;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.Impl.ProductoRepositoryImpl;
 import com.inventario.repository.ProductoRepository;
 import java.util.List;
@@ -72,7 +73,7 @@ public class ConfigurarPaqueteModalController {
             return;
         }
 
-        productoEncontrado = repository.buscarPorCodigoBarras(codigo);
+        productoEncontrado = DTOMapper.toModel(repository.buscarPorCodigoBarrasDTO(codigo));
         if (productoEncontrado != null) {
             lblNombreProducto.setText("Producto: " + productoEncontrado.getNombre());
             lblPrecioCosto.setText(String.format("Precio Costo: $%.2f", productoEncontrado.getPrecioCompra()));

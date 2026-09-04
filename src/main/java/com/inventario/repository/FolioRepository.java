@@ -1,6 +1,7 @@
 package com.inventario.repository;
 
 import com.inventario.model.Folio;
+import com.inventario.model.DTOs.FolioDTO;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,9 +13,19 @@ public interface FolioRepository {
 
     Optional<Folio> obtenerPorModulo(String modulo);
 
+    List<FolioDTO> obtenerTodosDTO();
+
+    Optional<FolioDTO> obtenerPorIdDTO(int id);
+
+    Optional<FolioDTO> obtenerPorModuloDTO(String modulo);
+
     boolean guardar(Folio folio);
 
     boolean actualizar(Folio folio);
+
+    boolean guardarDTO(FolioDTO folio);
+
+    boolean actualizarDTO(FolioDTO folio);
 
     boolean eliminar(int id);
 

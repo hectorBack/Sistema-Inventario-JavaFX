@@ -6,6 +6,9 @@ import com.inventario.model.Cliente;
 import com.inventario.model.DetalleVenta;
 import com.inventario.model.Producto;
 import com.inventario.model.Venta;
+import com.inventario.model.DTOs.DTOMapper;
+import com.inventario.model.DTOs.DetalleVentaDTO;
+import com.inventario.model.DTOs.VentaDTO;
 import com.inventario.repository.VentaRepository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,6 +20,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VentaRepositoryImpl implements VentaRepository {
+
+    @Override
+    public boolean registrarVentaDTO(VentaDTO venta, List<DetalleVentaDTO> detalles) {
+        List<DetalleVenta> modelos = new ArrayList<>();
+        for (DetalleVentaDTO detalle : detalles) modelos.add(DTOMapper.toModel(detalle));
+        return registrarVenta(DTOMapper.toModel(venta), modelos);
+    }
+
+    @Override
+    public List<VentaDTO> listarTodasDTO() {
+        List<VentaDTO> resultado = new ArrayList<>();
+        for (Venta venta : listarTodas()) resultado.add(DTOMapper.toDTO(venta));
+        return resultado;
+    }
+
+    @Override
+    public List<VentaDTO> buscarPorRangoFechasDTO(LocalDate inicio, LocalDate fin) {
+        List<VentaDTO> resultado = new ArrayList<>();
+        for (Venta venta : buscarPorRangoFechas(inicio, fin)) resultado.add(DTOMapper.toDTO(venta));
+        return resultado;
+    }
+
+    @Override
+    public List<DetalleVentaDTO> listarDetallesPorVentaDTO(int ventaId) {
+        List<DetalleVentaDTO> resultado = new ArrayList<>();
+        for (DetalleVenta detalle : listarDetallesPorVenta(ventaId)) resultado.add(DTOMapper.toDTO(detalle));
+        return resultado;
+    }
 
     @Override
     public boolean registrarVenta(Venta venta, List<DetalleVenta> detalles) {

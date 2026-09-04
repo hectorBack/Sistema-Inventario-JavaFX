@@ -2,6 +2,7 @@ package com.inventario.controller;
 
 import com.inventario.model.MovimientoInventario;
 import com.inventario.model.Producto;
+import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.Impl.MovimientoRepositoryImpl;
 import com.inventario.repository.Impl.ProductoRepositoryImpl;
 import com.inventario.repository.MovimientoRepository;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -111,7 +113,8 @@ public class MovimientoController implements Initializable {
     }
 
     private void cargarProductosEnCombo() {
-        List<Producto> productos = prodRepository.listarTodos();
+        List<Producto> productos = prodRepository.listarTodosDTO().stream()
+            .map(DTOMapper::toModel).collect(Collectors.toList());
         cmbProducto.setItems(FXCollections.observableArrayList(productos));
 
         // Formatear el ComboBox para que muestre el nombre del producto de forma limpia
@@ -166,7 +169,8 @@ public class MovimientoController implements Initializable {
 
     private void listarMovimientos() {
         listaMovimientos.clear();
-        listaMovimientos.addAll(movRepository.listarTodos());
+        listaMovimientos.addAll(movRepository.listarTodosDTO().stream()
+            .map(DTOMapper::toModel).collect(Collectors.toList()));
         tblMovimientos.setItems(listaMovimientos);
     }
 
@@ -177,7 +181,8 @@ public class MovimientoController implements Initializable {
         LocalDate fin = (dpFechaFin != null) ? dpFechaFin.getValue() : null;
 
         listaMovimientos.clear();
-        listaMovimientos.addAll(movRepository.buscarConFiltros(termino, tipo, inicio, fin));
+        listaMovimientos.addAll(movRepository.buscarConFiltrosDTO(termino, tipo, inicio, fin).stream()
+            .map(DTOMapper::toModel).collect(Collectors.toList()));
         tblMovimientos.setItems(listaMovimientos);
     }
 
@@ -215,7 +220,7 @@ public class MovimientoController implements Initializable {
                     txtMotivo.getText().trim().isEmpty() ? "Ajuste manual de inventario" : txtMotivo.getText().trim()
             );
 
-            if (movRepository.registrarMovimiento(nuevoMovimiento)) {
+            if (movRepository.registrarMovimientoDTO(DTOMapper.toDTO(nuevoMovimiento))) {
                 mostrarAlerta("Éxito", "Movimiento procesado y stock actualizado correctamente.", Alert.AlertType.INFORMATION);
                 limpiarCampos();
                 // Recargar productos en el ComboBox para sincronizar los valores de stock localmente
