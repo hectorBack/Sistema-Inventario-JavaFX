@@ -1,6 +1,7 @@
 package com.inventario.model.DTOs;
 
 public final class ClienteDTO {
+
     private final Integer id;
     private final String nombre;
     private final String rfc;
@@ -19,11 +20,31 @@ public final class ClienteDTO {
         this.estado = estado;
     }
 
-    public Integer getId() { return id; }
-    public String getNombre() { return nombre; }
-    public String getRfc() { return rfc; }
-    public String getTelefono() { return telefono; }
-    public String getEmail() { return email; }
-    public String getDireccion() { return direccion; }
-    public String getEstado() { return estado; }
+    public Integer getId() {
+        return id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getRfc() {
+        return rfc;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
 }

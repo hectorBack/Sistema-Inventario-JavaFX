@@ -178,12 +178,14 @@ public final class DTOMapper {
 
     public static VentaDTO toDTO(Venta venta) {
         return venta == null ? null : new VentaDTO(venta.getId(), venta.getCliente() == null ? null : venta.getCliente().getId(),
-                venta.getFecha(), decimal(venta.getTotal()), venta.getEstado());
+                venta.getCliente() == null ? null : venta.getCliente().getNombre(), venta.getFecha(),
+                decimal(venta.getTotal()), venta.getEstado());
     }
 
     public static Venta toModel(VentaDTO dto) {
         if (dto == null) return null;
-        Cliente cliente = dto.getClienteId() == null ? null : new Cliente(dto.getClienteId(), "", "", "", "", "", "ACTIVO");
+        Cliente cliente = dto.getClienteId() == null ? null : new Cliente(dto.getClienteId(),
+                dto.getClienteNombre() == null ? "" : dto.getClienteNombre(), "", "", "", "", "ACTIVO");
         return new Venta(valueOrZero(dto.getId()), cliente, dto.getFecha(), number(dto.getTotal()), dto.getEstado());
     }
 
@@ -196,7 +198,13 @@ public final class DTOMapper {
     public static DetalleVenta toModel(DetalleVentaDTO dto) {
         if (dto == null) return null;
         Producto producto = dto.getProductoId() == null ? null : new Producto();
-        if (producto != null) producto.setId(dto.getProductoId());
+        if (producto != null) {
+            producto.setId(dto.getProductoId());
+            producto.setNombre(dto.getNombreProducto() == null ? "" : dto.getNombreProducto());
+        } else if (dto.getNombreProducto() != null && !dto.getNombreProducto().isBlank()) {
+            producto = new Producto();
+            producto.setNombre(dto.getNombreProducto());
+        }
         DetalleVenta detalle = new DetalleVenta(valueOrZero(dto.getId()), valueOrZero(dto.getVentaId()), producto,
                 number(dto.getCantidad()), number(dto.getPrecioUnitario()));
         return detalle;
