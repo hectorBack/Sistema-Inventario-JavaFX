@@ -46,14 +46,22 @@ public class ProductosTableUtil {
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
 
         TableColumn<Producto, String> colCategoria = new TableColumn<>("Categoría");
-        colCategoria.setCellValueFactory(c -> c.getValue().getCategoria() != null
-                ? c.getValue().getCategoria().nombreProperty()
-                : new SimpleStringProperty("Sin Categoría"));
+        colCategoria.setCellValueFactory(c -> {
+            Producto p = c.getValue();
+            String nombreCat = (p != null && p.getCategoria() != null && p.getCategoria().getNombre() != null && !p.getCategoria().getNombre().isBlank())
+                    ? p.getCategoria().getNombre()
+                    : "Sin Categoría";
+            return new SimpleStringProperty(nombreCat);
+        });
 
         TableColumn<Producto, String> colProveedor = new TableColumn<>("Proveedor");
-        colProveedor.setCellValueFactory(c -> c.getValue().getProveedor() != null
-                ? c.getValue().getProveedor().nombreProperty()
-                : new SimpleStringProperty("Sin Proveedor"));
+        colProveedor.setCellValueFactory(c -> {
+            Producto p = c.getValue();
+            String nombreProv = (p != null && p.getProveedor() != null && p.getProveedor().getNombre() != null && !p.getProveedor().getNombre().isBlank())
+                    ? p.getProveedor().getNombre()
+                    : "Sin Proveedor";
+            return new SimpleStringProperty(nombreProv);
+        });
 
         tblProductos.getColumns().setAll(
                 colId, colCodigo, colNombre, colTipoVenta, colPrecio,

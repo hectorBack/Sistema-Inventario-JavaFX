@@ -33,7 +33,7 @@ public final class DTOMapper {
 
     public static Categoria toModel(CategoriaDTO dto) {
         return dto == null ? null : new Categoria(
-            valueOrZero(dto.getId()), dto.getNombre(), dto.getEstado());
+                valueOrZero(dto.getId()), dto.getNombre(), dto.getEstado());
     }
 
     public static ProveedorDTO toDTO(Proveedor proveedor) {
@@ -61,21 +61,38 @@ public final class DTOMapper {
     }
 
     public static ProductoDTO toDTO(Producto producto) {
-        return producto == null ? null : new ProductoDTO(
+        if (producto == null) {
+            return null;
+        }
+
+        String catNombre = producto.getCategoria() != null ? producto.getCategoria().getNombre() : null;
+        Integer catId = producto.getCategoria() != null ? producto.getCategoria().getId() : null;
+
+        String provNombre = producto.getProveedor() != null ? producto.getProveedor().getNombre() : null;
+        Integer provId = producto.getProveedor() != null ? producto.getProveedor().getId() : null;
+
+        return new ProductoDTO(
                 producto.getId(), producto.getCodigoBarras(), producto.getNombre(), producto.getDescripcion(),
                 decimal(producto.getPrecio()), decimal(producto.getPrecioMayoreo()), decimal(producto.getPrecioCompra()),
                 decimal(producto.getPorcentajeGanancia()), decimal(producto.getStock()), decimal(producto.getStockMinimo()),
                 producto.getTipoVenta(), producto.getEstado(),
-                producto.getCategoria() == null ? null : producto.getCategoria().getId(),
-                producto.getProveedor() == null ? null : producto.getProveedor().getId());
+                catId, catNombre,
+                provId, provNombre
+        );
     }
 
     public static Producto toModel(ProductoDTO dto) {
         if (dto == null) {
             return null;
         }
-        Categoria categoria = dto.getCategoriaId() == null ? null : new Categoria(dto.getCategoriaId(), "", "ACTIVO");
-        Proveedor proveedor = dto.getProveedorId() == null ? null : new Proveedor(dto.getProveedorId(), "", "", "", "", "ACTIVO");
+
+        // Asignamos el nombre real recibido en el DTO en lugar de ""
+        Categoria categoria = dto.getCategoriaId() == null ? null
+                : new Categoria(dto.getCategoriaId(), dto.getCategoriaNombre() == null ? "" : dto.getCategoriaNombre(), "ACTIVO");
+
+        Proveedor proveedor = dto.getProveedorId() == null ? null
+                : new Proveedor(dto.getProveedorId(), dto.getProveedorNombre() == null ? "" : dto.getProveedorNombre(), "", "", "", "ACTIVO");
+
         return new Producto(valueOrZero(dto.getId()), dto.getCodigoBarras(), dto.getNombre(), dto.getDescripcion(),
                 number(dto.getPrecio()), number(dto.getPrecioMayoreo()), number(dto.getPrecioCompra()),
                 number(dto.getPorcentajeGanancia()), number(dto.getStock()), number(dto.getStockMinimo()),
@@ -183,7 +200,9 @@ public final class DTOMapper {
     }
 
     public static Venta toModel(VentaDTO dto) {
-        if (dto == null) return null;
+        if (dto == null) {
+            return null;
+        }
         Cliente cliente = dto.getClienteId() == null ? null : new Cliente(dto.getClienteId(),
                 dto.getClienteNombre() == null ? "" : dto.getClienteNombre(), "", "", "", "", "ACTIVO");
         return new Venta(valueOrZero(dto.getId()), cliente, dto.getFecha(), number(dto.getTotal()), dto.getEstado());
@@ -196,7 +215,9 @@ public final class DTOMapper {
     }
 
     public static DetalleVenta toModel(DetalleVentaDTO dto) {
-        if (dto == null) return null;
+        if (dto == null) {
+            return null;
+        }
         Producto producto = dto.getProductoId() == null ? null : new Producto();
         if (producto != null) {
             producto.setId(dto.getProductoId());
@@ -226,7 +247,9 @@ public final class DTOMapper {
     }
 
     public static InformacionBD toModel(InformacionBDDTO dto) {
-        if (dto == null) return null;
+        if (dto == null) {
+            return null;
+        }
         InformacionBD info = new InformacionBD();
         info.setMotorVersion(dto.getMotorVersion());
         info.setTamanioBD(dto.getTamanioBD());
@@ -238,7 +261,9 @@ public final class DTOMapper {
     }
 
     public static CajeroDTO toDTO(Cajero cajero) {
-        if (cajero == null) return null;
+        if (cajero == null) {
+            return null;
+        }
         Map<String, Boolean> permisos = new LinkedHashMap<>();
         for (Method metodo : Cajero.class.getMethods()) {
             if (metodo.getName().startsWith("isPerm") && metodo.getParameterCount() == 0) {
@@ -253,7 +278,9 @@ public final class DTOMapper {
     }
 
     public static Cajero toModel(CajeroDTO dto) {
-        if (dto == null) return null;
+        if (dto == null) {
+            return null;
+        }
         Cajero cajero = new Cajero(valueOrZero(dto.getId()), dto.getUsuario(), dto.getContrasena(),
                 dto.getNombreCompleto(), dto.isActivo(), false, false, false, false, false, false, false, false, false,
                 false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
