@@ -140,3 +140,16 @@ CREATE TABLE IF NOT EXISTS configuracion_empresa (
 INSERT INTO configuracion_empresa (id, nombre_empresa, logo_path)
 VALUES (1, 'Mi Negocio', '')
 ON CONFLICT (id) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS configuracion_ticket (
+    id INT PRIMARY KEY DEFAULT 1,
+    lineas_encabezado TEXT[] NOT NULL DEFAULT '{}',
+    lineas_pie TEXT[] NOT NULL DEFAULT '{}',
+    incluir_precio_unitario BOOLEAN NOT NULL DEFAULT FALSE,
+    imprimir_descripcion_completa BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT chk_single_row CHECK (id = 1)
+);
+
+INSERT INTO configuracion_ticket (id, lineas_encabezado, lineas_pie, incluir_precio_unitario, imprimir_descripcion_completa)
+VALUES (1, ARRAY['MI ABARROTE S.A.', 'CALLE 123', 'TEL: 555-0000'], ARRAY['¡GRACIAS POR SU COMPRA!', 'CONSERVE SU TICKET'], FALSE, FALSE)
+ON CONFLICT (id) DO NOTHING;

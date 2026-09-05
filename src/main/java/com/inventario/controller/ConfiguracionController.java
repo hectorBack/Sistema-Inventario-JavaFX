@@ -98,7 +98,7 @@ public class ConfiguracionController {
 
     @FXML
     void onTicket(ActionEvent e) {
-        cambiarVista(e, "/com/inventario/view/config/ticketModal.fxml");
+        cargarEnContenidoCentral(e, "/com/inventario/view/ConfiguracionTicketView.fxml");
     }
 
     @FXML

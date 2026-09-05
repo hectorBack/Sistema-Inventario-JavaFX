@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" styleClass="scroll-pane" stylesheets="@../styles/theme.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.ConfiguracionTicketController">
+    <content>
+        <VBox spacing="20.0" styleClass="page-shell">
+            <children>
+                <!-- Encabezado de la página -->
+                <Label styleClass="page-title" text="PERSONALIZACION DEL TICKET DE VENTA" />
+
+                <HBox spacing="30.0">
+                    <children>
+                        <!-- Panel Izquierdo: Previsualizador del Ticket -->
+                        <VBox prefWidth="340.0" spacing="10.0" style="-fx-background-color: #ffffff; -fx-border-color: #cbd5e1; -fx-border-width: 1px; -fx-border-radius: 8px; -fx-padding: 15px; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 10, 0, 0, 3);">
+                            <children>
+                                <!-- Control de líneas para Encabezado -->
+                                <HBox alignment="CENTER_RIGHT" spacing="8.0">
+                                    <children>
+                                        <Label styleClass="form-label" text="líneas" />
+                                        <Spinner fx:id="spnLineasEncabezado" editable="true" prefWidth="70.0" styleClass="form-field" />
+                                    </children>
+                                </HBox>
+
+                                <!-- Inputs dinámicos del Encabezado -->
+                                <VBox fx:id="vboxEncabezadoInputs" spacing="4.0" />
+
+                                <!-- Contenedor de Vista Previa -->
+                                <VBox minHeight="260.0" spacing="6.0" style="-fx-padding: 10 0 10 0;">
+                                    <children>
+                                        <!-- Fecha y Hora -->
+                                        <HBox alignment="CENTER_LEFT">
+                                            <children>
+                                                <Label fx:id="lblFecha" style="-fx-font-family: 'Courier New'; -fx-font-weight: bold;" styleClass="primary-text" text="Fecha: -" />
+                                                <Label maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+                                                <Label fx:id="lblHora" style="-fx-font-family: 'Courier New'; -fx-font-weight: bold;" styleClass="primary-text" text="Hora: -" />
+                                            </children>
+                                        </HBox>
+
+                                        <!-- Cabecera de Tabla del Ticket -->
+                                        <HBox alignment="CENTER_LEFT" style="-fx-border-color: #0f172a; -fx-border-width: 1px 0 1px 0; -fx-padding: 2 0 2 0;">
+                                            <children>
+                                                <Label prefWidth="45.0" style="-fx-font-family: 'Courier New'; -fx-font-weight: bold;" styleClass="primary-text" text="Cant" />
+                                                <Label maxWidth="1.7976931348623157E308" style="-fx-font-family: 'Courier New'; -fx-font-weight: bold;" styleClass="primary-text" text="Descripción" HBox.hgrow="ALWAYS" />
+                                                <Label fx:id="lblHeaderPrecioUnitario" alignment="CENTER_RIGHT" prefWidth="60.0" style="-fx-font-family: 'Courier New'; -fx-font-weight: bold;" styleClass="primary-text" text="P.U." visible="false" managed="false" />
+                                                <Label alignment="CENTER_RIGHT" prefWidth="65.0" style="-fx-font-family: 'Courier New'; -fx-font-weight: bold;" styleClass="primary-text" text="Importe" />
+                                            </children>
+                                        </HBox>
+
+                                        <!-- Productos Renderizados Dinámicamente -->
+                                        <VBox fx:id="vboxDetalleProductos" spacing="2.0" />
+
+                                        <!-- Totales -->
+                                        <Label fx:id="lblNumeroArticulos" alignment="CENTER" maxWidth="1.7976931348623157E308" style="-fx-font-family: 'Courier New'; -fx-font-weight: bold; -fx-padding: 8 0 4 0;" styleClass="primary-text" text="No. de Artículos: 0" />
+                                        <Label fx:id="lblTotal" alignment="CENTER" maxWidth="1.7976931348623157E308" style="-fx-font-family: 'Courier New'; -fx-font-size: 16px; -fx-font-weight: bold;" styleClass="primary-text" text="Total: $0.00" />
+                                    </children>
+                                </VBox>
+
+                                <!-- Inputs dinámicos del Pie -->
+                                <VBox fx:id="vboxPieInputs" spacing="4.0" />
+
+                                <!-- Control de líneas para Pie -->
+                                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                    <children>
+                                        <Spinner fx:id="spnLineasPie" editable="true" prefWidth="70.0" styleClass="form-field" />
+                                        <Button mnemonicParsing="false" onAction="#onAgregarLineaPie" styleClass="action-config" text="Más líneas &gt;" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+
+                        <!-- Panel Derecho: Opciones de Configuración -->
+                        <VBox spacing="16.0" styleClass="form-panel" HBox.hgrow="ALWAYS">
+                            <padding>
+                                <Insets top="10.0" />
+                            </padding>
+                            <children>
+                                <CheckBox fx:id="chkIncluirPrecioUnitario" mnemonicParsing="false" styleClass="form-label" text="Incluir Precio Unitario en la impresión del ticket." />
+                                <CheckBox fx:id="chkImprimirDescripcionCompleta" mnemonicParsing="false" styleClass="form-label" text="Imprimir descripción completa (varios renglones para la descripción)." />
+
+                                <HBox alignment="BOTTOM_RIGHT" VBox.vgrow="ALWAYS">
+                                    <children>
+                                        <Button mnemonicParsing="false" onAction="#onGuardar" prefHeight="38.0" prefWidth="150.0" styleClass="action-button, action-primary" text="Guardar" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </content>
+</ScrollPane>

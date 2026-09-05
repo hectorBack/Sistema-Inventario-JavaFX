@@ -16,14 +16,38 @@ import com.inventario.model.DetalleVenta;
 import com.inventario.model.Venta;
 import com.inventario.model.InformacionBD;
 import com.inventario.model.Cajero;
+import com.inventario.model.ConfiguracionTicket;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import javafx.collections.FXCollections;
 
 public final class DTOMapper {
 
     private DTOMapper() {
+    }
+
+    public static ConfiguracionTicketDTO toDTO(ConfiguracionTicket config) {
+        return config == null ? null : new ConfiguracionTicketDTO(
+                config.getId(),
+                new ArrayList<>(config.getLineasEncabezado()),
+                new ArrayList<>(config.getLineasPie()),
+                config.isIncluirPrecioUnitario(),
+                config.isImprimirDescripcionCompleta()
+        );
+    }
+
+    public static ConfiguracionTicket toModel(ConfiguracionTicketDTO dto) {
+        return dto == null ? null : new ConfiguracionTicket(
+                valueOrZero(dto.getId()),
+                FXCollections.observableArrayList(dto.getLineasEncabezado() != null ? dto.getLineasEncabezado() : List.of()),
+                FXCollections.observableArrayList(dto.getLineasPie() != null ? dto.getLineasPie() : List.of()),
+                dto.isIncluirPrecioUnitario(),
+                dto.isImprimirDescripcionCompleta()
+        );
     }
 
     public static CategoriaDTO toDTO(Categoria categoria) {

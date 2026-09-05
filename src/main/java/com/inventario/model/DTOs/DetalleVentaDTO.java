@@ -3,6 +3,7 @@ package com.inventario.model.DTOs;
 import java.math.BigDecimal;
 
 public final class DetalleVentaDTO {
+
     private final Integer id;
     private final Integer ventaId;
     private final Integer productoId;
@@ -22,11 +23,38 @@ public final class DetalleVentaDTO {
         this.subtotal = subtotal;
     }
 
-    public Integer getId() { return id; }
-    public Integer getVentaId() { return ventaId; }
-    public Integer getProductoId() { return productoId; }
-    public String getNombreProducto() { return nombreProducto; }
-    public BigDecimal getCantidad() { return cantidad; }
-    public BigDecimal getPrecioUnitario() { return precioUnitario; }
-    public BigDecimal getSubtotal() { return subtotal; }
+    public Integer getId() {
+        return id;
+    }
+
+    public Integer getVentaId() {
+        return ventaId;
+    }
+
+    public Integer getProductoId() {
+        return productoId;
+    }
+
+    public String getNombreProducto() {
+        return nombreProducto;
+    }
+
+    public BigDecimal getCantidad() {
+        return cantidad;
+    }
+
+    public BigDecimal getPrecioUnitario() {
+        return precioUnitario;
+    }
+
+    public BigDecimal getSubtotal() {
+        return subtotal;
+    }
+
+    public String getCantidadFormateada() {
+        if (cantidad == null) {
+            return "0";
+        }
+        return cantidad.stripTrailingZeros().toPlainString();
+    }
 }
