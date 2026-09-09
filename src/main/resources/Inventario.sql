@@ -153,3 +153,15 @@ CREATE TABLE IF NOT EXISTS configuracion_ticket (
 INSERT INTO configuracion_ticket (id, lineas_encabezado, lineas_pie, incluir_precio_unitario, imprimir_descripcion_completa)
 VALUES (1, ARRAY['MI ABARROTE S.A.', 'CALLE 123', 'TEL: 555-0000'], ARRAY['¡GRACIAS POR SU COMPRA!', 'CONSERVE SU TICKET'], FALSE, FALSE)
 ON CONFLICT (id) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS impuesto (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    porcentaje DECIMAL(5,2) NOT NULL,
+    pais VARCHAR(50) NOT NULL DEFAULT 'México',
+    estado VARCHAR(20) NOT NULL DEFAULT 'ACTIVO'
+);
+
+ALTER TABLE impuesto 
+ADD COLUMN desglosar_ticket BOOLEAN DEFAULT false,
+ADD COLUMN precios_con_impuesto BOOLEAN DEFAULT false;

@@ -17,6 +17,7 @@ import com.inventario.model.Venta;
 import com.inventario.model.InformacionBD;
 import com.inventario.model.Cajero;
 import com.inventario.model.ConfiguracionTicket;
+import com.inventario.model.Impuesto;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -28,6 +29,36 @@ import javafx.collections.FXCollections;
 public final class DTOMapper {
 
     private DTOMapper() {
+    }
+
+    public static ImpuestoDTO toDTO(Impuesto entity) {
+        if (entity == null) {
+            return null;
+        }
+        return new ImpuestoDTO(
+                entity.getId(),
+                entity.getNombre(),
+                entity.getPorcentaje(),
+                entity.getPais(),
+                entity.getEstado(),
+                entity.isDesglosarTicket(),
+                entity.isPreciosConImpuesto()
+        );
+    }
+
+    public static Impuesto toModel(ImpuestoDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+        return new Impuesto(
+                valueOrZero(dto.getId()),
+                dto.getNombre(),
+                dto.getPorcentaje(),
+                dto.getPais(),
+                dto.getEstado(),
+                dto.getDesglosarTicket() != null ? dto.getDesglosarTicket() : false,
+                dto.getPreciosConImpuesto() != null ? dto.getPreciosConImpuesto() : false
+        );
     }
 
     public static ConfiguracionTicketDTO toDTO(ConfiguracionTicket config) {

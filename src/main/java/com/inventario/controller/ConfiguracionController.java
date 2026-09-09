@@ -108,7 +108,7 @@ public class ConfiguracionController {
 
     @FXML
     void onImpuestos(ActionEvent e) {
-        cambiarVista(e, "/com/inventario/view/config/impuestosModal.fxml");
+        cargarEnContenidoCentral(e, "/com/inventario/view/ImpuestosView.fxml");
     }
 
     @FXML
