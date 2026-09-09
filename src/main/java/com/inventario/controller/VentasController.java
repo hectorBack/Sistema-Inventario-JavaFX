@@ -16,6 +16,7 @@ import com.inventario.repository.ProductoRepository;
 import com.inventario.repository.PromocionRepository;
 import com.inventario.repository.VentaRepository;
 import com.inventario.util.Inventario.InventarioCalculosUtil;
+import com.inventario.util.FormatoMonedaUtil;
 import com.inventario.util.Productos.KeyboardShortcutUtil;
 import com.inventario.util.Ventas.BusquedaProductoUtil;
 import com.inventario.util.Ventas.CarritoService;
@@ -641,7 +642,7 @@ public class VentasController implements Initializable {
                 opciones.getTipoRedondeo()
         );
 
-        lblTotal.setText(String.format(Locale.US, "$%.2f", totalFinal));
+        lblTotal.setText(FormatoMonedaUtil.formatear(totalFinal));
     }
 
     private void limpiarPantallaCompleta() {

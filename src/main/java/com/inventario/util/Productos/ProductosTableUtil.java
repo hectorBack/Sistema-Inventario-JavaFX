@@ -1,6 +1,7 @@
 package com.inventario.util.Productos;
 
 import com.inventario.model.Producto;
+import com.inventario.util.FormatoMonedaUtil;
 import java.util.function.Function;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.TableColumn;
@@ -26,15 +27,18 @@ public class ProductosTableUtil {
 
         TableColumn<Producto, Double> colPrecio = new TableColumn<>("P. Venta");
         colPrecio.setCellValueFactory(new PropertyValueFactory<>("precio"));
+        configurarColumnaMoneda(colPrecio);
 
         TableColumn<Producto, Double> colPrecioCompra = new TableColumn<>("P. Costo");
         colPrecioCompra.setCellValueFactory(new PropertyValueFactory<>("precioCompra"));
+        configurarColumnaMoneda(colPrecioCompra);
 
         TableColumn<Producto, Double> colPorcentajeGanancia = new TableColumn<>("% Gan.");
         colPorcentajeGanancia.setCellValueFactory(new PropertyValueFactory<>("porcentajeGanancia"));
 
         TableColumn<Producto, Double> colPrecioMayoreo = new TableColumn<>("P. Mayoreo");
         colPrecioMayoreo.setCellValueFactory(new PropertyValueFactory<>("precioMayoreo"));
+        configurarColumnaMoneda(colPrecioMayoreo);
 
         TableColumn<Producto, Double> colStock = new TableColumn<>("Stock");
         colStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
@@ -68,6 +72,17 @@ public class ProductosTableUtil {
                 colPrecioCompra, colPrecioMayoreo, colPorcentajeGanancia,
                 colStock, colStockMin, colCategoria, colProveedor, colEstado
         );
+    }
+
+    private static void configurarColumnaMoneda(TableColumn<Producto, Double> columna) {
+        columna.setStyle("-fx-alignment: CENTER-RIGHT;");
+        columna.setCellFactory(tc -> new javafx.scene.control.TableCell<Producto, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : FormatoMonedaUtil.formatear(item));
+            }
+        });
     }
 
     public static <T> StringConverter<T> crearStringConverter(Function<T, String> extractorNombre) {

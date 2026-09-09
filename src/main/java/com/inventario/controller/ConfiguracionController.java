@@ -118,7 +118,7 @@ public class ConfiguracionController {
 
     @FXML
     void onSimboloMoneda(ActionEvent e) {
-        cambiarVista(e, "/com/inventario/view/config/monedaModal.fxml");
+        cargarEnContenidoCentral(e, "/com/inventario/view/ConfiguracionMonedaView.fxml");
     }
 
     @FXML

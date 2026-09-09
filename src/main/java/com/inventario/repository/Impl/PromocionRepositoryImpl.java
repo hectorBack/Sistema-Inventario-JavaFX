@@ -5,6 +5,7 @@ import com.inventario.model.Promocion;
 import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.model.DTOs.PromocionDTO;
 import com.inventario.repository.PromocionRepository;
+import com.inventario.util.FormatoMonedaUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -239,8 +240,8 @@ public class PromocionRepositoryImpl implements PromocionRepository {
                 (cantidadDesde <= promoDesde && cantidadHasta >= promoHasta)) {  // Contiene a la existente
                 
                 return String.format("Promoción en conflicto: Ya existe otra promoción para este producto " +
-                        "en el rango %.2f - %.2f kg/unid a $%.2f. El nuevo rango %.2f - %.2f se superpone con esta.",
-                        promoDesde, promoHasta, promo.getPrecioPromocion(), cantidadDesde, cantidadHasta);
+                    "en el rango %.2f - %.2f kg/unid a %s. El nuevo rango %.2f - %.2f se superpone con esta.",
+                    promoDesde, promoHasta, FormatoMonedaUtil.formatear(promo.getPrecioPromocion()), cantidadDesde, cantidadHasta);
             }
         }
         

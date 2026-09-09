@@ -6,6 +6,7 @@ import com.inventario.model.DTOs.VentaDTO;
 import com.inventario.repository.ConfiguracionTicketRepository;
 import com.inventario.repository.Impl.ConfiguracionTicketRepositoryImpl;
 import com.inventario.util.MockDataFactory;
+import com.inventario.util.FormatoMonedaUtil;
 
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
@@ -148,7 +149,7 @@ public class ConfiguracionTicketController implements Initializable {
 
                 // Columna Precio Unitario (P.U.) opcional en la misma fila
                 if (mostrarPU) {
-                    Label lblPU = new Label(String.format("$%.2f", item.getPrecioUnitario()));
+                    Label lblPU = new Label(FormatoMonedaUtil.formatear(item.getPrecioUnitario()));
                     lblPU.setMinWidth(60.0);
                     lblPU.setPrefWidth(60.0);
                     lblPU.setStyle("-fx-alignment: CENTER-RIGHT; -fx-text-fill: #000000;");
@@ -156,7 +157,7 @@ public class ConfiguracionTicketController implements Initializable {
                 }
 
                 // Importe (Subtotal)
-                Label lblImporte = new Label(String.format("$%.2f", item.getSubtotal()));
+                Label lblImporte = new Label(FormatoMonedaUtil.formatear(item.getSubtotal()));
                 lblImporte.setMinWidth(60.0);
                 lblImporte.setPrefWidth(60.0);
                 lblImporte.setStyle("-fx-alignment: CENTER-RIGHT; -fx-text-fill: #000000;");
@@ -171,7 +172,7 @@ public class ConfiguracionTicketController implements Initializable {
             lblNumeroArticulos.setText("No. de Artículos: " + ventaMock.getNumeroArticulos());
         }
         if (lblTotal != null) {
-            lblTotal.setText(String.format("Total: $%.2f", ventaMock.getTotal()));
+            lblTotal.setText("Total: " + FormatoMonedaUtil.formatear(ventaMock.getTotal()));
         }
     }
 

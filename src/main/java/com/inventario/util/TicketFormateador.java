@@ -3,6 +3,7 @@ package com.inventario.util;
 import com.inventario.model.DTOs.ConfiguracionTicketDTO;
 import com.inventario.model.DTOs.DetalleVentaDTO;
 import com.inventario.model.DTOs.VentaDTO;
+import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
@@ -43,11 +44,11 @@ public class TicketFormateador {
         if (venta.getDetalles() != null) {
             for (DetalleVentaDTO item : venta.getDetalles()) {
                 String cant = truncarTexto(item.getCantidadFormateada(), 5);
-                String importe = String.format("$%.2f", item.getSubtotal());
+                String importe = FormatoMonedaUtil.formatear(item.getSubtotal());
 
                 // Muestra opcional de Precio Unitario
                 if (config != null && config.isIncluirPrecioUnitario() && item.getPrecioUnitario() != null) {
-                    String precioUnitStr = String.format("@ $%.2f", item.getPrecioUnitario());
+                    String precioUnitStr = "@ " + FormatoMonedaUtil.formatear(item.getPrecioUnitario());
                     sb.append(String.format("%-5s %s\n", "", precioUnitStr));
                 }
 
@@ -70,7 +71,8 @@ public class TicketFormateador {
         String articulosStr = "No. de Articulos: " + venta.getNumeroArticulos();
         sb.append(centrarTexto(articulosStr, ANCHO_TICKET)).append("\n");
 
-        String totalStr = String.format("Total: $%.2f", venta.getTotal() != null ? venta.getTotal() : 0.0);
+        String totalStr = "Total: " + FormatoMonedaUtil.formatear(
+            venta.getTotal() != null ? venta.getTotal() : BigDecimal.ZERO);
         sb.append(centrarTexto(totalStr, ANCHO_TICKET)).append("\n\n");
 
         // 6. PIE DE PÁGINA (Configuración dinámica)

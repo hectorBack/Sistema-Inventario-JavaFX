@@ -16,6 +16,7 @@ import com.inventario.model.DetalleVenta;
 import com.inventario.model.Venta;
 import com.inventario.model.InformacionBD;
 import com.inventario.model.Cajero;
+import com.inventario.model.ConfiguracionMoneda;
 import com.inventario.model.ConfiguracionTicket;
 import com.inventario.model.Impuesto;
 import java.lang.reflect.Method;
@@ -29,6 +30,30 @@ import javafx.collections.FXCollections;
 public final class DTOMapper {
 
     private DTOMapper() {
+    }
+
+    public static ConfiguracionMonedaDTO toDTO(ConfiguracionMoneda model) {
+        if (model == null) {
+            return null;
+        }
+        return new ConfiguracionMonedaDTO(
+                model.getId(),
+                model.getSimboloMoneda(),
+                model.getSeparadorMiles(),
+                model.getSeparadorDecimal()
+        );
+    }
+
+    public static ConfiguracionMoneda toModel(ConfiguracionMonedaDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+        return new ConfiguracionMoneda(
+                valueOrZero(dto.getId()),
+                dto.getSimboloMoneda(),
+                dto.getSeparadorMiles(),
+                dto.getSeparadorDecimal()
+        );
     }
 
     public static ImpuestoDTO toDTO(Impuesto entity) {

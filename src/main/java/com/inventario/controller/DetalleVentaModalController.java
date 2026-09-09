@@ -4,6 +4,7 @@ import com.inventario.model.DetalleVenta;
 import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.model.Venta;
 import com.inventario.repository.Impl.VentaRepositoryImpl;
+import com.inventario.util.FormatoMonedaUtil;
 import com.inventario.repository.VentaRepository;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
@@ -95,7 +96,7 @@ public class DetalleVentaModalController implements Initializable {
             @Override
             protected void updateItem(Double item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : String.format("$%.2f", item));
+                setText(empty || item == null ? null : FormatoMonedaUtil.formatear(item));
             }
         });
 
@@ -106,7 +107,7 @@ public class DetalleVentaModalController implements Initializable {
             @Override
             protected void updateItem(Double item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : String.format("$%.2f", item));
+                setText(empty || item == null ? null : FormatoMonedaUtil.formatear(item));
             }
         });
     }
@@ -119,7 +120,7 @@ public class DetalleVentaModalController implements Initializable {
         String fechaFormateada = (venta.getFecha() != null) ? venta.getFecha().format(formatter) : "N/A";
         lblInfoClienteFecha.setText("Cliente: " + clienteNombre + " | Fecha: " + fechaFormateada);
         
-        lblTotalVenta.setText(String.format("$%.2f", venta.getTotal()));
+        lblTotalVenta.setText(FormatoMonedaUtil.formatear(venta.getTotal()));
         
         if ("CANCELADA".equalsIgnoreCase(venta.getEstado())) {
             lblEstadoVenta.setText("CANCELADA");

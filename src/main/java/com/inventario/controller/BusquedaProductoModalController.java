@@ -1,6 +1,7 @@
 package com.inventario.controller;
 
 import com.inventario.model.Producto;
+import com.inventario.util.FormatoMonedaUtil;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -58,7 +59,7 @@ public class BusquedaProductoModalController implements Initializable {
             @Override
             protected void updateItem(Double item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : String.format("$%.2f", item));
+                setText(empty || item == null ? null : FormatoMonedaUtil.formatear(item));
             }
         });
 

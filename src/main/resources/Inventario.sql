@@ -165,3 +165,14 @@ CREATE TABLE IF NOT EXISTS impuesto (
 ALTER TABLE impuesto 
 ADD COLUMN desglosar_ticket BOOLEAN DEFAULT false,
 ADD COLUMN precios_con_impuesto BOOLEAN DEFAULT false;
+
+CREATE TABLE IF NOT EXISTS configuracion_moneda (
+    id SERIAL PRIMARY KEY,
+    simbolo_moneda VARCHAR(5) NOT NULL DEFAULT '$',
+    separador_miles VARCHAR(2) NOT NULL DEFAULT ',',
+    separador_decimal VARCHAR(2) NOT NULL DEFAULT '.'
+);
+
+-- Fila base por defecto
+INSERT INTO configuracion_moneda (id, simbolo_moneda, separador_miles, separador_decimal) 
+VALUES (1, '$', ',', '.')

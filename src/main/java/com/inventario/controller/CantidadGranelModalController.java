@@ -4,6 +4,7 @@ import com.inventario.model.Producto;
 import com.inventario.model.Promocion;
 import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.PromocionRepository;
+import com.inventario.util.FormatoMonedaUtil;
 import java.net.URL;
 import java.util.List;
 import java.util.Locale;
@@ -93,7 +94,7 @@ public class CantidadGranelModalController implements Initializable {
         this.producto = prod;
         this.precioActual = prod.getPrecio();
         this.lblNombreProducto.setText(prod.getNombre().toUpperCase());
-        this.lblPrecioUnitario.setText(String.format("$%.2f", prod.getPrecio()));
+        this.lblPrecioUnitario.setText(FormatoMonedaUtil.formatear(prod.getPrecio()));
 
         editandoManualmente = true;
         this.txtCantidad.setText(String.format("%.3f", cantidadInicial));
@@ -129,12 +130,12 @@ public class CantidadGranelModalController implements Initializable {
             precioActual = promoActiva.getPrecioPromocion();
             promocionAplicada = promoActiva;
             // Actualizar el label para mostrar que hay promoción activa
-            this.lblPrecioUnitario.setText(String.format("$%.2f (PROMOCIÓN)", precioActual));
+            this.lblPrecioUnitario.setText(FormatoMonedaUtil.formatear(precioActual) + " (PROMOCIÓN)");
             this.lblPrecioUnitario.setStyle("-fx-text-fill: #16a34a; -fx-font-weight: bold;");
         } else {
             precioActual = producto.getPrecio();
             promocionAplicada = null;
-            this.lblPrecioUnitario.setText(String.format("$%.2f", producto.getPrecio()));
+            this.lblPrecioUnitario.setText(FormatoMonedaUtil.formatear(producto.getPrecio()));
             this.lblPrecioUnitario.setStyle("-fx-text-fill: inherit; -fx-font-weight: bold;");
         }
     }

@@ -3,6 +3,7 @@ package com.inventario.controller;
 import com.inventario.config.ConfiguracionSistema;
 import com.inventario.model.OpcionesHabilitadas;
 import com.inventario.util.Inventario.InventarioCalculosUtil;
+import com.inventario.util.FormatoMonedaUtil;
 import java.util.function.BiConsumer;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -56,7 +57,7 @@ public class CobroModalController {
 
         this.onPagoConfirmado = onPagoConfirmado;
 
-        this.lblTotalPagar.setText(String.format("$%.2f", total));
+        this.lblTotalPagar.setText(FormatoMonedaUtil.formatear(total));
         this.lblTotalArticulos.setText(String.valueOf(cantidadArticulos));
 
         // 1. CARGAR FORMAS DE PAGO SEGÚN CONFIGURACIÓN
@@ -75,7 +76,7 @@ public class CobroModalController {
             if ("A Crédito".equalsIgnoreCase(newVal)) {
                 txtPagoCon.setText("0.00");
                 txtPagoCon.setDisable(true);
-                txtCambio.setText("$0.00");
+                txtCambio.setText(FormatoMonedaUtil.formatear(0));
             } else {
                 txtPagoCon.setDisable(false);
                 txtPagoCon.setText(String.format(java.util.Locale.US, "%.2f", totalAPagar));
@@ -113,7 +114,7 @@ public class CobroModalController {
         try {
             String textoPago = txtPagoCon.getText().trim();
             if (textoPago.isEmpty()) {
-                txtCambio.setText("$0.00");
+                txtCambio.setText(FormatoMonedaUtil.formatear(0));
                 return;
             }
 
@@ -121,12 +122,12 @@ public class CobroModalController {
             double cambio = pago - totalAPagar;
 
             if (cambio >= 0) {
-                txtCambio.setText(String.format("$%.2f", cambio));
+                txtCambio.setText(FormatoMonedaUtil.formatear(cambio));
             } else {
-                txtCambio.setText("$0.00");
+                txtCambio.setText(FormatoMonedaUtil.formatear(0));
             }
         } catch (NumberFormatException e) {
-            txtCambio.setText("$0.00");
+            txtCambio.setText(FormatoMonedaUtil.formatear(0));
         }
     }
 

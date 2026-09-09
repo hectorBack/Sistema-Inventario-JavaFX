@@ -2,6 +2,7 @@ package com.inventario.controller;
 
 import com.inventario.model.Categoria;
 import com.inventario.model.Producto;
+import com.inventario.util.FormatoMonedaUtil;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -64,7 +65,7 @@ public class ReporteInventarioModalController implements Initializable {
             @Override
             protected void updateItem(Double item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : String.format("$%.2f", item));
+                setText(empty || item == null ? null : FormatoMonedaUtil.formatear(item));
             }
         });
 
@@ -75,7 +76,7 @@ public class ReporteInventarioModalController implements Initializable {
             @Override
             protected void updateItem(Double item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : String.format("$%.2f", item));
+                setText(empty || item == null ? null : FormatoMonedaUtil.formatear(item));
             }
         });
 
@@ -145,8 +146,8 @@ public class ReporteInventarioModalController implements Initializable {
             valorVentaTotal += (p.getPrecio() * p.getStock());
         }
 
-        lblCostoTotal.setText(String.format("$%.2f", costoTotal));
-        lblValorVentaTotal.setText(String.format("$%.2f", valorVentaTotal));
+        lblCostoTotal.setText(FormatoMonedaUtil.formatear(costoTotal));
+        lblValorVentaTotal.setText(FormatoMonedaUtil.formatear(valorVentaTotal));
         lblCantidadProductos.setText(String.valueOf(totalProductos));
     }
 

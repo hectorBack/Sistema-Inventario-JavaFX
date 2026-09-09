@@ -1,6 +1,7 @@
 package com.inventario.util.Ventas;
 
 import com.inventario.model.DetalleVenta;
+import com.inventario.util.FormatoMonedaUtil;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -38,7 +39,7 @@ public class VentasTablaUtil {
                 if (empty || item == null) {
                     setText(null);
                 } else {
-                    setText(String.format("$%.2f", item));
+                    setText(FormatoMonedaUtil.formatear(item));
                 }
             }
         });
@@ -53,7 +54,7 @@ public class VentasTablaUtil {
                 if (empty || item == null) {
                     setText(null);
                 } else {
-                    setText(String.format("$%.2f", item));
+                    setText(FormatoMonedaUtil.formatear(item));
                 }
             }
         });

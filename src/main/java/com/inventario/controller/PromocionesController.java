@@ -7,6 +7,7 @@ import com.inventario.repository.Impl.ProductoRepositoryImpl;
 import com.inventario.repository.Impl.PromocionRepositoryImpl;
 import com.inventario.repository.ProductoRepository;
 import com.inventario.repository.PromocionRepository;
+import com.inventario.util.FormatoMonedaUtil;
 import java.net.URL;
 import java.util.List;
 import java.util.Locale;
@@ -199,7 +200,7 @@ public class PromocionesController implements Initializable {
                 "Producto: " + seleccionada.getCodigoBarrasProducto() + "\n" +
                 "Rango: " + String.format("%.2f", seleccionada.getCantidadDesde()) + " - " + 
                 String.format("%.2f", seleccionada.getCantidadHasta()) + " kg/unid\n" +
-                "Precio: $" + String.format("%.2f", seleccionada.getPrecioPromocion()));
+                "Precio: " + FormatoMonedaUtil.formatear(seleccionada.getPrecioPromocion()));
         
         // Aumentar tamaño del texto del contenido
         Label contentLabel = (Label) alertaConfirmacion.getDialogPane().getContent();

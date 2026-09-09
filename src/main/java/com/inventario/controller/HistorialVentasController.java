@@ -11,6 +11,7 @@ import com.inventario.repository.Impl.VentaRepositoryImpl;
 import com.inventario.util.HistorialVentas.ExcelExporter;
 import com.inventario.util.HistorialVentas.FiltroPeriodo;
 import com.inventario.util.HistorialVentas.ReportePrinterManager;
+import com.inventario.util.FormatoMonedaUtil;
 import com.inventario.util.Productos.KeyboardShortcutUtil;
 import java.io.File;
 import java.net.URL;
@@ -167,7 +168,7 @@ public class HistorialVentasController implements Initializable {
             @Override
             protected void updateItem(Double item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : String.format("$%.2f", item));
+                setText(empty || item == null ? null : FormatoMonedaUtil.formatear(item));
             }
         });
 
@@ -341,7 +342,7 @@ public class HistorialVentasController implements Initializable {
                 .filter(v -> "COMPLETADA".equalsIgnoreCase(v.getEstado()))
                 .mapToDouble(Venta::getTotal)
                 .sum();
-        lblTotalHistorico.setText(String.format("$%.2f", totalCompleto));
+        lblTotalHistorico.setText(FormatoMonedaUtil.formatear(totalCompleto));
     }
 
     private void mostrarAlerta(String titulo, String mensaje, Alert.AlertType tipo) {

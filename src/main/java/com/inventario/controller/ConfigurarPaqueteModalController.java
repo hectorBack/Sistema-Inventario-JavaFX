@@ -2,6 +2,7 @@ package com.inventario.controller;
 
 import com.inventario.model.DetallePaquete;
 import com.inventario.model.Producto;
+import com.inventario.util.FormatoMonedaUtil;
 import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.repository.Impl.ProductoRepositoryImpl;
 import com.inventario.repository.ProductoRepository;
@@ -76,11 +77,11 @@ public class ConfigurarPaqueteModalController {
         productoEncontrado = DTOMapper.toModel(repository.buscarPorCodigoBarrasDTO(codigo));
         if (productoEncontrado != null) {
             lblNombreProducto.setText("Producto: " + productoEncontrado.getNombre());
-            lblPrecioCosto.setText(String.format("Precio Costo: $%.2f", productoEncontrado.getPrecioCompra()));
+            lblPrecioCosto.setText("Precio Costo: " + FormatoMonedaUtil.formatear(productoEncontrado.getPrecioCompra()));
             txtCantidad.requestFocus();
         } else {
             lblNombreProducto.setText("Producto: No encontrado");
-            lblPrecioCosto.setText("Precio Costo: $0.00");
+            lblPrecioCosto.setText("Precio Costo: " + FormatoMonedaUtil.formatear(0));
         }
     }
 
@@ -129,7 +130,7 @@ public class ConfigurarPaqueteModalController {
     private void limpiarCamposBusqueda() {
         txtCodigoProducto.clear();
         lblNombreProducto.setText("Producto: -");
-        lblPrecioCosto.setText("Precio Costo: $0.00");
+        lblPrecioCosto.setText("Precio Costo: " + FormatoMonedaUtil.formatear(0));
         txtCantidad.setText("1");
         productoEncontrado = null;
         txtCodigoProducto.requestFocus();
