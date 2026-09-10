@@ -84,8 +84,8 @@ public class ProductosTableUtil {
         colAcciones.setSortable(false);
         colAcciones.setStyle("-fx-alignment: CENTER;");
         colAcciones.setCellFactory(tc -> new TableCell<>() {
-            private final Button btnEdit = new Button("✏️");
-            private final Button btnDel = new Button("🗑️");
+            private final Button btnEdit = new Button("Editar");
+            private final Button btnDel = new Button("Eliminar");
             private final HBox container = new HBox(6, btnEdit, btnDel);
 
             {

@@ -28,7 +28,7 @@
                 <TableColumn fx:id="colPrecio" prefWidth="90.0" text="P. Venta" />
                 <TableColumn fx:id="colStock" prefWidth="80.0" text="Stock" />
                 <TableColumn fx:id="colCategoria" prefWidth="120.0" text="Categoría" />
-                <TableColumn fx:id="colAcciones" prefWidth="130.0" text="Acciones" />
+                <TableColumn fx:id="colAcciones" prefWidth="160.0" text="Acciones" />
             </columns>
             <columnResizePolicy>
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
