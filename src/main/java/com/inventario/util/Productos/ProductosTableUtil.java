@@ -2,17 +2,26 @@ package com.inventario.util.Productos;
 
 import com.inventario.model.Producto;
 import com.inventario.util.FormatoMonedaUtil;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.HBox;
 import javafx.util.StringConverter;
 
 public class ProductosTableUtil {
 
     @SuppressWarnings("unchecked")
-    public static void configurarColumnasProductos(TableView<Producto> tblProductos) {
+    public static void configurarColumnasProductos(
+            TableView<Producto> tblProductos,
+            Consumer<Producto> onEditar,
+            Consumer<Producto> onEliminar
+    ) {
         TableColumn<Producto, Integer> colId = new TableColumn<>("ID");
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
 
@@ -70,16 +79,56 @@ public class ProductosTableUtil {
             return new SimpleStringProperty(nombreProv);
         });
 
+        // Columna de Acciones con Botones Integrados
+        TableColumn<Producto, Void> colAcciones = new TableColumn<>("Acciones");
+        colAcciones.setSortable(false);
+        colAcciones.setStyle("-fx-alignment: CENTER;");
+        colAcciones.setCellFactory(tc -> new TableCell<>() {
+            private final Button btnEdit = new Button("✏️");
+            private final Button btnDel = new Button("🗑️");
+            private final HBox container = new HBox(6, btnEdit, btnDel);
+
+            {
+                btnEdit.getStyleClass().addAll("action-button", "action-secondary");
+                btnDel.getStyleClass().addAll("action-button", "action-danger");
+
+                btnEdit.setStyle("-fx-padding: 3 8; -fx-font-size: 11px;");
+                btnDel.setStyle("-fx-padding: 3 8; -fx-font-size: 11px;");
+
+                container.setAlignment(Pos.CENTER);
+
+                btnEdit.setOnAction(e -> {
+                    Producto p = getTableView().getItems().get(getIndex());
+                    if (onEditar != null && p != null) {
+                        onEditar.accept(p);
+                    }
+                });
+
+                btnDel.setOnAction(e -> {
+                    Producto p = getTableView().getItems().get(getIndex());
+                    if (onEliminar != null && p != null) {
+                        onEliminar.accept(p);
+                    }
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : container);
+            }
+        });
+
         tblProductos.getColumns().setAll(
                 colId, colCodigo, colNombre, colTipoVenta, colUnidadMedida, colPrecio,
                 colPrecioCompra, colPrecioMayoreo, colPorcentajeGanancia,
-                colStock, colStockMin, colCategoria, colProveedor, colEstado
+                colStock, colStockMin, colCategoria, colProveedor, colEstado, colAcciones
         );
     }
 
     private static void configurarColumnaMoneda(TableColumn<Producto, Double> columna) {
         columna.setStyle("-fx-alignment: CENTER-RIGHT;");
-        columna.setCellFactory(tc -> new javafx.scene.control.TableCell<Producto, Double>() {
+        columna.setCellFactory(tc -> new TableCell<Producto, Double>() {
             @Override
             protected void updateItem(Double item, boolean empty) {
                 super.updateItem(item, empty);

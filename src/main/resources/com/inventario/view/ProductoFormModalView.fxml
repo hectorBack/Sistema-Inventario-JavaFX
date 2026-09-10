@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefWidth="480.0" spacing="15.0" styleClass="page-shell" stylesheets="@../styles/theme.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.ProductoFormModalController">
+    <children>
+        <!-- Encabezado del Modal -->
+        <Label fx:id="lblTituloModal" text="NUEVO PRODUCTO" styleClass="section-title" />
+
+        <!-- Formulario Desplazable -->
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="480.0" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+            <content>
+                <VBox spacing="12.0" styleClass="form-panel">
+                    <children>
+                        <VBox spacing="4.0">
+                            <children>
+                                <Label minHeight="16.0" styleClass="form-label" text="Código de barras del producto" />
+                                <TextField fx:id="txtCodigoBarras" onAction="#onEscanearCodigoFormulario" prefHeight="32.0" promptText="Escanea o escribe el código..." styleClass="form-field" />
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="4.0">
+                            <children>
+                                <Label minHeight="16.0" styleClass="form-label" text="Nombre del producto" />
+                                <TextField fx:id="txtNombre" prefHeight="32.0" styleClass="form-field" />
+                            </children>
+                        </VBox>
+
+                        <HBox spacing="10.0">
+                            <children>
+                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label minHeight="16.0" styleClass="form-label" text="Se vende por" />
+                                        <ComboBox fx:id="cmbTipoVenta" maxWidth="1.7976931348623157E308" prefHeight="32.0" promptText="Por Unidad / Pieza" styleClass="form-field" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label minHeight="16.0" styleClass="form-label" text="Unidad de medida" />
+                                        <ComboBox fx:id="cmbUnidadMedida" maxWidth="1.7976931348623157E308" prefHeight="32.0" promptText="Seleccione unidad" styleClass="form-field" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <VBox fx:id="pnlContenidoPaquete" managed="false" spacing="4.0" visible="false">
+                            <children>
+                                <Button fx:id="btnConfigurarPaquete" maxWidth="1.7976931348623157E308" onAction="#onAbrirModalPaquete" prefHeight="35.0" styleClass="action-button, action-warning" text="📦 Configurar Paquete (0 items)" />
+                            </children>
+                        </VBox>
+
+                        <HBox spacing="10.0">
+                            <children>
+                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label minHeight="16.0" styleClass="form-label" text="Precio Costo ($)" />
+                                        <TextField fx:id="txtPrecioCompra" prefHeight="32.0" styleClass="form-field" text="0.00" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label minHeight="16.0" styleClass="form-label" text="Ganancia (%)" />
+                                        <TextField fx:id="txtPorcentajeGanancia" prefHeight="32.0" styleClass="form-field" text="20.00" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <HBox spacing="10.0">
+                            <children>
+                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label minHeight="16.0" styleClass="form-label" text="Precio Venta ($)" />
+                                        <TextField fx:id="txtPrecio" prefHeight="32.0" styleClass="form-field" text="0.00" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label minHeight="16.0" styleClass="form-label" text="P. Mayoreo ($)" />
+                                        <TextField fx:id="txtPrecioMayoreo" prefHeight="32.0" styleClass="form-field" text="0.00" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <HBox fx:id="contenedorStock" spacing="10.0">
+                            <children>
+                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label minHeight="16.0" styleClass="form-label" text="Stock Actual" />
+                                        <TextField fx:id="txtStock" prefHeight="32.0" styleClass="form-field" text="0" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label minHeight="16.0" styleClass="form-label" text="Stock Mínimo" />
+                                        <TextField fx:id="txtStockMinimo" prefHeight="32.0" styleClass="form-field" text="5" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <VBox spacing="4.0">
+                            <children>
+                                <Label minHeight="16.0" styleClass="form-label" text="Descripción" />
+                                <TextArea fx:id="txtDescripcion" prefHeight="50.0" styleClass="form-field" wrapText="true" />
+                            </children>
+                        </VBox>
+
+                        <HBox spacing="10.0">
+                            <children>
+                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label minHeight="16.0" styleClass="form-label" text="Categoría" />
+                                        <ComboBox fx:id="cmbCategoria" maxWidth="1.7976931348623157E308" prefHeight="32.0" promptText="Sin categoría" styleClass="form-field" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label minHeight="16.0" styleClass="form-label" text="Proveedor" />
+                                        <ComboBox fx:id="cmbProveedor" maxWidth="1.7976931348623157E308" prefHeight="32.0" promptText="Sin proveedor" styleClass="form-field" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <VBox spacing="4.0">
+                            <children>
+                                <Label minHeight="16.0" styleClass="form-label" text="Estado" />
+                                <ComboBox fx:id="cmbEstado" maxWidth="1.7976931348623157E308" prefHeight="32.0" promptText="Seleccione Estado" styleClass="form-field" />
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+
+        <!-- Botones de Acción del Modal -->
+        <HBox alignment="CENTER_RIGHT" spacing="10.0">
+            <children>
+                <Button mnemonicParsing="false" onAction="#onCancelar" prefHeight="38.0" prefWidth="110.0" styleClass="action-button, action-secondary" text="Cancelar" />
+                <Button mnemonicParsing="false" onAction="#onGuardar" prefHeight="38.0" prefWidth="120.0" styleClass="action-button, action-primary" text="Guardar" />
+            </children>
+        </HBox>
+    </children>
+</VBox>
