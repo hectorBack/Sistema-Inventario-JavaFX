@@ -5,14 +5,17 @@ import com.inventario.model.Categoria;
 import com.inventario.model.DetallePaquete;
 import com.inventario.model.OpcionesHabilitadas;
 import com.inventario.model.Producto;
+import com.inventario.model.UnidadMedida;
 import com.inventario.model.DTOs.DTOMapper;
 import com.inventario.model.Proveedor;
 import com.inventario.repository.CategoriaRepository;
 import com.inventario.repository.Impl.CategoriaRepositoryImpl;
 import com.inventario.repository.Impl.ProductoRepositoryImpl;
 import com.inventario.repository.Impl.ProveedorRepositoryImpl;
+import com.inventario.repository.Impl.UnidadMedidaRepositoryImpl;
 import com.inventario.repository.ProductoRepository;
 import com.inventario.repository.ProveedorRepository;
+import com.inventario.repository.UnidadMedidaRepository;
 import com.inventario.util.Inventario.InventarioCalculosUtil;
 import com.inventario.util.Inventario.InventarioUIUtil;
 import com.inventario.util.Productos.KeyboardShortcutUtil;
@@ -60,6 +63,8 @@ public class ProductosController implements Initializable {
     @FXML
     private ComboBox<String> cmbEstado, cmbTipoVenta;
     @FXML
+    private ComboBox<UnidadMedida> cmbUnidadMedida;
+    @FXML
     private ComboBox<Categoria> cmbCategoria;
     @FXML
     private ComboBox<Proveedor> cmbProveedor;
@@ -80,23 +85,30 @@ public class ProductosController implements Initializable {
     private final ProductoRepository repository;
     private final CategoriaRepository catRepository;
     private final ProveedorRepository provRepository;
+    private final UnidadMedidaRepository unidadRepository;
 
     private final ObservableList<Producto> listaProductos = FXCollections.observableArrayList();
     private final ObservableList<Categoria> listaCategorias = FXCollections.observableArrayList();
     private final ObservableList<Proveedor> listaProveedores = FXCollections.observableArrayList();
+    private final ObservableList<UnidadMedida> listaUnidades = FXCollections.observableArrayList();
     private final ObservableList<DetallePaquete> listaDetallePaquete = FXCollections.observableArrayList();
 
     private Producto productoSeleccionado;
 
     // Constructor para inyección de dependencias (o constructor por defecto según tu setup)
     public ProductosController() {
-        this(new ProductoRepositoryImpl(), new CategoriaRepositoryImpl(), new ProveedorRepositoryImpl());
+        this(new ProductoRepositoryImpl(), new CategoriaRepositoryImpl(), new ProveedorRepositoryImpl(), new UnidadMedidaRepositoryImpl());
     }
 
     public ProductosController(ProductoRepository repository, CategoriaRepository catRepository, ProveedorRepository provRepository) {
+        this(repository, catRepository, provRepository, new UnidadMedidaRepositoryImpl());
+    }
+
+    public ProductosController(ProductoRepository repository, CategoriaRepository catRepository, ProveedorRepository provRepository, UnidadMedidaRepository unidadRepository) {
         this.repository = repository;
         this.catRepository = catRepository;
         this.provRepository = provRepository;
+        this.unidadRepository = unidadRepository;
     }
 
     @Override
@@ -138,6 +150,15 @@ public class ProductosController implements Initializable {
 
         cmbTipoVenta.setItems(FXCollections.observableArrayList("UNIDAD", "GRANEL", "PAQUETE"));
         cmbTipoVenta.setValue("UNIDAD");
+
+        listaUnidades.setAll(unidadRepository.obtenerActivasDTO().stream()
+            .map(DTOMapper::toModel)
+            .collect(Collectors.toList()));
+        cmbUnidadMedida.setItems(listaUnidades);
+        cmbUnidadMedida.setValue(listaUnidades.stream()
+            .filter(UnidadMedida::isPredeterminado)
+            .findFirst()
+            .orElseGet(() -> listaUnidades.isEmpty() ? null : listaUnidades.get(0)));
     }
 
     private void configurarListeners() {
@@ -200,7 +221,7 @@ public class ProductosController implements Initializable {
             InventarioUIUtil.cargarProductoEnFormulario(
                     productoSeleccionado, txtCodigoBarras, txtNombre, txtDescripcion,
                     txtPrecio, txtPrecioCompra, txtPorcentajeGanancia, txtPrecioMayoreo,
-                    txtStock, txtStockMinimo, cmbEstado, cmbTipoVenta, cmbCategoria, cmbProveedor
+                    txtStock, txtStockMinimo, cmbEstado, cmbTipoVenta, cmbUnidadMedida, cmbCategoria, cmbProveedor
             );
         } else {
             productoSeleccionado = null;
@@ -319,7 +340,7 @@ public class ProductosController implements Initializable {
         Producto nuevoProducto = InventarioUIUtil.extraerProductoDeFormulario(
                 null, txtCodigoBarras, txtNombre, txtDescripcion, txtPrecio,
                 txtPrecioCompra, txtPorcentajeGanancia, txtPrecioMayoreo,
-                txtStock, txtStockMinimo, cmbEstado, cmbTipoVenta, cmbCategoria, cmbProveedor
+                txtStock, txtStockMinimo, cmbEstado, cmbTipoVenta, cmbUnidadMedida, cmbCategoria, cmbProveedor
         );
 
         if (repository.guardarDTO(DTOMapper.toDTO(nuevoProducto))) {
@@ -368,7 +389,7 @@ public class ProductosController implements Initializable {
         InventarioUIUtil.extraerProductoDeFormulario(
                 productoSeleccionado, txtCodigoBarras, txtNombre, txtDescripcion, txtPrecio,
                 txtPrecioCompra, txtPorcentajeGanancia, txtPrecioMayoreo,
-                txtStock, txtStockMinimo, cmbEstado, cmbTipoVenta, cmbCategoria, cmbProveedor
+                txtStock, txtStockMinimo, cmbEstado, cmbTipoVenta, cmbUnidadMedida, cmbCategoria, cmbProveedor
         );
 
         if (repository.actualizarDTO(DTOMapper.toDTO(productoSeleccionado))) {
@@ -521,6 +542,10 @@ public class ProductosController implements Initializable {
         // ComboBoxes a sus estados iniciales
         cmbEstado.setValue("ACTIVO");
         cmbTipoVenta.setValue("UNIDAD");
+        cmbUnidadMedida.setValue(listaUnidades.stream()
+            .filter(UnidadMedida::isPredeterminado)
+            .findFirst()
+            .orElseGet(() -> listaUnidades.isEmpty() ? null : listaUnidades.get(0)));
         cmbCategoria.setValue(null);
         cmbProveedor.setValue(null);
 

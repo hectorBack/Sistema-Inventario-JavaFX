@@ -3,6 +3,7 @@ package com.inventario.util.Inventario;
 import com.inventario.model.Categoria;
 import com.inventario.model.Producto;
 import com.inventario.model.Proveedor;
+import com.inventario.model.UnidadMedida;
 import java.util.Optional;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -33,6 +34,7 @@ public class InventarioUIUtil {
             TextField txtStockMinimo,
             ComboBox<String> cmbEstado,
             ComboBox<String> cmbTipoVenta,
+            ComboBox<UnidadMedida> cmbUnidadMedida,
             ComboBox<Categoria> cmbCategoria,
             ComboBox<Proveedor> cmbProveedor) {
 
@@ -52,6 +54,7 @@ public class InventarioUIUtil {
 
         p.setEstado(cmbEstado.getValue() != null ? cmbEstado.getValue() : "Activo");
         p.setTipoVenta(cmbTipoVenta.getValue() != null ? cmbTipoVenta.getValue() : "UNIDAD");
+        p.setUnidadMedida(cmbUnidadMedida.getValue() != null ? cmbUnidadMedida.getValue().getClave() : "PZA");
 
         p.setCategoria(cmbCategoria.getValue());
         p.setProveedor(cmbProveedor.getValue());
@@ -72,6 +75,7 @@ public class InventarioUIUtil {
             TextField txtStockMinimo,
             ComboBox<String> cmbEstado,
             ComboBox<String> cmbTipoVenta,
+            ComboBox<UnidadMedida> cmbUnidadMedida,
             ComboBox<Categoria> cmbCategoria,
             ComboBox<Proveedor> cmbProveedor) {
 
@@ -91,6 +95,9 @@ public class InventarioUIUtil {
 
         cmbEstado.setValue(p.getEstado());
         cmbTipoVenta.setValue(p.getTipoVenta() != null ? p.getTipoVenta() : "UNIDAD");
+        cmbUnidadMedida.setValue(cmbUnidadMedida.getItems().stream()
+            .filter(unidad -> unidad.getClave().equalsIgnoreCase(p.getUnidadMedida()))
+            .findFirst().orElse(null));
         cmbCategoria.setValue(p.getCategoria());
         cmbProveedor.setValue(p.getProveedor());
     }

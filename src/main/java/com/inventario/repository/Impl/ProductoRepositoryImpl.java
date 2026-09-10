@@ -54,8 +54,8 @@ public class ProductoRepositoryImpl implements ProductoRepository {
     @Override
     public boolean guardar(Producto p) {
         String sql = "INSERT INTO productos (codigo_barras, nombre, descripcion, precio, precio_compra, "
-                + "porcentaje_ganancia, precio_mayoreo, stock, stock_minimo, tipo_venta, estado, id_categoria, id_proveedor) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "porcentaje_ganancia, precio_mayoreo, stock, stock_minimo, tipo_venta, unidad_medida, estado, id_categoria, id_proveedor) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConexionDB.getConexion(); PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             setearParametrosProducto(ps, p);
@@ -78,12 +78,12 @@ public class ProductoRepositoryImpl implements ProductoRepository {
     @Override
     public boolean actualizar(Producto p) {
         String sql = "UPDATE productos SET codigo_barras=?, nombre=?, descripcion=?, precio=?, precio_compra=?, "
-                + "porcentaje_ganancia=?, precio_mayoreo=?, stock=?, stock_minimo=?, tipo_venta=?, estado=?, "
+                + "porcentaje_ganancia=?, precio_mayoreo=?, stock=?, stock_minimo=?, tipo_venta=?, unidad_medida=?, estado=?, "
                 + "id_categoria=?, id_proveedor=? WHERE id=?";
         try (Connection conn = ConexionDB.getConexion(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             setearParametrosProducto(ps, p);
-            ps.setInt(14, p.getId());
+            ps.setInt(15, p.getId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -264,16 +264,17 @@ public class ProductoRepositoryImpl implements ProductoRepository {
         ps.setDouble(8, p.getStock());
         ps.setDouble(9, p.getStockMinimo());
         ps.setString(10, p.getTipoVenta());
-        ps.setString(11, p.getEstado());
+        ps.setString(11, p.getUnidadMedida());
+        ps.setString(12, p.getEstado());
         if (p.getCategoria() != null) {
-            ps.setInt(12, p.getCategoria().getId());
-        } else {
-            ps.setNull(12, Types.INTEGER);
-        }
-        if (p.getProveedor() != null) {
-            ps.setInt(13, p.getProveedor().getId());
+            ps.setInt(13, p.getCategoria().getId());
         } else {
             ps.setNull(13, Types.INTEGER);
+        }
+        if (p.getProveedor() != null) {
+            ps.setInt(14, p.getProveedor().getId());
+        } else {
+            ps.setNull(14, Types.INTEGER);
         }
     }
 
@@ -290,6 +291,7 @@ public class ProductoRepositoryImpl implements ProductoRepository {
         p.setStock(rs.getDouble("stock"));
         p.setStockMinimo(rs.getDouble("stock_minimo"));
         p.setTipoVenta(rs.getString("tipo_venta"));
+        p.setUnidadMedida(rs.getString("unidad_medida"));
         p.setEstado(rs.getString("estado"));
 
         // --- MAPEAR CATEGORÍA ---

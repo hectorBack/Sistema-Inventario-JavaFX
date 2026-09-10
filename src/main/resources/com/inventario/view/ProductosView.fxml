@@ -47,6 +47,13 @@
                             </children>
                         </VBox>
 
+                        <VBox spacing="4.0">
+                            <children>
+                                <Label minHeight="16.0" text="Unidad de medida" styleClass="form-label"/>
+                                <ComboBox fx:id="cmbUnidadMedida" prefHeight="32.0" prefWidth="260.0" promptText="Seleccione unidad" styleClass="form-field"/>
+                            </children>
+                        </VBox>
+
                         <VBox fx:id="pnlContenidoPaquete" managed="false" spacing="4.0" visible="false">
                             <children>
                                 <Button fx:id="btnConfigurarPaquete" maxWidth="1.7976931348623157E308" onAction="#onAbrirModalPaquete" prefHeight="35.0" text="📦 Configurar Paquete (0 items)" styleClass="action-button, action-warning"/>

@@ -175,4 +175,25 @@ CREATE TABLE IF NOT EXISTS configuracion_moneda (
 
 -- Fila base por defecto
 INSERT INTO configuracion_moneda (id, simbolo_moneda, separador_miles, separador_decimal) 
-VALUES (1, '$', ',', '.')
+VALUES (1, '$', ',', '.');
+
+CREATE TABLE IF NOT EXISTS unidad_medida (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    clave VARCHAR(20) NOT NULL UNIQUE,
+    activo BOOLEAN NOT NULL DEFAULT FALSE,
+    predeterminado BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+-- Insertar las unidades del diseño (PZA queda activa por defecto)
+INSERT INTO unidad_medida (nombre, clave, activo, predeterminado) VALUES
+('Horas / Minutos', 'H / MIN', FALSE, FALSE),
+('Kilogramos / Gramos', 'KG / G', TRUE, FALSE),
+('Litros / Mililitros', 'L / ML', FALSE, FALSE),
+('Metros / Centímetros', 'M / CM', FALSE, FALSE),
+('No Aplica', 'NO APLICA', FALSE, FALSE),
+('Piezas', 'PZA', TRUE, TRUE)
+ON CONFLICT (clave) DO NOTHING;
+
+ALTER TABLE public.productos
+ADD COLUMN IF NOT EXISTS unidad_medida VARCHAR(20) NOT NULL DEFAULT 'PZA';

@@ -2,6 +2,7 @@ package com.inventario.util.Ventas;
 
 import com.inventario.model.DetalleVenta;
 import com.inventario.util.FormatoMonedaUtil;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -13,6 +14,13 @@ public class VentasTablaUtil {
         tblCarrito.setStyle("-fx-font-size: 16px;");
         TableColumn<DetalleVenta, String> colProducto = new TableColumn<>("Producto");
         colProducto.setCellValueFactory(new PropertyValueFactory<>("nombreProducto"));
+
+        TableColumn<DetalleVenta, String> colUnidad = new TableColumn<>("Unidad");
+        colUnidad.setCellValueFactory(cell -> {
+            DetalleVenta detalle = cell.getValue();
+            String unidad = detalle.getProducto() == null ? "PZA" : detalle.getProducto().getUnidadMedida();
+            return new SimpleStringProperty(unidad);
+        });
 
         TableColumn<DetalleVenta, Double> colCantidad = new TableColumn<>("Cantidad");
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
@@ -59,7 +67,7 @@ public class VentasTablaUtil {
             }
         });
 
-        tblCarrito.getColumns().setAll(colProducto, colCantidad, colPrecioUnitario, colSubtotal);
+        tblCarrito.getColumns().setAll(colProducto, colUnidad, colCantidad, colPrecioUnitario, colSubtotal);
     }
 
 }

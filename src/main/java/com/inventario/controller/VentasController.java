@@ -610,6 +610,7 @@ public class VentasController implements Initializable {
                 producto.getCategoria(),
                 producto.getProveedor()
         );
+            productoModificado.setUnidadMedida(producto.getUnidadMedida());
         return procesarAgregadoACarrito(productoModificado, cantidadAñadir);
     }
 

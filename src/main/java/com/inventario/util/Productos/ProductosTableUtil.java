@@ -25,6 +25,9 @@ public class ProductosTableUtil {
         TableColumn<Producto, String> colTipoVenta = new TableColumn<>("Tipo Venta");
         colTipoVenta.setCellValueFactory(new PropertyValueFactory<>("tipoVenta"));
 
+        TableColumn<Producto, String> colUnidadMedida = new TableColumn<>("Unidad");
+        colUnidadMedida.setCellValueFactory(new PropertyValueFactory<>("unidadMedida"));
+
         TableColumn<Producto, Double> colPrecio = new TableColumn<>("P. Venta");
         colPrecio.setCellValueFactory(new PropertyValueFactory<>("precio"));
         configurarColumnaMoneda(colPrecio);
@@ -68,7 +71,7 @@ public class ProductosTableUtil {
         });
 
         tblProductos.getColumns().setAll(
-                colId, colCodigo, colNombre, colTipoVenta, colPrecio,
+                colId, colCodigo, colNombre, colTipoVenta, colUnidadMedida, colPrecio,
                 colPrecioCompra, colPrecioMayoreo, colPorcentajeGanancia,
                 colStock, colStockMin, colCategoria, colProveedor, colEstado
         );

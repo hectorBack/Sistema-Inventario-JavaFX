@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="20.0" styleClass="page-shell" stylesheets="@../styles/theme.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.UnidadMedidaController">
+   <children>
+      <Label styleClass="page-title" text="UNIDADES DE MEDIDA" />
+
+      <VBox maxHeight="-Infinity" maxWidth="380.0" spacing="14.0" styleClass="form-panel">
+         <children>
+            <Label styleClass="muted-text" text="Elige las unidades de medida que usas en tu negocio" wrapText="true" />
+
+            <!-- Contenedor donde se insertan los CheckBox dinámicamente -->
+            <VBox fx:id="containerUnidades" prefHeight="220.0" spacing="10.0" style="-fx-border-color: #cbd5e1; -fx-border-radius: 8px; -fx-padding: 12px;" />
+
+            <HBox alignment="CENTER_RIGHT">
+               <children>
+                  <Button onAction="#onGuardar" prefHeight="38.0" prefWidth="150.0" styleClass="action-button, action-secondary" text="Guardar Cambios" />
+               </children>
+               <VBox.margin>
+                  <Insets top="8.0" />
+               </VBox.margin>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</VBox>

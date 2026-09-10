@@ -19,6 +19,7 @@ import com.inventario.model.Cajero;
 import com.inventario.model.ConfiguracionMoneda;
 import com.inventario.model.ConfiguracionTicket;
 import com.inventario.model.Impuesto;
+import com.inventario.model.UnidadMedida;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -30,6 +31,32 @@ import javafx.collections.FXCollections;
 public final class DTOMapper {
 
     private DTOMapper() {
+    }
+
+    public static UnidadMedidaDTO toDTO(UnidadMedida model) {
+        if (model == null) {
+            return null;
+        }
+        return new UnidadMedidaDTO(
+                model.getId(),
+                model.getNombre(),
+                model.getClave(),
+                model.isActivo(),
+                model.isPredeterminado()
+        );
+    }
+
+    public static UnidadMedida toModel(UnidadMedidaDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+        return new UnidadMedida(
+                valueOrZero(dto.getId()),
+                dto.getNombre(),
+                dto.getClave(),
+                dto.isActivo(),
+                dto.isPredeterminado()
+        );
     }
 
     public static ConfiguracionMonedaDTO toDTO(ConfiguracionMoneda model) {
@@ -155,7 +182,7 @@ public final class DTOMapper {
                 producto.getId(), producto.getCodigoBarras(), producto.getNombre(), producto.getDescripcion(),
                 decimal(producto.getPrecio()), decimal(producto.getPrecioMayoreo()), decimal(producto.getPrecioCompra()),
                 decimal(producto.getPorcentajeGanancia()), decimal(producto.getStock()), decimal(producto.getStockMinimo()),
-                producto.getTipoVenta(), producto.getEstado(),
+                producto.getTipoVenta(), producto.getUnidadMedida(), producto.getEstado(),
                 catId, catNombre,
                 provId, provNombre
         );
@@ -173,10 +200,12 @@ public final class DTOMapper {
         Proveedor proveedor = dto.getProveedorId() == null ? null
                 : new Proveedor(dto.getProveedorId(), dto.getProveedorNombre() == null ? "" : dto.getProveedorNombre(), "", "", "", "ACTIVO");
 
-        return new Producto(valueOrZero(dto.getId()), dto.getCodigoBarras(), dto.getNombre(), dto.getDescripcion(),
+        Producto producto = new Producto(valueOrZero(dto.getId()), dto.getCodigoBarras(), dto.getNombre(), dto.getDescripcion(),
                 number(dto.getPrecio()), number(dto.getPrecioMayoreo()), number(dto.getPrecioCompra()),
                 number(dto.getPorcentajeGanancia()), number(dto.getStock()), number(dto.getStockMinimo()),
                 dto.getTipoVenta(), dto.getEstado(), categoria, proveedor);
+        producto.setUnidadMedida(dto.getUnidadMedida());
+        return producto;
     }
 
     public static EmpresaDTO toDTO(Empresa empresa) {

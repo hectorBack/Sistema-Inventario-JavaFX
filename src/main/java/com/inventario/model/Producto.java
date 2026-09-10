@@ -22,6 +22,7 @@ public class Producto {
     private final DoubleProperty stockMinimo;
     private final StringProperty descripcion;
     private final StringProperty tipoVenta; // "UNIDAD", "GRANEL", "PAQUETE"
+    private final StringProperty unidadMedida;
     private final DoubleProperty precioMayoreo;
 
     private final ObjectProperty<Categoria> categoria;
@@ -44,6 +45,7 @@ public class Producto {
         this.stock = new SimpleDoubleProperty(stock);
         this.stockMinimo = new SimpleDoubleProperty(stockMinimo);
         this.tipoVenta = new SimpleStringProperty(tipoVenta != null ? tipoVenta : "UNIDAD");
+        this.unidadMedida = new SimpleStringProperty("PZA");
         this.estado = new SimpleStringProperty(estado);
         this.categoria = new SimpleObjectProperty<>(categoria);
         this.proveedor = new SimpleObjectProperty<>(proveedor);
@@ -152,6 +154,14 @@ public class Producto {
         tipoVenta.set(value);
     }
 
+    public String getUnidadMedida() {
+        return unidadMedida.get();
+    }
+
+    public void setUnidadMedida(String value) {
+        unidadMedida.set(value != null && !value.isBlank() ? value : "PZA");
+    }
+
     public String getEstado() {
         return estado.get();
     }
@@ -219,6 +229,10 @@ public class Producto {
 
     public StringProperty tipoVentaProperty() {
         return tipoVenta;
+    }
+
+    public StringProperty unidadMedidaProperty() {
+        return unidadMedida;
     }
 
     public StringProperty estadoProperty() {

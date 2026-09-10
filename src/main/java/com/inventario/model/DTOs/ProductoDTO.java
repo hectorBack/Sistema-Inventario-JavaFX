@@ -15,6 +15,7 @@ public final class ProductoDTO {
     private final BigDecimal stock;
     private final BigDecimal stockMinimo;
     private final String tipoVenta;
+    private final String unidadMedida;
     private final String estado;
     private final Integer categoriaId;
     private final String categoriaNombre;
@@ -22,6 +23,10 @@ public final class ProductoDTO {
     private final String proveedorNombre;
 
     public ProductoDTO(Integer id, String codigoBarras, String nombre, String descripcion, BigDecimal precio, BigDecimal precioMayoreo, BigDecimal precioCompra, BigDecimal porcentajeGanancia, BigDecimal stock, BigDecimal stockMinimo, String tipoVenta, String estado, Integer categoriaId, String categoriaNombre, Integer proveedorId, String proveedorNombre) {
+        this(id, codigoBarras, nombre, descripcion, precio, precioMayoreo, precioCompra, porcentajeGanancia, stock, stockMinimo, tipoVenta, "PZA", estado, categoriaId, categoriaNombre, proveedorId, proveedorNombre);
+    }
+
+    public ProductoDTO(Integer id, String codigoBarras, String nombre, String descripcion, BigDecimal precio, BigDecimal precioMayoreo, BigDecimal precioCompra, BigDecimal porcentajeGanancia, BigDecimal stock, BigDecimal stockMinimo, String tipoVenta, String unidadMedida, String estado, Integer categoriaId, String categoriaNombre, Integer proveedorId, String proveedorNombre) {
         this.id = id;
         this.codigoBarras = codigoBarras;
         this.nombre = nombre;
@@ -33,6 +38,7 @@ public final class ProductoDTO {
         this.stock = stock;
         this.stockMinimo = stockMinimo;
         this.tipoVenta = tipoVenta;
+        this.unidadMedida = unidadMedida;
         this.estado = estado;
         this.categoriaId = categoriaId;
         this.categoriaNombre = categoriaNombre;
@@ -82,6 +88,10 @@ public final class ProductoDTO {
 
     public String getTipoVenta() {
         return tipoVenta;
+    }
+
+    public String getUnidadMedida() {
+        return unidadMedida;
     }
 
     public String getEstado() {

@@ -123,7 +123,7 @@ public class ConfiguracionController {
 
     @FXML
     void onUnidadesMedida(ActionEvent e) {
-        cambiarVista(e, "/com/inventario/view/config/unidadesModal.fxml");
+        cargarEnContenidoCentral(e, "/com/inventario/view/UnidadMedidaView.fxml");
     }
 
     // --- ACCIONES SUBMÓDULO: DISPOSITIVOS ---
