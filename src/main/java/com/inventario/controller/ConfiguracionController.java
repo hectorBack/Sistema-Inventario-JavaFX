@@ -129,7 +129,7 @@ public class ConfiguracionController {
     // --- ACCIONES SUBMÓDULO: DISPOSITIVOS ---
     @FXML
     void onImpresoraTickets(ActionEvent e) {
-        cambiarVista(e, "/com/inventario/view/config/impresoraModal.fxml");
+        cargarEnContenidoCentral(e, "/com/inventario/view/ConfiguracionImpresoraView.fxml");
     }
 
     @FXML

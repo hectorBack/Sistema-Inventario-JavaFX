@@ -16,6 +16,7 @@ import com.inventario.model.DetalleVenta;
 import com.inventario.model.Venta;
 import com.inventario.model.InformacionBD;
 import com.inventario.model.Cajero;
+import com.inventario.model.ConfiguracionImpresora;
 import com.inventario.model.ConfiguracionMoneda;
 import com.inventario.model.ConfiguracionTicket;
 import com.inventario.model.Impuesto;
@@ -31,6 +32,36 @@ import javafx.collections.FXCollections;
 public final class DTOMapper {
 
     private DTOMapper() {
+    }
+
+    public static ConfiguracionImpresoraDTO toDTO(ConfiguracionImpresora entity) {
+        if (entity == null) {
+            return null;
+        }
+        return new ConfiguracionImpresoraDTO(
+                entity.getId(),
+                entity.getNombreImpresora(),
+                entity.getFuente(),
+                entity.getTamanoFuente(),
+                entity.getColumnas(),
+                entity.isUsarFuenteNormalTotales(),
+                entity.isTodasNegritas()
+        );
+    }
+
+    public static ConfiguracionImpresora toModel(ConfiguracionImpresoraDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+        return new ConfiguracionImpresora(
+                dto.getId(),
+                dto.getNombreImpresora(),
+                dto.getFuente(),
+                dto.getTamanoFuente(),
+                dto.getColumnas(),
+                dto.isUsarFuenteNormalTotales(),
+                dto.isTodasNegritas()
+        );
     }
 
     public static UnidadMedidaDTO toDTO(UnidadMedida model) {

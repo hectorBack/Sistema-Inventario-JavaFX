@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="16.0" styleClass="page-shell" stylesheets="@../styles/theme.css" xmlns="http://javafx.com/fxml/1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.inventario.controller.ConfiguracionImpresoraController">
+    <children>
+        <!-- Encabezado de la Sección -->
+        <VBox spacing="4.0">
+            <children>
+                <Label styleClass="page-title" text="IMPRESORA DE TICKETS" />
+                <Label styleClass="muted-text" text="Por favor elige la impresora de tickets entre las impresoras instaladas en tu sistema:" wrapText="true" />
+            </children>
+        </VBox>
+
+        <!-- Panel Formulario Principal -->
+        <VBox maxWidth="650.0" spacing="16.0" styleClass="form-panel">
+            <children>
+                <!-- Selección de Impresora -->
+                <VBox spacing="6.0">
+                    <children>
+                        <Label styleClass="form-label" text="Impresora de Tickets:" />
+                        <ComboBox fx:id="cbImpresoras" maxWidth="1.7976931348623157E308" prefHeight="38.0" promptText="Seleccione una impresora..." styleClass="combo-box" />
+                    </children>
+                </VBox>
+
+                <!-- Fuente y Tamaño -->
+                <HBox spacing="12.0">
+                    <children>
+                        <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label styleClass="form-label" text="Fuente de Impresión Normal" />
+                                <ComboBox fx:id="cbFuentes" maxWidth="1.7976931348623157E308" prefHeight="38.0" promptText="Seleccione fuente..." styleClass="combo-box" />
+                            </children>
+                        </VBox>
+                        <VBox prefWidth="120.0" spacing="6.0">
+                            <children>
+                                <Label styleClass="form-label" text="Tamaño" />
+                                <Spinner fx:id="spTamanoFuente" editable="true" prefHeight="38.0" styleClass="form-field" />
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+
+                <!-- Columnas -->
+                <VBox prefWidth="120.0" spacing="6.0">
+                    <children>
+                        <Label styleClass="form-label" text="Columnas" />
+                        <Spinner fx:id="spColumnas" editable="true" prefHeight="38.0" prefWidth="120.0" styleClass="form-field" />
+                    </children>
+                </VBox>
+
+                <!-- Opciones secundarias Checkbox -->
+                <VBox spacing="10.0">
+                    <children>
+                        <CheckBox fx:id="chkFuenteNormalTotales" text="Usar fuente &quot;normal&quot; para los totales" />
+                        <CheckBox fx:id="chkTodasNegritas" text="Poner todas las letras Negritas" />
+                    </children>
+                    <VBox.margin>
+                        <Insets top="4.0" />
+                    </VBox.margin>
+                </VBox>
+
+                <!-- Botón de Guardado -->
+                <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                    <children>
+                        <Button fx:id="btnGuardar" onAction="#handleGuardar" prefHeight="40.0" prefWidth="160.0" styleClass="action-button, action-primary" text="Guardar Cambios" />
+                    </children>
+                    <VBox.margin>
+                        <Insets top="10.0" />
+                    </VBox.margin>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</VBox>

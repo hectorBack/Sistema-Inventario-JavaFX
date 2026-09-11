@@ -197,3 +197,13 @@ ON CONFLICT (clave) DO NOTHING;
 
 ALTER TABLE public.productos
 ADD COLUMN IF NOT EXISTS unidad_medida VARCHAR(20) NOT NULL DEFAULT 'PZA';
+
+CREATE TABLE configuracion_impresora (
+    id SERIAL PRIMARY KEY,
+    nombre_impresora VARCHAR(255) NOT NULL,
+    fuente VARCHAR(100) NOT NULL DEFAULT 'Courier New',
+    tamano_fuente INT NOT NULL DEFAULT 10,
+    columnas INT NOT NULL DEFAULT 36,
+    usar_fuente_normal_totales BOOLEAN NOT NULL DEFAULT FALSE,
+    todas_negritas BOOLEAN NOT NULL DEFAULT FALSE
+);

@@ -6,9 +6,16 @@ import com.inventario.model.DetalleVenta;
 import com.inventario.model.OpcionesHabilitadas;
 import com.inventario.model.Producto;
 import com.inventario.model.Venta;
+import com.inventario.model.DTOs.ConfiguracionImpresoraDTO;
+import com.inventario.model.DTOs.ConfiguracionTicketDTO;
 import com.inventario.model.DTOs.DTOMapper;
+import com.inventario.model.DTOs.VentaDTO;
 import com.inventario.repository.ClienteRepository;
+import com.inventario.repository.ConfiguracionImpresoraRepository;
+import com.inventario.repository.ConfiguracionTicketRepository;
 import com.inventario.repository.Impl.ClienteRepositoryImpl;
+import com.inventario.repository.Impl.ConfiguracionImpresoraRepositoryImpl;
+import com.inventario.repository.Impl.ConfiguracionTicketRepositoryImpl;
 import com.inventario.repository.Impl.ProductoRepositoryImpl;
 import com.inventario.repository.Impl.PromocionRepositoryImpl;
 import com.inventario.repository.Impl.VentaRepositoryImpl;
@@ -17,6 +24,7 @@ import com.inventario.repository.PromocionRepository;
 import com.inventario.repository.VentaRepository;
 import com.inventario.util.Inventario.InventarioCalculosUtil;
 import com.inventario.util.FormatoMonedaUtil;
+import com.inventario.util.TicketPrinterService;
 import com.inventario.util.Productos.KeyboardShortcutUtil;
 import com.inventario.util.Ventas.BusquedaProductoUtil;
 import com.inventario.util.Ventas.CarritoService;
@@ -89,17 +97,32 @@ public class VentasController implements Initializable {
     private final ProductoRepository productoRepository;
     private final PromocionRepository promocionRepository;
     private final CarritoService carritoService;
+    private final ConfiguracionImpresoraRepository configuracionImpresoraRepository;
+    private final ConfiguracionTicketRepository configuracionTicketRepository;
+    private final TicketPrinterService ticketPrinterService;
 
     public VentasController() {
-        this(new VentaRepositoryImpl(), new ClienteRepositoryImpl(), new ProductoRepositoryImpl(), new PromocionRepositoryImpl(), new CarritoService());
+        this(new VentaRepositoryImpl(), new ClienteRepositoryImpl(), new ProductoRepositoryImpl(), new PromocionRepositoryImpl(), new CarritoService(),
+                new ConfiguracionImpresoraRepositoryImpl(), new ConfiguracionTicketRepositoryImpl(), new TicketPrinterService());
     }
 
-    public VentasController(VentaRepository ventaRepository, ClienteRepository clienteRepository, ProductoRepository productoRepository, PromocionRepository promocionRepository, CarritoService carritoService) {
+    public VentasController(VentaRepository ventaRepository, ClienteRepository clienteRepository, ProductoRepository productoRepository,
+            PromocionRepository promocionRepository, CarritoService carritoService) {
+        this(ventaRepository, clienteRepository, productoRepository, promocionRepository, carritoService,
+                new ConfiguracionImpresoraRepositoryImpl(), new ConfiguracionTicketRepositoryImpl(), new TicketPrinterService());
+    }
+
+    public VentasController(VentaRepository ventaRepository, ClienteRepository clienteRepository, ProductoRepository productoRepository, PromocionRepository promocionRepository, CarritoService carritoService,
+            ConfiguracionImpresoraRepository configuracionImpresoraRepository, ConfiguracionTicketRepository configuracionTicketRepository,
+            TicketPrinterService ticketPrinterService) {
         this.ventaRepository = ventaRepository;
         this.clienteRepository = clienteRepository;
         this.productoRepository = productoRepository;
         this.promocionRepository = promocionRepository;
         this.carritoService = carritoService;
+        this.configuracionImpresoraRepository = configuracionImpresoraRepository;
+        this.configuracionTicketRepository = configuracionTicketRepository;
+        this.ticketPrinterService = ticketPrinterService;
     }
 
     // Lista en memoria que actúa como el carrito de compras temporal
@@ -347,8 +370,21 @@ public class VentasController implements Initializable {
 
             if (guardadoExitoso) {
                 if (imprimirTicket) {
-                    // TicketService.imprimirTicket(nuevaVenta, detalles, pagoCon);
-                    mostrarAlerta("Venta Exitosa", "La venta se registró e imprimió correctamente.", Alert.AlertType.INFORMATION);
+                    VentaDTO ventaDTO = new VentaDTO(
+                            nuevaVenta.getId(),
+                            cliente.getId(),
+                            cliente.getNombre(),
+                            nuevaVenta.getFecha(),
+                            DTOMapper.toDTO(nuevaVenta).getTotal(),
+                            nuevaVenta.getEstado(),
+                            detalles.stream().map(DTOMapper::toDTO).collect(Collectors.toList())
+                    );
+                    ConfiguracionImpresoraDTO configuracionImpresora = configuracionImpresoraRepository.obtenerConfiguracion();
+                    ConfiguracionTicketDTO configuracionTicket = configuracionTicketRepository.obtenerConfiguracionDTO();
+                    boolean impreso = ticketPrinterService.imprimir(ventaDTO, configuracionTicket, configuracionImpresora);
+                    if (!impreso) {
+                        mostrarAlerta("Venta Registrada", "La venta se guardó, pero no fue posible imprimir el ticket. Revisa la configuración de la impresora.", Alert.AlertType.WARNING);
+                    }
                 }
 
                 limpiarPantallaCompleta();

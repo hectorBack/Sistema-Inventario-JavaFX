@@ -9,77 +9,89 @@ import java.util.Locale;
 
 public class TicketFormateador {
 
-    private static final int ANCHO_TICKET = 40; // Ancho en caracteres para impresora de 80mm
+    public static String generarTextoTicket(VentaDTO venta, ConfiguracionTicketDTO config, int columnas) {
+        if (columnas <= 0) {
+            columnas = 36; // Fallback por defecto si no viene de la BD
+        }
 
-    public static String generarTextoTicket(VentaDTO venta, ConfiguracionTicketDTO config) {
         StringBuilder sb = new StringBuilder();
 
-        // 1. ENCABEZADO (Configuración dinámica)
+        // 1. ENCABEZADO
         if (config != null && config.getLineasEncabezado() != null) {
             for (String linea : config.getLineasEncabezado()) {
                 if (linea != null && !linea.trim().isEmpty()) {
-                    sb.append(centrarTexto(linea.trim(), ANCHO_TICKET)).append("\n");
+                    sb.append(centrarTexto(linea.trim(), columnas)).append("\n");
                 }
             }
         }
         sb.append("\n");
 
-        // 2. FECHA Y HORA (Formato español)
-        if (venta.getFecha() != null) {
+        // 2. FECHA Y HORA
+        if (venta != null && venta.getFecha() != null) {
             DateTimeFormatter fmtFecha = DateTimeFormatter.ofPattern("dd 'de' MMMM 'de' yyyy", new Locale("es", "ES"));
             DateTimeFormatter fmtHora = DateTimeFormatter.ofPattern("hh:mm a", Locale.ENGLISH);
 
-            String fechaStr = venta.getFecha().format(fmtFecha);
-            String horaStr = venta.getFecha().format(fmtHora);
+            String fechaStr = "Fecha: " + venta.getFecha().format(fmtFecha);
+            String horaStr = "Hora: " + venta.getFecha().format(fmtHora);
 
-            sb.append(formatearDosColumnas(fechaStr, horaStr, ANCHO_TICKET)).append("\n");
+            sb.append(formatearDosColumnas(fechaStr, horaStr, columnas)).append("\n");
         }
-        sb.append(repetirCaracter('-', ANCHO_TICKET)).append("\n");
+        sb.append(repetirCaracter('-', columnas)).append("\n");
 
-        // 3. CABECERA DE TABLA
-        sb.append(String.format("%-5s %-22s %11s", "Cant.", "Descripcion", "Importe")).append("\n");
-        sb.append(repetirCaracter('-', ANCHO_TICKET)).append("\n");
+        // 3. CABECERA DE TABLA DINÁMICA
+        // Anchos: Cantidad(4), Importe(9). El resto se asigna a la Descripción.
+        int anchoCant = 4;
+        int anchoImporte = 9;
+        int anchoDesc = columnas - anchoCant - anchoImporte - 2; // -2 por los dos espacios separadores
 
-        // 4. DETALLE DE PRODUCTOS (DetalleVentaDTO)
-        if (venta.getDetalles() != null) {
+        if (anchoDesc < 5) {
+            anchoDesc = 5; // Seguridad mínima
+        }
+
+        String formatoFila = "%-" + anchoCant + "s %-" + anchoDesc + "s %" + anchoImporte + "s";
+        sb.append(String.format(formatoFila, "Cant", "Descripcion", "Importe")).append("\n");
+        sb.append(repetirCaracter('-', columnas)).append("\n");
+
+        // 4. DETALLE DE PRODUCTOS
+        if (venta != null && venta.getDetalles() != null) {
             for (DetalleVentaDTO item : venta.getDetalles()) {
-                String cant = truncarTexto(item.getCantidadFormateada(), 5);
+                String cant = truncarTexto(item.getCantidadFormateada(), anchoCant);
                 String importe = FormatoMonedaUtil.formatear(item.getSubtotal());
+                String nombreProd = item.getNombreProducto() != null ? item.getNombreProducto() : "";
 
                 // Muestra opcional de Precio Unitario
                 if (config != null && config.isIncluirPrecioUnitario() && item.getPrecioUnitario() != null) {
                     String precioUnitStr = "@ " + FormatoMonedaUtil.formatear(item.getPrecioUnitario());
-                    sb.append(String.format("%-5s %s\n", "", precioUnitStr));
+                    sb.append(String.format("%-" + anchoCant + "s %s\n", "", precioUnitStr));
                 }
 
-                String nombreProd = item.getNombreProducto() != null ? item.getNombreProducto() : "";
-
                 if (config != null && config.isImprimirDescripcionCompleta()) {
-                    // Si sobrepasa el ancho, ajusta renglones
-                    sb.append(String.format("%-5s %-22s %11s\n", cant, nombreProd, importe));
+                    // Si sobrepasa la columna, la imprime entera ocupando la fila
+                    sb.append(String.format(formatoFila, cant, nombreProd, importe)).append("\n");
                 } else {
-                    // Cortar si supera el ancho máximo asignado a la columna
-                    String descTruncada = truncarTexto(nombreProd, 22);
-                    sb.append(String.format("%-5s %-22s %11s\n", cant, descTruncada, importe));
+                    String descTruncada = truncarTexto(nombreProd, anchoDesc);
+                    sb.append(String.format(formatoFila, cant, descTruncada, importe)).append("\n");
                 }
             }
         }
 
-        sb.append(repetirCaracter('-', ANCHO_TICKET)).append("\n");
+        sb.append(repetirCaracter('-', columnas)).append("\n");
 
         // 5. NO. ARTÍCULOS Y TOTAL
-        String articulosStr = "No. de Articulos: " + venta.getNumeroArticulos();
-        sb.append(centrarTexto(articulosStr, ANCHO_TICKET)).append("\n");
+        if (venta != null) {
+            String articulosStr = "No. de Articulos: " + venta.getNumeroArticulos();
+            sb.append(centrarTexto(articulosStr, columnas)).append("\n");
 
-        String totalStr = "Total: " + FormatoMonedaUtil.formatear(
-            venta.getTotal() != null ? venta.getTotal() : BigDecimal.ZERO);
-        sb.append(centrarTexto(totalStr, ANCHO_TICKET)).append("\n\n");
+            String totalStr = "Total: " + FormatoMonedaUtil.formatear(
+                    venta.getTotal() != null ? venta.getTotal() : BigDecimal.ZERO);
+            sb.append(centrarTexto(totalStr, columnas)).append("\n\n");
+        }
 
-        // 6. PIE DE PÁGINA (Configuración dinámica)
+        // 6. PIE DE PÁGINA
         if (config != null && config.getLineasPie() != null) {
             for (String linea : config.getLineasPie()) {
                 if (linea != null && !linea.trim().isEmpty()) {
-                    sb.append(centrarTexto(linea.trim(), ANCHO_TICKET)).append("\n");
+                    sb.append(centrarTexto(linea.trim(), columnas)).append("\n");
                 }
             }
         }
@@ -99,11 +111,22 @@ public class TicketFormateador {
     }
 
     private static String formatearDosColumnas(String izq, String der, int ancho) {
-        int espacios = ancho - izq.length() - der.length();
-        if (espacios < 1) {
-            espacios = 1;
+        if (izq == null) {
+            izq = "";
         }
-        return izq + " ".repeat(espacios) + der;
+        if (der == null) {
+            der = "";
+        }
+
+        // Si juntas exceden el ancho, se truncan proporcionalmente
+        if ((izq.length() + der.length() + 1) > ancho) {
+            int maxIzq = ancho - der.length() - 1;
+            if (maxIzq > 0) {
+                izq = izq.substring(0, maxIzq);
+            }
+        }
+        int espacios = ancho - izq.length() - der.length();
+        return izq + " ".repeat(Math.max(1, espacios)) + der;
     }
 
     private static String repetirCaracter(char c, int conteo) {
@@ -116,5 +139,4 @@ public class TicketFormateador {
         }
         return texto.length() > maxLongitud ? texto.substring(0, maxLongitud) : texto;
     }
-
 }

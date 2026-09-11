@@ -1,9 +1,17 @@
 package com.inventario.controller;
 
 import com.inventario.config.ConfiguracionSistema;
+import com.inventario.model.DTOs.ConfiguracionImpresoraDTO;
+import com.inventario.model.DTOs.ConfiguracionTicketDTO;
+import com.inventario.model.DTOs.VentaDTO;
 import com.inventario.model.OpcionesHabilitadas;
+import com.inventario.repository.ConfiguracionImpresoraRepository;
+import com.inventario.repository.ConfiguracionTicketRepository;
+import com.inventario.repository.Impl.ConfiguracionImpresoraRepositoryImpl;
+import com.inventario.repository.Impl.ConfiguracionTicketRepositoryImpl;
 import com.inventario.util.Inventario.InventarioCalculosUtil;
 import com.inventario.util.FormatoMonedaUtil;
+import com.inventario.util.TicketPrinterService;
 import java.util.function.BiConsumer;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -42,13 +50,31 @@ public class CobroModalController {
     private boolean ventaConfirmada = false;
     private boolean imprimirTicket = false;
 
+    private VentaDTO ventaActual;
+
     private BiConsumer<Double, Boolean> onPagoConfirmado;
 
+    // Servicios y repositorios agregados
+    private final ConfiguracionImpresoraRepository impresoraRepository;
+    private final ConfiguracionTicketRepository ticketRepository;
+    private final TicketPrinterService ticketPrinterService;
+
+    public CobroModalController() {
+        this.impresoraRepository = new ConfiguracionImpresoraRepositoryImpl();
+        this.ticketRepository = new ConfiguracionTicketRepositoryImpl();
+        this.ticketPrinterService = new TicketPrinterService();
+    }
+
+    // Firma sobrecargada para recibir la venta completa en caso de requerir impresión
+    public void initData(VentaDTO venta, int cantidadArticulos, BiConsumer<Double, Boolean> onPagoConfirmado) {
+        this.ventaActual = venta;
+        double total = (venta != null && venta.getTotal() != null) ? venta.getTotal().doubleValue() : 0.0;
+        initData(total, cantidadArticulos, onPagoConfirmado);
+    }
+
     public void initData(double total, int cantidadArticulos, BiConsumer<Double, Boolean> onPagoConfirmado) {
-        // Obtener configuración de redondeo activa
         OpcionesHabilitadas opciones = ConfiguracionSistema.getInstancia().getOpciones();
 
-        // Aplicar la regla de redondeo antes de fijar el total a pagar definitivo
         this.totalAPagar = InventarioCalculosUtil.aplicarRedondeo(
                 total,
                 opciones.isHabilitarRedondeo(),
@@ -57,10 +83,9 @@ public class CobroModalController {
 
         this.onPagoConfirmado = onPagoConfirmado;
 
-        this.lblTotalPagar.setText(FormatoMonedaUtil.formatear(total));
+        this.lblTotalPagar.setText(FormatoMonedaUtil.formatear(totalAPagar));
         this.lblTotalArticulos.setText(String.valueOf(cantidadArticulos));
 
-        // 1. CARGAR FORMAS DE PAGO SEGÚN CONFIGURACIÓN
         ObservableList<String> formasPago = FXCollections.observableArrayList("Efectivo");
         boolean ofrecerCredito = ConfiguracionSistema.getInstancia().getOpciones().isOfrecerCredito();
 
@@ -71,7 +96,6 @@ public class CobroModalController {
         cmbFormaPago.setItems(formasPago);
         cmbFormaPago.getSelectionModel().selectFirst();
 
-        // Escuchar cambios de forma de pago para ajustar el campo Pago Con
         cmbFormaPago.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if ("A Crédito".equalsIgnoreCase(newVal)) {
                 txtPagoCon.setText("0.00");
@@ -84,7 +108,7 @@ public class CobroModalController {
             }
         });
 
-        txtPagoCon.setText(String.format(java.util.Locale.US, "%.2f", total));
+        txtPagoCon.setText(String.format(java.util.Locale.US, "%.2f", totalAPagar));
         onCalcularCambio(null);
 
         Platform.runLater(() -> {
@@ -133,31 +157,28 @@ public class CobroModalController {
 
     @FXML
     void onCobrarEImprimir(ActionEvent event) {
-        if (validarPago()) {
-            this.ventaConfirmada = true;
-            this.imprimirTicket = true;
-
-            double montoPago = "A Crédito".equalsIgnoreCase(cmbFormaPago.getValue()) ? 0.0 : Double.parseDouble(txtPagoCon.getText().trim());
-            cerrarModal();
-
-            if (onPagoConfirmado != null) {
-                onPagoConfirmado.accept(montoPago, true);
-            }
-        }
+        procesarCobro(true);
     }
 
     @FXML
     void onCobrarSoloRegistro(ActionEvent event) {
+        procesarCobro(false);
+    }
+
+    private void procesarCobro(boolean conImpresion) {
         if (validarPago()) {
             this.ventaConfirmada = true;
-            this.imprimirTicket = false;
+            this.imprimirTicket = conImpresion;
 
             double montoPago = "A Crédito".equalsIgnoreCase(cmbFormaPago.getValue()) ? 0.0 : Double.parseDouble(txtPagoCon.getText().trim());
-            cerrarModal();
 
+            // 1. Primero se notifica al controlador principal (VentasController)
             if (onPagoConfirmado != null) {
-                onPagoConfirmado.accept(montoPago, false);
+                onPagoConfirmado.accept(montoPago, conImpresion);
             }
+
+            // 2. Finalmente se cierra la ventana modal
+            cerrarModal();
         }
     }
 
